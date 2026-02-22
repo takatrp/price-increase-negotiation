@@ -1,16 +1,27 @@
 {
+  "schema_version": 1,
   "meta": {
     "updated": "2026-02-22",
-    "note": "都道府県（または県庁所在市等）の外部指標を集約。数値は根拠が確認できるもののみ入れる。未設定はnull推奨。"
+    "note": "CPI/賃上げ率は必要に応じて追記。最低賃金は厚労省の答申状況（発効日予定）に基づく。",
+    "sources": {
+      "min_wage": {
+        "publisher": "厚生労働省",
+        "title": "令和7年度 地域別最低賃金 答申状況（別紙）",
+        "url": "https://www.mhlw.go.jp/content/11302000/001557056.pdf",
+        "caution": "発効日（予定）は異議申出等により変更となる可能性あり。"
+      }
+    }
   },
   "national": {
-    "cpi_yoy": 1.5,
-    "cpi_asof": "2026年1月（全国・総合、前年同月比）",
+    "cpi_yoy": null,
+    "cpi_asof": null,
     "wage_yoy": null,
     "wage_asof": null,
-    "sources": {
-      "cpi": "総務省統計局：消費者物価指数（CPI）月報（2026年1月 全国 総合 前年同月比）",
-      "wage": null
+    "min_wage_avg": {
+      "new": 1121,
+      "old": 1055,
+      "inc": 66,
+      "eff": null
     }
   },
   "prefs": {
@@ -19,30 +30,72 @@
       "cpi_asof": null,
       "wage_yoy": null,
       "wage_asof": null,
-      "sources": {
-        "cpi": "（例）e-Stat/兵庫県/神戸市のCPI公表資料で確認して入力",
-        "wage": "（例）厚労省 賃上げ動向/県統計等で確認して入力"
-      }
+      "min_wage": { "new": 1116, "old": 1052, "inc": 64, "eff": "2025-10-04" }
     },
     "鳥取": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
       "wage_asof": null,
-      "sources": {
-        "cpi": "（例）鳥取県公表PDF（県庁所在市別CPI一覧に鳥取市が掲載）",
-        "wage": null
-      }
+      "min_wage": { "new": 1030, "old": 957, "inc": 73, "eff": "2025-10-04" }
     },
     "島根": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
       "wage_asof": null,
-      "sources": {
-        "cpi": "（例）鳥取県公表PDF（県庁所在市別CPI一覧に松江市が掲載）",
-        "wage": null
-      }
+      "min_wage": { "new": 1033, "old": 962, "inc": 71, "eff": "2025-11-17" }
+    },
+
+    "滋賀": {
+      "cpi_yoy": null,
+      "cpi_asof": null,
+      "wage_yoy": null,
+      "wage_asof": null,
+      "min_wage": { "new": 1080, "old": 1017, "inc": 63, "eff": "2025-10-05" }
+    },
+    "京都": {
+      "cpi_yoy": null,
+      "cpi_asof": null,
+      "wage_yoy": null,
+      "wage_asof": null,
+      "min_wage": { "new": 1122, "old": 1058, "inc": 64, "eff": "2025-11-21" }
+    },
+    "大阪": {
+      "cpi_yoy": null,
+      "cpi_asof": null,
+      "wage_yoy": null,
+      "wage_asof": null,
+      "min_wage": { "new": 1177, "old": 1114, "inc": 63, "eff": "2025-10-16" }
+    },
+    "奈良": {
+      "cpi_yoy": null,
+      "cpi_asof": null,
+      "wage_yoy": null,
+      "wage_asof": null,
+      "min_wage": { "new": 1051, "old": 986, "inc": 65, "eff": "2025-11-16" }
+    },
+
+    "岡山": {
+      "cpi_yoy": null,
+      "cpi_asof": null,
+      "wage_yoy": null,
+      "wage_asof": null,
+      "min_wage": { "new": 1047, "old": 982, "inc": 65, "eff": "2025-12-01" }
+    },
+    "広島": {
+      "cpi_yoy": null,
+      "cpi_asof": null,
+      "wage_yoy": null,
+      "wage_asof": null,
+      "min_wage": { "new": 1085, "old": 1020, "inc": 65, "eff": "2025-11-01" }
+    },
+    "山口": {
+      "cpi_yoy": null,
+      "cpi_asof": null,
+      "wage_yoy": null,
+      "wage_asof": null,
+      "min_wage": { "new": 1043, "old": 979, "inc": 64, "eff": "2025-10-16" }
     }
   }
 }
