@@ -1,29 +1,25 @@
 <!DOCTYPE html>
 <!--
   値上げ交渉ナビゲーター
-  internal version: r02
+  internal version: r03
   last updated: auto (document.lastModified)
 
-  反映内容（A〜C）：
-  A) コピー処理：navigator.clipboard 優先 + フォールバック（execCommand）／コピー状態表示の堅牢化
-  B) 入力バリデーション強化：未入力ガイド、改定率/差額の表示、URLパラメータ転記（ハイライト/ステータス表示）
-     併せてトンマナは元コード（brand色・UI密度）に合わせて調整
-  C) フッター：クレジット、CC、利用条件、バージョン、最終更新日を追加（価格改定検討ツールと同形式）
+  反映内容（今回）：
+  1) GA4（gtag.js）削除
+  2) 「値上げの背景（外部要因）」を細分化（要因チップを拡充＋補足欄）
+  3) 都道府県別データの読み込み・反映（最低賃金は内蔵データ／CPI・賃上げ率等はJSON読込で自動反映できる枠組みを実装）
+     - 内蔵：都道府県別 最低賃金（新・旧・引上げ額・発効予定日）
+     - 任意：pref_cost_data.json（同階層 or URL）をfetchしてCPI等を反映（キー例はUI内に表示）
+
+  メモ：
+  - 本ツールはクライアントサイド（ブラウザ）で動きます。
+  - 「最新の物価上昇率（CPI）」「都道府県別の賃上げ率」等は、(a) 事前にJSONとして用意して配信する方式が堅牢です（APIキー露出やCORS問題を回避）。
 -->
 <html lang="ja">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>値上げ交渉ナビゲーター</title>
-
-<!-- Google tag (gtag.js) ※必要に応じてID差し替え -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-L4493W828C"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-L4493W828C');
-</script>
 
 <link rel="icon" type="image/png" sizes="192x192" href="favicon192192.png">
 <link rel="apple-touch-icon" sizes="192x192" href="favicon192192.png">
@@ -42,9 +38,9 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-
 .pill{display:inline-block;background:rgba(87,136,153,.1);color:var(--brand);font-weight:700;border-radius:999px;padding:5px 9px;font-size:.8rem;margin-bottom:10px}
 .cardHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 label{display:block;font-size:.86rem;color:#374151;margin:12px 0 6px;font-weight:600}
-input[type="text"],textarea{width:100%;box-sizing:border-box;border:1px solid #e5e7eb;border-radius:10px;padding:10px;font-size:1rem;background:#fff;outline:none;transition: background-color 0.2s, border-color 0.2s, color 0.2s;}
-input:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(87,136,153,.15)}
-input::placeholder{color:#c7ccd3}
+input[type="text"],textarea,select{width:100%;box-sizing:border-box;border:1px solid #e5e7eb;border-radius:10px;padding:10px;font-size:1rem;background:#fff;outline:none;transition: background-color 0.2s, border-color 0.2s, color 0.2s;}
+input:focus,textarea:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(87,136,153,.15)}
+input::placeholder,textarea::placeholder{color:#c7ccd3}
 .hint{font-size:.76rem;color:var(--muted);margin-top:4px}
 .danger{color:var(--warn);font-weight:700;margin-top:8px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 12px;font-weight:700;font-size:.92rem;cursor:pointer;transition: opacity 0.2s;}
@@ -52,11 +48,11 @@ input::placeholder{color:#c7ccd3}
 .btn.alt{background:#e5e7eb;color:#111827}
 .btn.ghost{background:transparent;color:#374151;border:1px solid #d1d5db}
 .btn.sm{padding:6px 8px;font-size:.82rem;border-radius:8px}
-.miniActions{display:flex;gap:8px;margin-top:12px}
+.miniActions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 
 /* チップ */
 .chipGroup{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;margin-bottom:4px}
-.chip{border:1px solid #d1d5db;background:#fff;border-radius:999px;padding:8px 12px;font-size:.85rem;font-weight:700;color:#374151;cursor:pointer;transition: all 0.2s;}
+.chip{border:1px solid #d1d5db;background:#fff;border-radius:999px;padding:8px 12px;font-size:.85rem;font-weight:700;color:#374151;cursor:pointer;transition: all 0.2s;line-height:1.1}
 .chip:hover{background:#f3f4f6}
 .chip.active{border-color:var(--brand);background:#eef6fa;color:#0f172a}
 
@@ -80,8 +76,8 @@ input::placeholder{color:#c7ccd3}
 .mk-mini a{color:inherit;text-decoration:underline}
 .note{font-size:.8rem;color:#6b7280;text-align:center;margin-bottom:24px}
 
-/* --- 転記された値のハイライト（価格改定検討ツールと同系統） --- */
-input.imported-value{
+/* --- 転記された値のハイライト --- */
+input.imported-value, select.imported-value, textarea.imported-value{
   background-color:#fff9e6 !important;
   border-color:#f2c94c !important;
   color:var(--warn);
@@ -90,9 +86,28 @@ input.imported-value{
 .importStatus{margin:8px 0 0;font-size:.82rem;color:#0f172a;background:#eef6fa;border:1px solid #d6eaf3;border-radius:10px;padding:8px 10px;display:none}
 .importStatus.show{display:block}
 
+/* データパネル */
+.divider{height:1px;background:#e5e7eb;margin:12px 0}
+.dataPanel{border:1px solid #e5e7eb;border-radius:12px;background:#fafafa;padding:10px 12px;margin-top:10px}
+.dataRow{display:flex;gap:10px;flex-wrap:wrap;font-size:.86rem;color:#111827}
+.dataKey{color:#475569;font-weight:800}
+.badge{display:inline-block;border:1px solid #d1d5db;border-radius:999px;padding:2px 8px;font-size:.72rem;color:#334155;background:#fff}
+.small{font-size:.78rem;color:#64748b}
+.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:.78rem;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;padding:2px 6px}
+
+/* details */
+details{border:1px solid #e5e7eb;border-radius:12px;background:#ffffff;padding:10px 12px;margin-top:10px}
+summary{cursor:pointer;font-weight:900;color:#0f172a}
+details[open]{background:#fcfeff}
+.mutedBox{margin-top:8px;border:1px dashed #cbd5e1;background:#f8fafc;border-radius:12px;padding:10px}
+pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
+.inlineChk{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.inlineChk label{margin:0;font-weight:800;color:#0f172a;font-size:.84rem;display:flex;gap:8px;align-items:center}
+.inlineChk input{width:auto}
+
 /* 印刷 */
 @media print{
-  .miniActions, .tabs, .chipGroup, button { display:none !important; }
+  .miniActions, .tabs, .chipGroup, button, details, .inlineChk { display:none !important; }
   .wrap{max-width:900px}
   textarea.docArea{border:1px solid #e5e7eb}
 }
@@ -141,15 +156,92 @@ input.imported-value{
       </div>
 
       <div class="card">
-        <div class="pill">STEP 2：値上げの背景（外部要因）</div>
-        <div class="hint">該当するものをすべて選択してください（複数選択可）</div>
-        <div class="chipGroup" id="factorGroup">
-          <button class="chip active" type="button" data-val="原材料費の高騰">原材料費の高騰</button>
-          <button class="chip" type="button" data-val="物流費・運賃の負担増">物流費・運賃の負担増</button>
-          <button class="chip active" type="button" data-val="人件費・最低賃金の上昇">人件費・最低賃金の上昇</button>
-          <button class="chip" type="button" data-val="円安による仕入コスト増">円安による仕入コスト増</button>
-          <button class="chip" type="button" data-val="エネルギー価格の高騰">エネルギー価格の高騰</button>
+        <div class="pill">STEP 2：値上げの背景（外部要因・データ根拠）</div>
+        <div class="hint">外部要因は「細分化したチップ」から複数選択。必要なら「参考データ（都道府県別等）」も文面へ挿入できます。</div>
+
+        <label for="prefSelect">主な提供エリア（都道府県）</label>
+        <select id="prefSelect" aria-label="都道府県選択"></select>
+
+        <div class="dataPanel" aria-label="参考データ（最低賃金など）">
+          <div class="dataRow">
+            <span class="dataKey">最低賃金（参考）</span>
+            <span id="minWageView">—</span>
+            <span class="badge" id="minWageBadge">未取得</span>
+          </div>
+          <div class="small" id="minWageNote">※最低賃金は内蔵データ（都道府県別）。CPI等は下の「データ読み込み」で自動反映できます。</div>
         </div>
+
+        <div class="inputGrid" style="margin-top:10px;">
+          <div>
+            <label for="cpiRate">物価上昇率（CPI等・%）</label>
+            <input type="text" id="cpiRate" inputmode="decimal" placeholder="例）2.3" />
+            <div class="hint">例：前年同月比（総合）。根拠がある値のみ入力してください。</div>
+          </div>
+          <div>
+            <label for="wageRate">人件費上昇率（賃上げ/採用圧力等・%）</label>
+            <input type="text" id="wageRate" inputmode="decimal" placeholder="例）3.5" />
+            <div class="hint">未入力の場合、最低賃金の上昇率（参考）を自動提案できます。</div>
+          </div>
+        </div>
+
+        <div class="inputGrid">
+          <div>
+            <label for="cpiAsOf">物価データの対象（任意）</label>
+            <input type="text" id="cpiAsOf" placeholder="例）2026年1月（前年同月比）" />
+          </div>
+          <div>
+            <label for="wageAsOf">人件費データの対象（任意）</label>
+            <input type="text" id="wageAsOf" placeholder="例）2025年度（賃上げ）" />
+          </div>
+        </div>
+
+        <div class="inlineChk">
+          <label><input type="checkbox" id="includeEvidence" checked> 参考データ（%や最低賃金）を文面に挿入</label>
+          <label><input type="checkbox" id="includeSources"> 出典（簡易）も併記</label>
+          <button class="btn ghost sm" id="autoFillBtn" type="button">自動提案（空欄のみ）</button>
+        </div>
+
+        <details id="dataLoader">
+          <summary>都道府県データを読み込み（JSON）</summary>
+          <div class="hint">同階層の <span class="kbd">pref_cost_data.json</span> またはURLから読み込みます（CPI/賃上げ率など）。</div>
+
+          <label for="dataUrl">JSONのURL（空欄なら ./pref_cost_data.json を試行）</label>
+          <input type="text" id="dataUrl" placeholder="例）https://.../pref_cost_data.json" />
+
+          <div class="miniActions">
+            <button class="btn" id="loadDataBtn" type="button">読み込み</button>
+            <button class="btn alt" id="clearDataBtn" type="button">読込解除</button>
+            <span id="dataLoadStatus" class="small" aria-live="polite"></span>
+          </div>
+
+          <div class="mutedBox">
+            <div class="small" style="margin-bottom:6px;"><b>JSONキー例（最小）</b></div>
+            <pre class="sample" id="jsonSample"></pre>
+          </div>
+          <div class="small">※キーは「北海道 / 青森 / … / 東京 / 大阪 / 京都 / …」のように、都道府県名（都・道・府・県を除いた形）でもOKにしてあります。</div>
+        </details>
+
+        <div class="divider"></div>
+
+        <div class="hint">外部要因（細分化）：該当するものをすべて選択してください（複数選択可）</div>
+        <div class="chipGroup" id="factorGroup">
+          <button class="chip active" type="button" data-val="原材料・仕入コストの上昇">原材料・仕入</button>
+          <button class="chip" type="button" data-val="包装資材・消耗品の値上げ">包装・消耗品</button>
+          <button class="chip" type="button" data-val="物流費・運賃の上昇">物流</button>
+          <button class="chip" type="button" data-val="エネルギー（電気・ガス・燃料）価格の上昇">エネルギー</button>
+          <button class="chip active" type="button" data-val="人件費（賃上げ・採用難）による負担増">人件費</button>
+          <button class="chip" type="button" data-val="最低賃金の改定（都道府県別）">最低賃金</button>
+          <button class="chip" type="button" data-val="社会保険料等の負担増">社保負担</button>
+          <button class="chip" type="button" data-val="円安による仕入コスト増">円安</button>
+          <button class="chip" type="button" data-val="金利上昇・資金調達コスト増">金利</button>
+          <button class="chip" type="button" data-val="規制対応・コンプライアンス対応コスト">規制対応</button>
+          <button class="chip" type="button" data-val="設備更新・保守コストの増加">設備保守</button>
+          <button class="chip" type="button" data-val="IT/サブスク費用の増加">IT/サブスク</button>
+        </div>
+
+        <label for="extraFactors">補足（任意）</label>
+        <textarea id="extraFactors" rows="2" placeholder="例）主要仕入先からの値上げ通知（+8%）、燃料サーチャージ継続、採用単価の上昇 等"></textarea>
+        <div class="hint">※ここに「自社に固有の事実」を書けると、説得力が跳ね上がります（相手は“総論”より“具体”で動きます）。</div>
       </div>
 
       <div class="card">
@@ -203,18 +295,140 @@ input.imported-value{
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r02</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r03</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終的な条件提示や交渉は、取引実態・競合・需給・契約条項等も踏まえてご判断ください。</div>
 
 <script>
 (function(){
+  /* =========================
+     0) 参考データ（内蔵：最低賃金）
+     - キー：都道府県名（都・道・府・県を除いた表記、北海道はそのまま）
+     ========================= */
+  const PREFS = [
+    {k:'北海道', l:'北海道'},
+    {k:'青森', l:'青森県'},
+    {k:'岩手', l:'岩手県'},
+    {k:'宮城', l:'宮城県'},
+    {k:'秋田', l:'秋田県'},
+    {k:'山形', l:'山形県'},
+    {k:'福島', l:'福島県'},
+    {k:'茨城', l:'茨城県'},
+    {k:'栃木', l:'栃木県'},
+    {k:'群馬', l:'群馬県'},
+    {k:'埼玉', l:'埼玉県'},
+    {k:'千葉', l:'千葉県'},
+    {k:'東京', l:'東京都'},
+    {k:'神奈川', l:'神奈川県'},
+    {k:'新潟', l:'新潟県'},
+    {k:'富山', l:'富山県'},
+    {k:'石川', l:'石川県'},
+    {k:'福井', l:'福井県'},
+    {k:'山梨', l:'山梨県'},
+    {k:'長野', l:'長野県'},
+    {k:'岐阜', l:'岐阜県'},
+    {k:'静岡', l:'静岡県'},
+    {k:'愛知', l:'愛知県'},
+    {k:'三重', l:'三重県'},
+    {k:'滋賀', l:'滋賀県'},
+    {k:'京都', l:'京都府'},
+    {k:'大阪', l:'大阪府'},
+    {k:'兵庫', l:'兵庫県'},
+    {k:'奈良', l:'奈良県'},
+    {k:'和歌山', l:'和歌山県'},
+    {k:'鳥取', l:'鳥取県'},
+    {k:'島根', l:'島根県'},
+    {k:'岡山', l:'岡山県'},
+    {k:'広島', l:'広島県'},
+    {k:'山口', l:'山口県'},
+    {k:'徳島', l:'徳島県'},
+    {k:'香川', l:'香川県'},
+    {k:'愛媛', l:'愛媛県'},
+    {k:'高知', l:'高知県'},
+    {k:'福岡', l:'福岡県'},
+    {k:'佐賀', l:'佐賀県'},
+    {k:'長崎', l:'長崎県'},
+    {k:'熊本', l:'熊本県'},
+    {k:'大分', l:'大分県'},
+    {k:'宮崎', l:'宮崎県'},
+    {k:'鹿児島', l:'鹿児島県'},
+    {k:'沖縄', l:'沖縄県'}
+  ];
+  const PREF_LABEL = Object.fromEntries(PREFS.map(x=>[x.k,x.l]));
+
+  // 参考：地域別最低賃金（新/旧/引上げ額/発効予定日）
+  // ※値は「答申状況」掲載の一覧に基づく（2025年度想定）
+  const MIN_WAGE = {
+    "全国加重平均": {n:1121,o:1055,inc:66,eff:"2025-10-01"},
+    "北海道": {n:1075,o:1010,inc:65,eff:"2025-10-04"},
+    "青森": {n:1029,o:953,inc:76,eff:"2025-11-21"},
+    "岩手": {n:1031,o:952,inc:79,eff:"2025-12-01"},
+    "宮城": {n:1038,o:973,inc:65,eff:"2025-10-04"},
+    "秋田": {n:1031,o:951,inc:80,eff:"2026-03-31"},
+    "山形": {n:1032,o:955,inc:77,eff:"2025-12-23"},
+    "福島": {n:1033,o:955,inc:78,eff:"2026-01-01"},
+    "茨城": {n:1074,o:1005,inc:69,eff:"2025-10-12"},
+    "栃木": {n:1068,o:1004,inc:64,eff:"2025-10-01"},
+    "群馬": {n:1063,o:985,inc:78,eff:"2026-03-01"},
+    "埼玉": {n:1141,o:1078,inc:63,eff:"2025-11-01"},
+    "千葉": {n:1140,o:1076,inc:64,eff:"2025-10-03"},
+    "東京": {n:1226,o:1163,inc:63,eff:"2025-10-03"},
+    "神奈川": {n:1225,o:1162,inc:63,eff:"2025-10-04"},
+    "新潟": {n:1050,o:985,inc:65,eff:"2025-10-02"},
+    "富山": {n:1062,o:998,inc:64,eff:"2025-10-12"},
+    "石川": {n:1054,o:984,inc:70,eff:"2025-10-08"},
+    "福井": {n:1053,o:984,inc:69,eff:"2025-10-08"},
+    "山梨": {n:1052,o:988,inc:64,eff:"2025-12-01"},
+    "長野": {n:1061,o:998,inc:63,eff:"2025-10-03"},
+    "岐阜": {n:1065,o:1001,inc:64,eff:"2025-10-18"},
+    "静岡": {n:1097,o:1034,inc:63,eff:"2025-11-01"},
+    "愛知": {n:1140,o:1077,inc:63,eff:"2025-10-18"},
+    "三重": {n:1087,o:1023,inc:64,eff:"2025-11-21"},
+    "滋賀": {n:1080,o:1017,inc:63,eff:"2025-10-05"},
+    "京都": {n:1122,o:1058,inc:64,eff:"2025-11-21"},
+    "大阪": {n:1177,o:1114,inc:63,eff:"2025-10-16"},
+    "兵庫": {n:1116,o:1052,inc:64,eff:"2025-10-04"},
+    "奈良": {n:1051,o:986,inc:65,eff:"2025-11-16"},
+    "和歌山": {n:1045,o:980,inc:65,eff:"2025-11-01"},
+    "鳥取": {n:1030,o:957,inc:73,eff:"2025-10-04"},
+    "島根": {n:1033,o:962,inc:71,eff:"2025-11-17"},
+    "岡山": {n:1047,o:982,inc:65,eff:"2025-12-01"},
+    "広島": {n:1085,o:1020,inc:65,eff:"2025-11-01"},
+    "山口": {n:1043,o:979,inc:64,eff:"2025-10-16"},
+    "徳島": {n:1046,o:980,inc:66,eff:"2026-01-01"},
+    "香川": {n:1036,o:970,inc:66,eff:"2025-10-18"},
+    "愛媛": {n:1033,o:956,inc:77,eff:"2025-12-01"},
+    "高知": {n:1023,o:952,inc:71,eff:"2025-12-01"},
+    "福岡": {n:1057,o:992,inc:65,eff:"2025-11-16"},
+    "佐賀": {n:1030,o:956,inc:74,eff:"2025-11-21"},
+    "長崎": {n:1031,o:953,inc:78,eff:"2025-12-01"},
+    "熊本": {n:1034,o:952,inc:82,eff:"2026-01-01"},
+    "大分": {n:1035,o:954,inc:81,eff:"2026-01-01"},
+    "宮崎": {n:1023,o:952,inc:71,eff:"2025-11-16"},
+    "鹿児島": {n:1026,o:953,inc:73,eff:"2025-11-01"},
+    "沖縄": {n:1023,o:952,inc:71,eff:"2025-12-01"}
+  };
+
   /* --- ユーティリティ --- */
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
   const toNum = v => { const s = String(v||'').replace(/,/g,'').replace(/[^\d.-]/g,''); const n = parseFloat(s); return isFinite(n) ? n : NaN; };
   const yen = n => isFinite(n) ? new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(n) : '—';
-  const clamp = (v,min,max)=>Math.min(max,Math.max(min,v));
+  const pct1 = n => isFinite(n) ? (Math.round(n*10)/10).toFixed(1) : '';
+  const z2 = n => String(n).padStart(2,'0');
+  const fmtYMD = s => {
+    if(!s) return '';
+    const d = new Date(s);
+    if(isNaN(d.getTime())) return String(s);
+    return `${d.getFullYear()}-${z2(d.getMonth()+1)}-${z2(d.getDate())}`;
+  };
+  const joinJa = (arr) => {
+    const a = (arr||[]).filter(Boolean);
+    if(a.length===0) return '';
+    if(a.length===1) return a[0];
+    if(a.length===2) return a[0] + "および" + a[1];
+    return a.slice(0,-1).join("、") + "等";
+  };
 
   /* --- DOM --- */
   const productName = $('#productName');
@@ -230,7 +444,28 @@ input.imported-value{
   const validateMsg = $('#validateMsg');
   const importStatusEl = $('#importStatus');
 
-  /* --- 入力時に転記ハイライトを消す --- */
+  const prefSelect = $('#prefSelect');
+  const minWageView = $('#minWageView');
+  const minWageBadge = $('#minWageBadge');
+  const minWageNote = $('#minWageNote');
+
+  const cpiRate = $('#cpiRate');
+  const wageRate = $('#wageRate');
+  const cpiAsOf = $('#cpiAsOf');
+  const wageAsOf = $('#wageAsOf');
+  const includeEvidence = $('#includeEvidence');
+  const includeSources = $('#includeSources');
+  const autoFillBtn = $('#autoFillBtn');
+
+  const dataUrl = $('#dataUrl');
+  const loadDataBtn = $('#loadDataBtn');
+  const clearDataBtn = $('#clearDataBtn');
+  const dataLoadStatus = $('#dataLoadStatus');
+  const jsonSample = $('#jsonSample');
+
+  const extraFactors = $('#extraFactors');
+
+  /* --- URL転記ハイライト除去 --- */
   document.addEventListener('input', (e) => {
     if(e.target && e.target.classList && e.target.classList.contains('imported-value')){
       e.target.classList.remove('imported-value');
@@ -325,6 +560,185 @@ input.imported-value{
     }
   }
 
+  /* =========================
+     1) 都道府県 UI 初期化
+     ========================= */
+  function buildPrefOptions(){
+    prefSelect.innerHTML = '';
+    for(const p of PREFS){
+      const opt = document.createElement('option');
+      opt.value = p.k;
+      opt.textContent = p.l;
+      prefSelect.appendChild(opt);
+    }
+  }
+
+  /* =========================
+     2) JSON 読み込み（任意）
+     ========================= */
+  let COST_DATA = null; // {meta, national, prefs}
+  const SAMPLE_JSON = {
+    meta: { updated: "2026-02-22", note: "任意：統計データをここに集約（例）" },
+    national: { cpi_yoy: 2.3, cpi_asof: "2026年1月（前年同月比）", wage_yoy: 3.2, wage_asof: "2025年度（賃上げ）" },
+    prefs: {
+      "兵庫": { cpi_yoy: 2.1, wage_yoy: 3.0 },
+      "東京": { cpi_yoy: 2.6, wage_yoy: 3.5 }
+    }
+  };
+
+  function setStatus(msg, ok){
+    dataLoadStatus.textContent = msg || '';
+    dataLoadStatus.style.color = ok ? '#0f172a' : '#b91c1c';
+  }
+
+  async function fetchJson(url){
+    const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+    const res = await fetch(url + bust, { cache: 'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  }
+
+  function normalizePrefKey(k){
+    if(!k) return '';
+    let s = String(k).trim();
+    s = s.replace(/[都道府県]$/,''); // 末尾の都道府県を落とす
+    if(s==="東京都") s="東京";
+    if(s==="大阪府") s="大阪";
+    if(s==="京都府") s="京都";
+    if(s==="北海道") s="北海道";
+    return s;
+  }
+
+  function getPrefData(prefKey){
+    if(!COST_DATA || !COST_DATA.prefs) return null;
+    const direct = COST_DATA.prefs[prefKey];
+    if(direct) return direct;
+    // keyが「東京都」等で来るケースも吸収
+    for(const key in COST_DATA.prefs){
+      if(normalizePrefKey(key) === prefKey) return COST_DATA.prefs[key];
+    }
+    return null;
+  }
+
+  function setLocal(key, val){ try{ localStorage.setItem(key, val); }catch(e){} }
+  function getLocal(key){ try{ return localStorage.getItem(key) || ''; }catch(e){ return ''; } }
+
+  async function loadCostData(url){
+    const u = (url && url.trim()) ? url.trim() : './pref_cost_data.json';
+    setStatus('読み込み中…', true);
+    try{
+      const json = await fetchJson(u);
+      COST_DATA = json;
+      setStatus('読み込みOK（' + u + '）', true);
+      setLocal('mk_cost_data_url', u);
+      renderPrefPanel();
+      autoFillFromData(true); // 読み込み直後は空欄を提案
+      generate();
+    }catch(e){
+      COST_DATA = null;
+      setStatus('読み込み失敗：' + e.message + '（URL/配置/CORSをご確認ください）', false);
+      renderPrefPanel();
+      generate();
+    }
+  }
+
+  function clearCostData(){
+    COST_DATA = null;
+    setStatus('読込解除しました（内蔵データのみ）', true);
+    generate();
+    renderPrefPanel();
+  }
+
+  /* =========================
+     3) 最低賃金パネル描画＆自動提案
+     ========================= */
+  function minWageInfo(prefKey){
+    const w = MIN_WAGE[prefKey];
+    if(!w || !isFinite(w.n) || !isFinite(w.o)) return null;
+    const p = (w.o>0) ? (w.inc / w.o * 100) : NaN;
+    return {
+      ...w,
+      pct: p,
+      label: PREF_LABEL[prefKey] || prefKey
+    };
+  }
+
+  function renderPrefPanel(){
+    const key = prefSelect.value || '兵庫';
+    const w = minWageInfo(key);
+    if(w){
+      minWageView.textContent = `${w.o.toLocaleString('ja-JP')}円 → ${w.n.toLocaleString('ja-JP')}円（+${w.inc}円、+${pct1(w.pct)}%）／発効予定：${fmtYMD(w.eff)}`;
+      minWageBadge.textContent = '内蔵';
+      minWageBadge.style.borderColor = '#d1d5db';
+      minWageBadge.style.color = '#334155';
+      minWageNote.textContent = '※最低賃金は内蔵データ（都道府県別）。CPI/賃上げ率はJSON読込で自動反映できます。';
+    }else{
+      minWageView.textContent = '—';
+      minWageBadge.textContent = '未取得';
+      minWageBadge.style.color = '#b91c1c';
+      minWageNote.textContent = '※最低賃金データが取得できませんでした。';
+    }
+  }
+
+  function autoFillFromData(onlyIfBlank){
+    const key = prefSelect.value || '兵庫';
+    const w = minWageInfo(key);
+    const pd = getPrefData(key);
+    const nat = COST_DATA && COST_DATA.national ? COST_DATA.national : null;
+
+    const blank = (el)=> !String(el.value||'').trim();
+    const setIf = (el, v) => {
+      if(onlyIfBlank && !blank(el)) return;
+      if(v===undefined || v===null || v==='') return;
+      el.value = String(v);
+    };
+
+    // CPI：pref → national の順で提案
+    if(pd && isFinite(toNum(pd.cpi_yoy))) setIf(cpiRate, toNum(pd.cpi_yoy));
+    else if(nat && isFinite(toNum(nat.cpi_yoy))) setIf(cpiRate, toNum(nat.cpi_yoy));
+
+    if(pd && pd.cpi_asof) setIf(cpiAsOf, pd.cpi_asof);
+    else if(nat && nat.cpi_asof) setIf(cpiAsOf, nat.cpi_asof);
+
+    // 人件費：pref → national → 最低賃金% の順で提案
+    if(pd && isFinite(toNum(pd.wage_yoy))) setIf(wageRate, toNum(pd.wage_yoy));
+    else if(nat && isFinite(toNum(nat.wage_yoy))) setIf(wageRate, toNum(nat.wage_yoy));
+    else if(w && isFinite(w.pct)) setIf(wageRate, pct1(w.pct)); // 参考：最低賃金上昇率
+
+    if(pd && pd.wage_asof) setIf(wageAsOf, pd.wage_asof);
+    else if(nat && nat.wage_asof) setIf(wageAsOf, nat.wage_asof);
+  }
+
+  function evidenceLines(){
+    if(!includeEvidence.checked) return [];
+    const key = prefSelect.value || '兵庫';
+    const label = PREF_LABEL[key] || key;
+    const lines = [];
+
+    const w = minWageInfo(key);
+    // 最低賃金は「入力不要の参考」として強い根拠になるため、常に候補に入れる（ただしユーザーが外したい場合は後で編集可）
+    if(w){
+      lines.push(`${label}の最低賃金：${w.o.toLocaleString('ja-JP')}円 → ${w.n.toLocaleString('ja-JP')}円（+${w.inc}円、+${pct1(w.pct)}%）〔発効予定：${fmtYMD(w.eff)}〕`);
+    }
+
+    const cpi = toNum(cpiRate.value);
+    if(isFinite(cpi)){
+      const asof = (cpiAsOf.value||'').trim();
+      lines.push(`物価（CPI等）：前年同月比 +${pct1(cpi)}%${asof?`（${asof}）`:''}`);
+    }
+
+    const wage = toNum(wageRate.value);
+    if(isFinite(wage)){
+      const asof = (wageAsOf.value||'').trim();
+      lines.push(`人件費（賃上げ/採用圧力等）：+${pct1(wage)}%${asof?`（${asof}）`:''}`);
+    }
+
+    if(includeSources.checked){
+      lines.push(`出典（簡易）：最低賃金は厚生労働省の地域別最低賃金一覧、CPI/賃上げ率等はe-Stat等の公的統計（※本ツールは入力/JSON読込値を引用）`);
+    }
+    return lines;
+  }
+
   /* --- 生成 --- */
   function generate(){
     updateRateHint();
@@ -347,12 +761,19 @@ input.imported-value{
     }
 
     const factors = getSelectedValues('#factorGroup');
-    const factorText = factors.length > 0 ? factors.join('および') : '急激な環境変化';
+    const extra = (extraFactors.value||'').trim();
+    const factorText = factors.length > 0 ? joinJa(factors) : '原材料費・物流費・人件費等の上昇';
+    const factorTail = extra ? `（補足：${extra}）` : '';
 
     const efforts = getSelectedValues('#effortGroup');
-    const effortText = efforts.length > 0 ? efforts.join('や') : '徹底したコスト削減';
+    const effortText = efforts.length > 0 ? joinJa(efforts) : '徹底したコスト削減';
 
     const relation = getSelectedValues('#relationGroup')[0] || 'B';
+
+    const ev = evidenceLines();
+    const evBlock = (ev.length>0)
+      ? `【参考（外部指標／根拠）】\n${ev.map(x=>'・'+x).join('\n')}\n`
+      : '';
 
     let text = '';
 
@@ -370,9 +791,8 @@ input.imported-value{
 平素は格別のお引き立てを賜り、また長年にわたり当社のビジネスを支えていただき、心より感謝申し上げます。
 
 本日は、誠に心苦しいお願いがあり、ご連絡いたしました。
-昨今の${factorText}を受け、当社を取り巻く環境は厳しい状況が続いております。
-
-〇〇様にはご負担をおかけしてはならないと、${effortText}に努め、なんとか価格を据え置いてまいりました。
+昨今の${factorText}${factorTail}を受け、当社を取り巻く環境は厳しい状況が続いております。
+${evBlock ? '\n' + evBlock : ''}〇〇様にはご負担をおかけしてはならないと、${effortText}に努め、なんとか価格を据え置いてまいりました。
 しかしながら、自助努力だけではこれ以上のコスト増を吸収することが困難な限界に達しております。
 
 このままでは、〇〇様へご提供している「${prod}」の品質や安定供給を維持できなくなる恐れがあり、熟慮を重ねた結果、以下の通り価格改定をお願いせざるを得ないという結論に至りました。
@@ -400,8 +820,8 @@ input.imported-value{
 平素は弊社のサービスをご愛顧いただき、厚く御礼申し上げます。
 さて、本日は価格改定に関するお願いがございます。
 
-昨今の${factorText}により、各種コストが上昇しております。
-弊社といたしましても、お客様への影響を最小限に抑えるべく、${effortText}など、あらゆる対策を講じてまいりました。
+昨今の${factorText}${factorTail}により、各種コストが上昇しております。
+${evBlock ? '\n' + evBlock : ''}弊社といたしましても、お客様への影響を最小限に抑えるべく、${effortText}など、あらゆる対策を講じてまいりました。
 
 しかしながら、現在の価格体系のままでは従来の品質レベルおよび安定的な提供を維持することが困難な状況となっております。
 つきましては、誠に不本意ではございますが、下記の通り価格の改定を実施させていただきたく存じます。
@@ -424,9 +844,8 @@ input.imported-value{
 [自社名]の[氏名]でございます。
 
 本日は、今後の継続的なご提供に向けた価格改定のご相談でご連絡いたしました。
-昨今の${factorText}が常態化しており、弊社のコスト構造にも継続的な影響が出ております。
-
-弊社におきましても、${effortText}を重ねてまいりましたが、企業努力のみでコスト増を吸収し続けることは困難な局面に入っております。
+昨今の${factorText}${factorTail}が常態化しており、弊社のコスト構造にも継続的な影響が出ております。
+${evBlock ? '\n' + evBlock : ''}弊社におきましても、${effortText}を重ねてまいりましたが、企業努力のみでコスト増を吸収し続けることは困難な局面に入っております。
 このままでは、御社に納品させていただいている「${prod}」の品質や納期に支障が出るリスクがあり、弊社として避けるべき事態です。
 
 つきましては、継続提供の前提となる適正価格化として、以下の目安で価格改定の協議をお願いしたく存じます。
@@ -449,13 +868,13 @@ input.imported-value{
       }
     } else {
       const ttl = (relation==='A') ? '関係性が良好な顧客向け' : (relation==='B') ? '標準的な取引先向け' : '価格に厳しい顧客向け';
+      const evTalk = (ev.length>0) ? `\n（参考：${ev.slice(0,2).join('／')}）\n` : '\n';
       text =
 `【${ttl} 面談トークスクリプト】
 
 ■ 1. 冒頭（状況共有）
 「本日はお時間をいただきありがとうございます。実は本日、少し心苦しいご相談がございましてお伺いしました。
-御社もご認識の通りかとは存じますが、昨今の${factorText}の影響が弊社にも及んでおり、厳しい状況が続いております。」
-
+御社もご認識の通りかとは存じますが、昨今の${factorText}${factorTail}の影響が弊社にも及んでおり、厳しい状況が続いております。」${evTalk}
 ■ 2. 自助努力の提示と限界
 「もちろん、御社にはご迷惑をおかけできないと、弊社内でも${effortText}などを進め、これまで価格を維持してまいりました。
 ただ、いよいよ社内努力だけでは吸収できない水準に達してしまいました。」
@@ -481,7 +900,7 @@ ${
     outputArea.value = text;
   }
 
-  /* --- コピー処理（A） --- */
+  /* --- コピー処理 --- */
   function showCopied(){
     copyStatus.classList.add('show');
     clearTimeout(showCopied._t);
@@ -489,13 +908,11 @@ ${
   }
 
   async function copyText(text){
-    // 1) Clipboard API
     if(navigator.clipboard && window.isSecureContext){
       try{ await navigator.clipboard.writeText(text); return true; }catch(e){}
     }
-    // 2) Fallback: execCommand
     try{
-      outputArea.removeAttribute('readonly'); // 一部環境でselectできない対策
+      outputArea.removeAttribute('readonly');
       outputArea.select();
       outputArea.setSelectionRange(0, outputArea.value.length);
       const ok = document.execCommand('copy');
@@ -516,14 +933,33 @@ ${
   printBtn.addEventListener('click', () => { try{ window.print(); }catch(e){} });
 
   /* --- 入力イベント --- */
-  [productName, currentPrice, newPrice, effectiveDate].forEach(el => el.addEventListener('input', generate));
+  [productName, currentPrice, newPrice, effectiveDate, cpiRate, wageRate, cpiAsOf, wageAsOf, includeEvidence, includeSources, extraFactors]
+    .forEach(el => el.addEventListener('input', generate));
 
-  /* --- URLパラメータ転記（B） --- */
+  /* --- 自動提案 --- */
+  autoFillBtn.addEventListener('click', () => {
+    autoFillFromData(true);
+    generate();
+  });
+
+  /* --- 都道府県変更 --- */
+  prefSelect.addEventListener('change', () => {
+    setLocal('mk_pref_key', prefSelect.value);
+    renderPrefPanel();
+    // 変更時は「空欄だけ」自動提案
+    autoFillFromData(true);
+    generate();
+  });
+
+  /* --- JSON ロード --- */
+  loadDataBtn.addEventListener('click', () => loadCostData(dataUrl.value));
+  clearDataBtn.addEventListener('click', () => clearCostData());
+
+  /* --- URLパラメータ転記 --- */
   function getUrlParams(){
     const params = new URLSearchParams(window.location.search);
     let hasParam = false;
 
-    // 価格改定検討ツール系：price/P と chgAbs/P2 を想定（既存互換）
     const p = params.get('price') || params.get('P');
     if(p && isFinite(toNum(p))){
       currentPrice.value = Math.round(toNum(p)).toLocaleString('ja-JP');
@@ -537,7 +973,6 @@ ${
       hasParam = true;
     }
 
-    // 任意：product / effectiveDate
     const prod = params.get('product') || params.get('prod');
     if(prod){
       productName.value = String(prod);
@@ -551,32 +986,97 @@ ${
       hasParam = true;
     }
 
+    const pref = params.get('pref');
+    if(pref){
+      const k = normalizePrefKey(pref);
+      if(PREF_LABEL[k]){
+        prefSelect.value = k;
+        markImported(prefSelect);
+        hasParam = true;
+      }
+    }
+
     if(hasParam){
-      showImportStatus('✅ 転記：URLパラメータから数値を取り込みました。');
+      showImportStatus('✅ 転記：URLパラメータから値を取り込みました。');
     }
     return hasParam;
   }
 
   /* --- リセット --- */
+  function resetChips(groupId, multiple){
+    const g = $(groupId);
+    // HTMLのactiveを「初期状態」とする（ロード後にDOMを書き換えない運用のため）
+    // ここでは一旦全解除→data-default属性があれば採用、なければ「元のactiveを温存」する運用にせず、
+    // 明示的に初期状態へ戻すため、固定でセット。
+    const chips = Array.from(g.querySelectorAll('.chip'));
+    chips.forEach(c=>c.classList.remove('active'));
+    if(groupId==='#relationGroup'){
+      const b = chips.find(x=>x.getAttribute('data-val')==='B');
+      if(b) b.classList.add('active');
+      return;
+    }
+    if(groupId==='#effortGroup'){
+      chips.filter(x=>['徹底した経費削減','数年間にわたる価格据え置き'].includes(x.getAttribute('data-val'))).forEach(x=>x.classList.add('active'));
+      return;
+    }
+    if(groupId==='#factorGroup'){
+      chips.filter(x=>['原材料・仕入コストの上昇','人件費（賃上げ・採用難）による負担増'].includes(x.getAttribute('data-val'))).forEach(x=>x.classList.add('active'));
+      return;
+    }
+  }
+
   resetBtn.addEventListener('click', () => {
-    [productName,currentPrice,newPrice,effectiveDate].forEach(el=>{
+    [productName,currentPrice,newPrice,effectiveDate,cpiRate,wageRate,cpiAsOf,wageAsOf,extraFactors].forEach(el=>{
       el.value='';
       el.classList.remove('imported-value');
     });
+    includeEvidence.checked = true;
+    includeSources.checked = false;
+
+    // 都道府県はユーザーの設定を残す（操作ストレスを減らす）
+    resetChips('#factorGroup', true);
+    resetChips('#effortGroup', true);
+    resetChips('#relationGroup', false);
+
+    renderPrefPanel();
+    autoFillFromData(true);
     generate();
   });
 
-  /* --- フッタ日付（C） --- */
+  /* --- フッタ日付 --- */
   try{
     $('#cpy-year').textContent = String(new Date().getFullYear());
     const ld = new Date(document.lastModified);
-    const z = n => String(n).padStart(2,'0');
-    const ymd = isNaN(ld.getTime()) ? '' : `${ld.getFullYear()}-${z(ld.getMonth()+1)}-${z(ld.getDate())}`;
+    const ymd = isNaN(ld.getTime()) ? '' : `${ld.getFullYear()}-${z2(ld.getMonth()+1)}-${z2(ld.getDate())}`;
     $('#last-updated-date').textContent = ymd;
   }catch(e){}
 
+  /* --- JSONサンプル表示 --- */
+  try{
+    jsonSample.textContent = JSON.stringify(SAMPLE_JSON, null, 2);
+  }catch(e){}
+
   /* --- 初期化 --- */
+  buildPrefOptions();
+
+  // 都道府県はローカル保存優先（なければ兵庫）
+  const savedPref = getLocal('mk_pref_key');
+  if(savedPref && PREF_LABEL[savedPref]) prefSelect.value = savedPref;
+  else prefSelect.value = '兵庫';
+
+  // 前回のJSON URL
+  const savedUrl = getLocal('mk_cost_data_url');
+  if(savedUrl) dataUrl.value = savedUrl;
+
+  renderPrefPanel();
   getUrlParams();
+
+  // 初回：空欄だけ自動提案（最低賃金%など）
+  autoFillFromData(true);
+
+  // 可能なら ./pref_cost_data.json を自動試行（失敗してもOK）
+  loadCostData(savedUrl || './pref_cost_data.json');
+
   generate();
 
 })();
