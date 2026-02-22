@@ -130,7 +130,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
       <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56">
     </a>
-    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r19</span></div>
+    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r20</span></div>
     <div class="headRight">
       <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
     </div>
@@ -424,7 +424,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r19</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r20</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -723,7 +723,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   async function loadCostData(url, silent){
     const u = (url && url.trim()) ? url.trim() : './pref_cost_data.json';
     if(!silent) setStatus('読み込み中…', true);
-    
     try{
       const json = await fetchJson(u);
       COST_DATA = json;
@@ -738,7 +737,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       }
     }
 
-    // JSONロード結果に関わらず、UIに必ず反映させる（エラーでCOST_DATAを吹き飛ばさないように分離）
     try {
       renderAllByPref();
       generate();
@@ -943,8 +941,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       return baseMw * Math.pow(0.985, 2002 - year);
     }
     if (hist && year > 2025) {
-      const baseMw = hist[2025];
-      return baseMw * Math.pow(1.05, year - 2025);
+      return hist[2025]; 
     }
     return null;
   }
@@ -961,7 +958,9 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const ny = new Date().getFullYear();
 
     const baseMw = getHistoricalMinWageForPref(prefKey, by);
-    const nowMw = getHistoricalMinWageForPref(prefKey, ny);
+    
+    const currentMwInfo = minWageInfo(prefKey);
+    const nowMw = currentMwInfo ? currentMwInfo.n : getHistoricalMinWageForPref(prefKey, ny);
 
     if(!baseMw || !nowMw) return { cum: 0, baseMw: 0, nowMw: 0, by, ny, prefKey };
 
@@ -987,16 +986,16 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     cpiSinceBadge.className = 'badge warn';
 
     if(calcDetailBox) {
-      let detailHtml = `<b>【累積CPI（物価）計算過程】</b><br>`;
+      let detailHtml = `<b>【累積物価上昇率（CPI）の計算式】</b><br>`;
       detailHtml += `基準時（${x.by}年${x.bm+1}月）の推定CPI：${x.baseCpi.toFixed(2)}<br>`;
       detailHtml += `現在（${x.ny}年${x.nm+1}月）の推定CPI：${x.nowCpi.toFixed(2)}<br>`;
-      detailHtml += `計算式：(${x.nowCpi.toFixed(2)} ÷ ${x.baseCpi.toFixed(2)} - 1) × 100 = <b>${x.cum.toFixed(2)}%</b><br><br>`;
+      detailHtml += `⇒ (${x.nowCpi.toFixed(2)} ÷ ${x.baseCpi.toFixed(2)} - 1) × 100 = <b>${x.cum.toFixed(2)}%</b><br><br>`;
       
-      detailHtml += `<b>【累積最低賃金計算過程】</b><br>`;
+      detailHtml += `<b>【累積最低賃金上昇率の計算式】</b><br>`;
       detailHtml += `対象エリア：${mwX.prefKey}<br>`;
       detailHtml += `基準年（${mwX.by}年）の最低賃金：${Math.round(mwX.baseMw)}円<br>`;
       detailHtml += `現在（${mwX.ny}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>`;
-      detailHtml += `計算式：(${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`;
+      detailHtml += `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`;
       
       calcDetailBox.innerHTML = detailHtml;
     }
@@ -1196,7 +1195,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const efforts = getSelectedValues('#effortGroup');
     const effortText = efforts.length>0 ? joinJa(efforts) : '（未選択）';
 
-    // 顧客タイプの日本語化
     const customerTypes = getSelectedValues('#customerGroup');
     const customerLabels = {
       'strategic': '戦略顧客（最重要）',
