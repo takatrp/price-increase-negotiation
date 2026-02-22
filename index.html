@@ -130,7 +130,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
       <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56">
     </a>
-    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r16</span></div>
+    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r17</span></div>
     <div class="headRight">
       <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
     </div>
@@ -416,7 +416,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r16</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r17</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -461,9 +461,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     "山口": {n:1043,o:979,inc:64,eff:"2025-10-16"}
   };
 
-  /* 都道府県別 最低賃金の履歴データ (2002〜2025年) 
-     ※デフレ期(2002〜2004頃)は据え置きが多かったため同額で補完
-  */
+  /* 都道府県別 最低賃金の履歴データ (2002〜2025年) */
   const MW_HISTORY = {
     "滋賀": {2002:651, 2003:651, 2004:651, 2005:657, 2006:662, 2007:677, 2008:691, 2009:693, 2010:697, 2011:701, 2012:714, 2013:727, 2014:746, 2015:764, 2016:788, 2017:813, 2018:839, 2019:866, 2020:868, 2021:896, 2022:927, 2023:967, 2024:1017, 2025:1080},
     "京都": {2002:677, 2003:677, 2004:677, 2005:682, 2006:686, 2007:700, 2008:717, 2009:729, 2010:735, 2011:737, 2012:749, 2013:759, 2014:779, 2015:808, 2016:831, 2017:856, 2018:882, 2019:909, 2020:909, 2021:937, 2022:968, 2023:1008, 2024:1058, 2025:1122},
@@ -966,14 +964,40 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     cpiSinceBadge.className = 'badge warn';
   }
 
-  function renderAllByPref(){
-    renderMinWagePanel();
-    applyLinkedRates();
+  /* =========================
+     値上げ率等の計算と入力チェック
+     ========================= */
+  function updateRateHint(){
+    const cp = toNum(currentPrice.value);
+    const np = toNum(newPrice.value);
+    if(isFinite(cp) && cp>0 && isFinite(np) && np>=0){
+      const rate = ((np/cp)-1)*100;
+      const diff = np - cp;
+      rateHint.textContent = `改定率：約${pct1(rate)}% ／ 差額：${diff>=0?'+':''}${yen(diff)}`;
+    }else{
+      rateHint.textContent = '改定率：— ／ 差額：—';
+    }
   }
 
-  /* =========================
-     値上げ幅の妥当性チェック
-     ========================= */
+  function validateBasic(){
+    const prod = productName.value.trim();
+    const cp = toNum(currentPrice.value);
+    const np = toNum(newPrice.value);
+
+    let msg = '';
+    if(!prod) msg = '「対象商品・サービス名」が未入力です（送付前に必ず埋めてください）。';
+    if(isFinite(cp) && isFinite(np) && cp>0 && np<0) msg = '「改定後単価」に負の値が入っています。';
+    if(isFinite(cp) && isFinite(np) && cp>0 && np===0) msg = '「改定後単価」が0円です。意図した入力か確認してください。';
+
+    if(msg){
+      validateMsg.style.display = 'block';
+      validateMsg.textContent = msg;
+    }else{
+      validateMsg.style.display = 'none';
+      validateMsg.textContent = '';
+    }
+  }
+
   function validatePriceIncrease() {
     const cp = toNum(currentPrice.value);
     const np = toNum(newPrice.value);
@@ -1003,6 +1027,11 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       validationWarning.textContent = warning.trim();
       validationWarning.style.display = 'block';
     }
+  }
+
+  function renderAllByPref(){
+    renderMinWagePanel();
+    applyLinkedRates();
   }
 
   /* =========================
