@@ -13,10 +13,14 @@
     }
   },
   "national": {
-    "cpi_yoy": null,
-    "cpi_asof": null,
-    "wage_yoy": null,
-    "wage_asof": null,
+    "cpi_yoy": 2.0,
+    "cpi_asof": "2026年1月（前年同月比・生鮮食品を除く総合）",
+    "wage_yoy": 4.65,
+    "wage_asof": "2025年春季生活闘争（連合 第7回〔最終〕回答集計：300人未満の中小組合・加重平均）",
+    "sources": {
+      "cpi": "e-Stat（総務省統計局）『2026年1月分 消費者物価指数（CPI）結果の概要（全国）』",
+      "wage": "連合『2025春季生活闘争 第7回（最終）回答集計結果について』（2025-07-03）"
+    },
     "min_wage_avg": {
       "new": 1121,
       "old": 1055,
@@ -46,7 +50,6 @@
       "wage_asof": null,
       "min_wage": { "new": 1033, "old": 962, "inc": 71, "eff": "2025-11-17" }
     },
-
     "滋賀": {
       "cpi_yoy": null,
       "cpi_asof": null,
@@ -75,7 +78,6 @@
       "wage_asof": null,
       "min_wage": { "new": 1051, "old": 986, "inc": 65, "eff": "2025-11-16" }
     },
-
     "岡山": {
       "cpi_yoy": null,
       "cpi_asof": null,
