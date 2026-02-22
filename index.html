@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>値上げ交渉ナビゲーター</title>
+
+<style>
+:root{--brand:#578899;--ink:#1f2937;--muted:#6b7280;--bg:#f7fafc;--ok:#10b981;--warn:#ef4444;--card:#fff;--grid:#e5e7eb;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;}
+.wrap{max-width:1100px;margin:0 auto;padding:12px}
+.header{display:flex;align-items:center;gap:12px;margin:6px 0 8px}
+.logo{height:56px;width:auto;object-fit:contain;border-radius:8px}
+.title{font-weight:800;font-size:1.25rem;color:#0f172a;display:flex;align-items:center;gap:6px}
+.sub{font-size:.85rem;color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);padding:16px;margin-bottom:12px}
+.pill{display:inline-block;background:rgba(87,136,153,.1);color:var(--brand);font-weight:700;border-radius:999px;padding:5px 9px;font-size:.8rem;margin-bottom:12px}
+.cardHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+label{display:block;font-size:.86rem;color:#374151;margin:12px 0 6px;font-weight:600}
+input[type="text"],textarea{width:100%;box-sizing:border-box;border:1px solid #e5e7eb;border-radius:10px;padding:10px;font-size:1rem;background:#fff;outline:none;transition: background-color 0.2s, border-color 0.2s, color 0.2s;}
+input:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(87,136,153,.15)}
+input::placeholder{color:#c7ccd3}
+.hint{font-size:.76rem;color:var(--muted);margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 12px;font-weight:700;font-size:.92rem;cursor:pointer;transition: opacity 0.2s;}
+.btn:hover{opacity:0.9}
+.btn.alt{background:#e5e7eb;color:#111827}
+.miniActions{display:flex;gap:8px;margin-top:12px}
+
+/* チップ（選択ボタン）のスタイル */
+.chipGroup{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;margin-bottom:4px}
+.chip{border:1px solid #d1d5db;background:#fff;border-radius:999px;padding:8px 12px;font-size:.85rem;font-weight:700;color:#374151;cursor:pointer;transition: all 0.2s;}
+.chip:hover{background:#f3f4f6}
+.chip.active{border-color:var(--brand);background:#eef6fa;color:#0f172a}
+
+.inputGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:480px){.inputGrid{grid-template-columns:1fr}}
+
+.dashboard{display:block}
+.colL,.colR{display:flex;flex-direction:column;gap:10px}
+@media (orientation:landscape){.dashboard{display:grid;grid-template-columns:minmax(300px,45%) 1fr;gap:16px;align-items:start}}
+@media (min-width:1024px){.dashboard{display:grid;grid-template-columns:420px 1fr;gap:16px;align-items:start}}
+.mk-mini{margin:24px auto 10px;max-width:1100px;color:#374151;font-size:.84rem;text-align:center}
+.mk-mini a{color:inherit;text-decoration:underline}
+
+/* タブスタイル */
+.tabs{display:flex;border-bottom:2px solid #e5e7eb;margin-bottom:12px}
+.tab{padding:8px 16px;font-size:.9rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+
+.docArea{min-height:400px;line-height:1.6;font-family:inherit;resize:vertical;background:#f8fafc}
+.statusMsg{font-size:0.85rem;color:var(--ok);font-weight:600;margin-left:auto;opacity:0;transition:opacity 0.3s;}
+.statusMsg.show{opacity:1;}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="title">値上げ交渉ナビゲーター</div>
+  </div>
+  <div class="sub">取引先との関係性や外部要因を選択し、適正な価格改定の案内文書を自動生成します。</div>
+
+  <div class="dashboard">
+    <div class="colL">
+      <div class="card">
+        <div class="pill">STEP 1：改定内容の基本情報</div>
+        
+        <label for="productName">対象商品・サービス名</label>
+        <input type="text" id="productName" placeholder="例）顧問報酬、システム保守費用、〇〇部品" />
+
+        <div class="inputGrid">
+          <div>
+            <label for="currentPrice">現在の単価（税抜）</label>
+            <input type="text" id="currentPrice" inputmode="decimal" placeholder="例）1,200" />
+          </div>
+          <div>
+            <label for="newPrice">改定後単価（税抜）</label>
+            <input type="text" id="newPrice" inputmode="decimal" placeholder="例）1,320" />
+          </div>
+        </div>
+
+        <label for="effectiveDate">適用開始時期</label>
+        <input type="text" id="effectiveDate" placeholder="例）2025年4月1日 ご注文分より" />
+      </div>
+
+      <div class="card">
+        <div class="pill">STEP 2：値上げの背景（外部要因）</div>
+        <div class="hint">該当するものをすべて選択してください（複数選択可）</div>
+        <div class="chipGroup" id="factorGroup">
+          <button class="chip active" type="button" data-val="原材料費の高騰">原材料費の高騰</button>
+          <button class="chip" type="button" data-val="物流費・運賃の負担増">物流費・運賃の負担増</button>
+          <button class="chip active" type="button" data-val="人件費・最低賃金の上昇">人件費・最低賃金の上昇</button>
+          <button class="chip" type="button" data-val="円安による仕入コスト増">円安による仕入コスト増</button>
+          <button class="chip" type="button" data-val="エネルギー価格の高騰">エネルギー価格の高騰</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="pill">STEP 3：自社の自助努力</div>
+        <div class="hint">これまで行ってきた努力を選択してください（複数選択可）</div>
+        <div class="chipGroup" id="effortGroup">
+          <button class="chip active" type="button" data-val="徹底した経費削減">徹底した経費削減</button>
+          <button class="chip" type="button" data-val="業務のDX化・効率化">業務のDX化・効率化</button>
+          <button class="chip" type="button" data-val="仕入先の見直し・統合">仕入先の見直し・統合</button>
+          <button class="chip active" type="button" data-val="数年間にわたる価格据え置き">数年間にわたる価格据え置き</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="pill">STEP 4：取引先との関係性</div>
+        <div class="hint">相手に合わせたトーン＆マナーで文章を調整します（1つ選択）</div>
+        <div class="chipGroup" id="relationGroup">
+          <button class="chip" type="button" data-val="A">長年の信頼あり（共感・誠実トーン）</button>
+          <button class="chip active" type="button" data-val="B">一般的な取引先（標準・論理トーン）</button>
+          <button class="chip" type="button" data-val="C">価格に厳しい（データ重視・代替案提示）</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="colR">
+      <div class="card">
+        <div class="cardHeader" style="margin-bottom:0;">
+          <div class="pill">生成された文面</div>
+          <span id="copyStatus" class="statusMsg">コピーしました</span>
+        </div>
+        
+        <div class="tabs" id="outputTabs">
+          <div class="tab active" data-target="document">案内文書（メール・書面）</div>
+          <div class="tab" data-target="script">面談トークスクリプト</div>
+        </div>
+
+        <textarea id="outputArea" class="docArea" readonly></textarea>
+
+        <div class="miniActions">
+          <button class="btn" id="copyBtn" type="button">クリップボードにコピー</button>
+          <button class="btn alt" id="printBtn" type="button">印刷プレビュー</button>
+        </div>
+        <div class="hint" style="margin-top:8px;">※生成された文章はコピー後、自社の状況に合わせて微調整してご使用ください。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="mk-mini">
+  © <span id="cpy-year"></span> 税理士法人松本会計事務所
+</footer>
+
+<script>
+(function(){
+  // --- ユーティリティ ---
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+  const yen = n => isFinite(n) ? new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(n) : '—';
+  const toNum = v => { const s = String(v||'').replace(/,/g,'').replace(/[^\d.-]/g,''); const n = parseFloat(s); return isFinite(n) ? n : NaN; };
+  
+  // --- DOM要素 ---
+  const productName = $('#productName');
+  const currentPrice = $('#currentPrice');
+  const newPrice = $('#newPrice');
+  const effectiveDate = $('#effectiveDate');
+  const outputArea = $('#outputArea');
+  const copyBtn = $('#copyBtn');
+  const printBtn = $('#printBtn');
+  const copyStatus = $('#copyStatus');
+
+  // --- 入力のカンマ整形 ---
+  const formatInput = (el) => {
+    const val = toNum(el.value);
+    if(isFinite(val)) el.value = Math.round(val).toLocaleString('ja-JP');
+  };
+  currentPrice.addEventListener('blur', () => formatInput(currentPrice));
+  newPrice.addEventListener('blur', () => formatInput(newPrice));
+
+  // --- チップの選択制御 ---
+  function setupChips(groupId, multiple) {
+    const group = $(groupId);
+    group.addEventListener('click', (e) => {
+      if(e.target.classList.contains('chip')) {
+        if(!multiple) {
+          group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          e.target.classList.add('active');
+        } else {
+          e.target.classList.toggle('active');
+        }
+        generateDocument();
+      }
+    });
+  }
+  setupChips('#factorGroup', true);
+  setupChips('#effortGroup', true);
+  setupChips('#relationGroup', false);
+
+  // --- タブの制御 ---
+  let currentOutputMode = 'document';
+  $('#outputTabs').addEventListener('click', (e) => {
+    if(e.target.classList.contains('tab')) {
+      $$('.tab').forEach(t => t.classList.remove('active'));
+      e.target.classList.add('active');
+      currentOutputMode = e.target.getAttribute('data-target');
+      generateDocument();
+    }
+  });
+
+  // --- テキスト生成ロジック ---
+  function getSelectedValues(groupId) {
+    return Array.from($(groupId).querySelectorAll('.chip.active')).map(c => c.getAttribute('data-val'));
+  }
+
+  function generateDocument() {
+    // 値の取得と整形
+    const prod = productName.value.trim() || '＿＿＿＿（対象商品・サービス）';
+    const cp = toNum(currentPrice.value);
+    const np = toNum(newPrice.value);
+    const dateStr = effectiveDate.value.trim() || '＿＿年＿＿月＿＿日';
+    
+    const cpStr = isFinite(cp) ? yen(cp) : '＿＿＿円';
+    const npStr = isFinite(np) ? yen(np) : '＿＿＿円';
+    
+    let rateStr = '';
+    if(isFinite(cp) && isFinite(np) && cp > 0) {
+      const rate = ((np / cp) - 1) * 100;
+      rateStr = `約${Math.round(rate * 10) / 10}%（${cpStr} → ${npStr}）`;
+    } else {
+      rateStr = `${cpStr} → ${npStr}`;
+    }
+
+    // 要因・努力の結合
+    const factors = getSelectedValues('#factorGroup');
+    const factorText = factors.length > 0 ? factors.join('および') : '急激な環境変化';
+    
+    const efforts = getSelectedValues('#effortGroup');
+    const effortText = efforts.length > 0 ? efforts.join('や') : '徹底したコスト削減';
+
+    const relation = getSelectedValues('#relationGroup')[0] || 'B';
+
+    let text = '';
+
+    if(currentOutputMode === 'document') {
+      // --- 案内文書生成 ---
+      if(relation === 'A') {
+        text = `件名：【重要】価格改定のお願いと、今後のサービス提供につきまして
+
+〇〇株式会社
+〇〇様
+
+いつも大変お世話になっております。
+[自社名]の[氏名]でございます。
+
+平素は格別のお引き立てを賜り、また長年にわたり当社のビジネスを支えていただき、心より感謝申し上げます。
+
+本日は、誠に心苦しいお願いがあり、ご連絡いたしました。
+昨今の${factorText}を受け、当社を取り巻く環境はかつてなく厳しい状況が続いております。
+
+〇〇様にはご負担をおかけしてはならないと、${effortText}に努め、なんとか価格を据え置いてまいりました。しかしながら、自助努力だけではこれ以上のコスト増を吸収することが極めて困難な限界に達しております。
+
+このままでは、〇〇様へご提供している「${prod}」の品質や安定供給を維持できなくなる恐れがあり、熟慮を重ねた結果、苦渋の決断ではございますが、以下の通り価格改定をお願いせざるを得ないという結論に至りました。
+
+【改定内容】
+・対象：${prod}
+・改定価格：${rateStr}
+・適用時期：${dateStr}
+
+御社にご負担をおかけすることとなり、大変申し訳ございません。
+適正な価格を頂戴することで、今後も〇〇様の事業にこれまで以上の品質とサービスで貢献し続けることをお約束いたします。
+
+本件につきまして、ご不明な点やご相談がございましたら、遠慮なくお申し付けください。何卒、当社を取り巻く厳しい事情をご賢察いただき、ご理解を賜りますよう伏してお願い申し上げます。`;
+
+      } else if(relation === 'B') {
+        text = `件名：【重要】${prod} 価格改定に関するお知らせ
+
+〇〇株式会社
+〇〇様
+
+いつも大変お世話になっております。
+[自社名]の[氏名]でございます。
+
+平素は弊社のサービスをご愛顧いただき、厚く御礼申し上げます。
+さて、本日は価格改定に関する重要なお願いがございます。
+
+すでにご高承の通り、昨今の${factorText}により、各種コストが大幅に上昇しております。
+
+弊社といたしましても、お客様への影響を最小限に抑えるべく、${effortText}など、あらゆる対策を講じてまいりました。
+
+しかしながら、現在の価格体系のままでは従来の品質レベルおよび安定的な提供を維持することが困難な状況となっております。つきましては、誠に不本意ではございますが、下記の通り価格の改定を実施させていただきたく存じます。
+
+【改定内容】
+・対象：${prod}
+・改定価格：${rateStr}
+・適用時期：${dateStr}
+
+お客様にはご負担とご迷惑をおかけいたします分、より一層のサービス向上に努めてまいる所存です。
+何卒、諸事情をご理解いただき、今後とも変わらぬご高配を賜りますようお願い申し上げます。`;
+
+      } else {
+        text = `件名：【重要】${prod}の適正価格化（価格改定）に関するご相談
+
+〇〇株式会社
+〇〇様
+
+いつも大変お世話になっております。
+[自社名]の[氏名]でございます。
+
+日頃より多大なるご支援を賜り、誠にありがとうございます。
+本日は、今後の継続的なご提供に向けた、価格改定のご相談でご連絡いたしました。
+
+報道等でも報じられております通り、${factorText}が常態化しております。
+
+弊社におきましても、${effortText}を重ねてまいりましたが、弊社単独の企業努力のみでコスト増を吸収することは、もはや不可能な状況に直面しております。
+
+このままの条件では、御社に納品させていただいている「${prod}」の品質や納期に重大な支障をきたす可能性があり、弊社として絶対に避けなければならない事態です。
+
+御社の事業活動に引き続き高い品質で貢献し続けるための適正価格化として、誠に恐縮ではございますが、以下の通り価格改定の協議をお願いしたく存じます。
+
+【お願いしたい改定内容の目安】
+・対象：${prod}
+・改定価格（目安）：${rateStr}
+・適用時期：${dateStr}
+
+御社の厳格なコスト管理方針は重々承知しております。もし上記での全面的なご承認が難しい場合におきましても、以下のような代替案を含め、双方が納得できる着地点を模索したく存じます。
+
+【ご協議の選択肢（例）】
+・段階的な価格改定の実施
+・発注ロット・契約期間の見直しによる単価の維持
+・一部仕様・納品条件の緩和によるコスト抑制
+
+近日中に、本件につきまして改めてお打ち合わせの機会をいただけないでしょうか。
+何卒ご検討のほどよろしくお願い申し上げます。`;
+      }
+
+    } else {
+      // --- トークスクリプト生成 ---
+      text = `【${relation === 'A' ? '関係性が良好な顧客向け' : (relation === 'B' ? '標準的な取引先向け' : '価格に厳しい顧客向け')} 面談トークスクリプト】
+
+■ 1. 冒頭のジャブ（状況の共有）
+「本日はお時間をいただきありがとうございます。実は本日、少し心苦しいご相談がございましてお伺いしました。
+御社もご認識の通りかとは存じますが、昨今の${factorText}の影響が弊社にも大きく及んでおりまして、全社的に非常に厳しい状況となっております。」
+
+■ 2. 自助努力の提示と限界
+「もちろん、御社にはご迷惑をおかけできないと、弊社内でも${effortText}などを進め、これまで価格を維持してまいりました。
+しかし、いよいよ社内の努力だけでは吸収できない限界に達してしまいました。」
+
+■ 3. 結論（値上げの打診）
+「このままですと、御社にご提供している『${prod}』の品質維持や安定供給に支障をきたす恐れがございます。
+つきましては、大変恐縮ではございますが、${dateStr}より、単価を現在の ${cpStr} から ${npStr} へ見直しをさせていただけないでしょうか。」
+
+■ 4. 反論への切り返し（想定Q&A）
+${relation === 'C' ? '顧客：「うちは予算が厳しい。見送ってほしい」\n回答：「ご事情は重々承知しております。ただ、このままでは品質の維持がお約束できない状況です。もし単価維持をご希望される場合は、例えば納期条件の緩和や、発注ロットの調整など、別の形でのコスト抑制案をご協議させていただけないでしょうか。」' : '顧客：「他社はまだ値上げしていないよ」\n回答：「他社様の状況は存じ上げませんが、弊社といたしましては、現在の品質を落とさずに御社へサービスを提供し続けるために、今回ギリギリのラインで算出した適正価格となります。どうかご斟酌いただけないでしょうか。」'}
+`;
+    }
+
+    outputArea.value = text;
+  }
+
+  // --- イベントリスナー設定 ---
+  const inputs = [productName, currentPrice, newPrice, effectiveDate];
+  inputs.forEach(el => el.addEventListener('input', generateDocument));
+
+  // --- URLパラメータの取得（価格改定検討ツールからの連携） ---
+  function getUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    let hasParam = false;
+    
+    // 単価の取得（price または P）
+    const p = params.get('price') || params.get('P');
+    if (p && isFinite(toNum(p))) {
+      currentPrice.value = Math.round(toNum(p)).toLocaleString('ja-JP');
+      hasParam = true;
+    }
+    
+    // 改定後単価の取得（P2 または chgAbs）
+    const p2 = params.get('P2') || params.get('chgAbs');
+    if (p2 && isFinite(toNum(p2))) {
+      newPrice.value = Math.round(toNum(p2)).toLocaleString('ja-JP');
+      hasParam = true;
+    }
+
+    return hasParam;
+  }
+
+  // --- コピー＆印刷アクション ---
+  copyBtn.addEventListener('click', () => {
+    outputArea.select();
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+    
+    copyStatus.classList.add('show');
+    setTimeout(() => copyStatus.classList.remove('show'), 2000);
+  });
+
+  printBtn.addEventListener('click', () => {
+    window.print();
+  });
+
+  // --- 初期化 ---
+  $('#cpy-year').textContent = new Date().getFullYear();
+  getUrlParams();
+  generateDocument();
+
+})();
+</script>
+</body>
+</html>
