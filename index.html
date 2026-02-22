@@ -130,7 +130,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
       <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56">
     </a>
-    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r18</span></div>
+    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r19</span></div>
     <div class="headRight">
       <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
     </div>
@@ -424,7 +424,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r18</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r19</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -683,10 +683,17 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   }
 
   async function fetchJson(url){
-    const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
-    const res = await fetch(url + bust, { cache: 'no-store' });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    return await res.json();
+    try {
+      const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+      const res = await fetch(url + bust, { cache: 'no-store' });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    } catch (e) {
+      // ローカルサーバー等でパラメータ起因によりfetch失敗した場合のフォールバック
+      const res2 = await fetch(url, { cache: 'no-store' });
+      if(!res2.ok) throw new Error('HTTP ' + res2.status);
+      return await res2.json();
+    }
   }
 
   function normalizePrefKey(k){
@@ -716,13 +723,12 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   async function loadCostData(url, silent){
     const u = (url && url.trim()) ? url.trim() : './pref_cost_data.json';
     if(!silent) setStatus('読み込み中…', true);
+    
     try{
       const json = await fetchJson(u);
       COST_DATA = json;
       setStatus('読み込みOK（' + u + '）', true);
       setLocal('mk_cost_data_url', u);
-      renderAllByPref();
-      generate();
     }catch(e){
       COST_DATA = null;
       if(silent){
@@ -730,8 +736,14 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       }else{
         setStatus('読み込み失敗：' + e.message, false);
       }
+    }
+
+    // JSONロード結果に関わらず、UIに必ず反映させる（エラーでCOST_DATAを吹き飛ばさないように分離）
+    try {
       renderAllByPref();
       generate();
+    } catch(err) {
+      console.error('UI反映時エラー', err);
     }
   }
 
@@ -860,7 +872,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       setScopeBadge(cpiScopeBadge, 'manual');
       setScopeBadge(wageScopeBadge, 'manual');
     }
-    updateCpiSinceView();
   }
 
   /* =========================
@@ -1054,6 +1065,11 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       validationWarning.textContent = warning.trim();
       validationWarning.style.display = 'block';
     }
+  }
+
+  function renderAllByPref(){
+    renderMinWagePanel();
+    applyLinkedRates();
   }
 
   /* =========================
