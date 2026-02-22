@@ -1,0 +1,48 @@
+{
+  "meta": {
+    "updated": "2026-02-22",
+    "note": "都道府県（または県庁所在市等）の外部指標を集約。数値は根拠が確認できるもののみ入れる。未設定はnull推奨。"
+  },
+  "national": {
+    "cpi_yoy": 1.5,
+    "cpi_asof": "2026年1月（全国・総合、前年同月比）",
+    "wage_yoy": null,
+    "wage_asof": null,
+    "sources": {
+      "cpi": "総務省統計局：消費者物価指数（CPI）月報（2026年1月 全国 総合 前年同月比）",
+      "wage": null
+    }
+  },
+  "prefs": {
+    "兵庫": {
+      "cpi_yoy": null,
+      "cpi_asof": null,
+      "wage_yoy": null,
+      "wage_asof": null,
+      "sources": {
+        "cpi": "（例）e-Stat/兵庫県/神戸市のCPI公表資料で確認して入力",
+        "wage": "（例）厚労省 賃上げ動向/県統計等で確認して入力"
+      }
+    },
+    "鳥取": {
+      "cpi_yoy": null,
+      "cpi_asof": null,
+      "wage_yoy": null,
+      "wage_asof": null,
+      "sources": {
+        "cpi": "（例）鳥取県公表PDF（県庁所在市別CPI一覧に鳥取市が掲載）",
+        "wage": null
+      }
+    },
+    "島根": {
+      "cpi_yoy": null,
+      "cpi_asof": null,
+      "wage_yoy": null,
+      "wage_asof": null,
+      "sources": {
+        "cpi": "（例）鳥取県公表PDF（県庁所在市別CPI一覧に松江市が掲載）",
+        "wage": null
+      }
+    }
+  }
+}
