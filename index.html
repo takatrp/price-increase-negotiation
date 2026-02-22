@@ -130,7 +130,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
       <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56">
     </a>
-    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r22</span></div>
+    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r23</span></div>
     <div class="headRight">
       <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
     </div>
@@ -424,7 +424,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r22</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r23</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -1192,7 +1192,18 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const factorText = factors.length>0 ? joinJa(factors) : '（未選択）';
     const extraText = extra ? `補足：${extra}` : '補足：—';
 
-    const efforts = getSelectedValues('#effortGroup');
+    let efforts = getSelectedValues('#effortGroup');
+    if (decidedYM) {
+      const m = (currentPriceAsOf.value||'').trim().match(/^(\d{4})-(\d{2})$/);
+      if(m) {
+        const by = parseInt(m[1],10);
+        const ny = new Date().getFullYear();
+        const diff = ny - by;
+        if(diff > 0) {
+          efforts = efforts.map(e => e === '数年間にわたる価格据え置き' ? `${diff}年間にわたる価格据え置き` : e);
+        }
+      }
+    }
     const effortText = efforts.length>0 ? joinJa(efforts) : '（未選択）';
 
     // 顧客タイプの日本語化
@@ -1260,7 +1271,18 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     // 補足がある場合は「～に加え、〇〇」と結合
     const combinedFactors = extra ? `${factorText}に加え、${extra}` : factorText;
 
-    const efforts = getSelectedValues('#effortGroup');
+    let efforts = getSelectedValues('#effortGroup');
+    if (decidedYM) {
+      const m = (currentPriceAsOf.value||'').trim().match(/^(\d{4})-(\d{2})$/);
+      if(m) {
+        const by = parseInt(m[1],10);
+        const ny = new Date().getFullYear();
+        const diff = ny - by;
+        if(diff > 0) {
+          efforts = efforts.map(e => e === '数年間にわたる価格据え置き' ? `${diff}年間にわたる価格据え置き` : e);
+        }
+      }
+    }
     const effortText = efforts.length > 0 ? joinJa(efforts) : '徹底したコスト削減';
 
     const relation = getSelectedValues('#relationGroup')[0] || 'B';
