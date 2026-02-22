@@ -1,9 +1,33 @@
 <!DOCTYPE html>
+<!--
+  値上げ交渉ナビゲーター
+  internal version: r02
+  last updated: auto (document.lastModified)
+
+  反映内容（A〜C）：
+  A) コピー処理：navigator.clipboard 優先 + フォールバック（execCommand）／コピー状態表示の堅牢化
+  B) 入力バリデーション強化：未入力ガイド、改定率/差額の表示、URLパラメータ転記（ハイライト/ステータス表示）
+     併せてトンマナは元コード（brand色・UI密度）に合わせて調整
+  C) フッター：クレジット、CC、利用条件、バージョン、最終更新日を追加（価格改定検討ツールと同形式）
+-->
 <html lang="ja">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>値上げ交渉ナビゲーター</title>
+
+<!-- Google tag (gtag.js) ※必要に応じてID差し替え -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-L4493W828C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-L4493W828C');
+</script>
+
+<link rel="icon" type="image/png" sizes="192x192" href="favicon192192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="favicon192192.png">
+<link rel="shortcut icon" href="favicon192192.png">
 
 <style>
 :root{--brand:#578899;--ink:#1f2937;--muted:#6b7280;--bg:#f7fafc;--ok:#10b981;--warn:#ef4444;--card:#fff;--grid:#e5e7eb;}
@@ -12,21 +36,25 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-
 .header{display:flex;align-items:center;gap:12px;margin:6px 0 8px}
 .logo{height:56px;width:auto;object-fit:contain;border-radius:8px}
 .title{font-weight:800;font-size:1.25rem;color:#0f172a;display:flex;align-items:center;gap:6px}
-.sub{font-size:.85rem;color:var(--muted);margin:0 0 16px}
+.headRight{margin-left:auto;display:flex;gap:6px;align-items:center}
+.sub{font-size:.85rem;color:var(--muted);margin:0 0 12px}
 .card{background:var(--card);border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);padding:16px;margin-bottom:12px}
-.pill{display:inline-block;background:rgba(87,136,153,.1);color:var(--brand);font-weight:700;border-radius:999px;padding:5px 9px;font-size:.8rem;margin-bottom:12px}
+.pill{display:inline-block;background:rgba(87,136,153,.1);color:var(--brand);font-weight:700;border-radius:999px;padding:5px 9px;font-size:.8rem;margin-bottom:10px}
 .cardHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 label{display:block;font-size:.86rem;color:#374151;margin:12px 0 6px;font-weight:600}
 input[type="text"],textarea{width:100%;box-sizing:border-box;border:1px solid #e5e7eb;border-radius:10px;padding:10px;font-size:1rem;background:#fff;outline:none;transition: background-color 0.2s, border-color 0.2s, color 0.2s;}
 input:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(87,136,153,.15)}
 input::placeholder{color:#c7ccd3}
 .hint{font-size:.76rem;color:var(--muted);margin-top:4px}
+.danger{color:var(--warn);font-weight:700;margin-top:8px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 12px;font-weight:700;font-size:.92rem;cursor:pointer;transition: opacity 0.2s;}
 .btn:hover{opacity:0.9}
 .btn.alt{background:#e5e7eb;color:#111827}
+.btn.ghost{background:transparent;color:#374151;border:1px solid #d1d5db}
+.btn.sm{padding:6px 8px;font-size:.82rem;border-radius:8px}
 .miniActions{display:flex;gap:8px;margin-top:12px}
 
-/* チップ（選択ボタン）のスタイル */
+/* チップ */
 .chipGroup{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;margin-bottom:4px}
 .chip{border:1px solid #d1d5db;background:#fff;border-radius:999px;padding:8px 12px;font-size:.85rem;font-weight:700;color:#374151;cursor:pointer;transition: all 0.2s;}
 .chip:hover{background:#f3f4f6}
@@ -37,34 +65,60 @@ input::placeholder{color:#c7ccd3}
 
 .dashboard{display:block}
 .colL,.colR{display:flex;flex-direction:column;gap:10px}
-@media (orientation:landscape){.dashboard{display:grid;grid-template-columns:minmax(300px,45%) 1fr;gap:16px;align-items:start}}
-@media (min-width:1024px){.dashboard{display:grid;grid-template-columns:420px 1fr;gap:16px;align-items:start}}
-.mk-mini{margin:24px auto 10px;max-width:1100px;color:#374151;font-size:.84rem;text-align:center}
-.mk-mini a{color:inherit;text-decoration:underline}
+@media (orientation:landscape){.dashboard{display:grid;grid-template-columns:minmax(320px,45%) 1fr;gap:12px;align-items:start}}
+@media (min-width:1024px){.dashboard{display:grid;grid-template-columns:420px 1fr;gap:12px;align-items:start}}
 
-/* タブスタイル */
+/* タブ */
 .tabs{display:flex;border-bottom:2px solid #e5e7eb;margin-bottom:12px}
-.tab{padding:8px 16px;font-size:.9rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab{padding:8px 16px;font-size:.9rem;font-weight:800;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
 .tab.active{color:var(--brand);border-bottom-color:var(--brand)}
 
-.docArea{min-height:400px;line-height:1.6;font-family:inherit;resize:vertical;background:#f8fafc}
-.statusMsg{font-size:0.85rem;color:var(--ok);font-weight:600;margin-left:auto;opacity:0;transition:opacity 0.3s;}
+.docArea{min-height:420px;line-height:1.6;font-family:inherit;resize:vertical;background:#f8fafc}
+.statusMsg{font-size:0.85rem;color:var(--ok);font-weight:700;margin-left:auto;opacity:0;transition:opacity 0.25s;}
 .statusMsg.show{opacity:1;}
+.mk-mini{margin:16px auto 10px;max-width:1100px;color:#374151;font-size:.84rem;text-align:center}
+.mk-mini a{color:inherit;text-decoration:underline}
+.note{font-size:.8rem;color:#6b7280;text-align:center;margin-bottom:24px}
+
+/* --- 転記された値のハイライト（価格改定検討ツールと同系統） --- */
+input.imported-value{
+  background-color:#fff9e6 !important;
+  border-color:#f2c94c !important;
+  color:var(--warn);
+  font-weight:900;
+}
+.importStatus{margin:8px 0 0;font-size:.82rem;color:#0f172a;background:#eef6fa;border:1px solid #d6eaf3;border-radius:10px;padding:8px 10px;display:none}
+.importStatus.show{display:block}
+
+/* 印刷 */
+@media print{
+  .miniActions, .tabs, .chipGroup, button { display:none !important; }
+  .wrap{max-width:900px}
+  textarea.docArea{border:1px solid #e5e7eb}
+}
 </style>
 </head>
 
 <body>
 <div class="wrap">
   <div class="header">
+    <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
+      <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56">
+    </a>
     <div class="title">値上げ交渉ナビゲーター</div>
+    <div class="headRight">
+      <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
+    </div>
   </div>
-  <div class="sub">取引先との関係性や外部要因を選択し、適正な価格改定の案内文書を自動生成します。</div>
+  <div class="sub">取引先との関係性や背景要因を選択し、価格改定の案内文書／面談トークを自動生成します。</div>
+
+  <div id="importStatus" class="importStatus" role="status" aria-live="polite"></div>
 
   <div class="dashboard">
     <div class="colL">
       <div class="card">
         <div class="pill">STEP 1：改定内容の基本情報</div>
-        
+
         <label for="productName">対象商品・サービス名</label>
         <input type="text" id="productName" placeholder="例）顧問報酬、システム保守費用、〇〇部品" />
 
@@ -78,9 +132,12 @@ input::placeholder{color:#c7ccd3}
             <input type="text" id="newPrice" inputmode="decimal" placeholder="例）1,320" />
           </div>
         </div>
+        <div class="hint" id="rateHint">改定率：— ／ 差額：—</div>
 
         <label for="effectiveDate">適用開始時期</label>
-        <input type="text" id="effectiveDate" placeholder="例）2025年4月1日 ご注文分より" />
+        <input type="text" id="effectiveDate" placeholder="例）2026年4月1日 ご注文分より" />
+
+        <div id="validateMsg" class="danger" style="display:none;"></div>
       </div>
 
       <div class="card">
@@ -108,11 +165,11 @@ input::placeholder{color:#c7ccd3}
 
       <div class="card">
         <div class="pill">STEP 4：取引先との関係性</div>
-        <div class="hint">相手に合わせたトーン＆マナーで文章を調整します（1つ選択）</div>
+        <div class="hint">相手に合わせたトーンで文面を調整します（1つ選択）</div>
         <div class="chipGroup" id="relationGroup">
-          <button class="chip" type="button" data-val="A">長年の信頼あり（共感・誠実トーン）</button>
-          <button class="chip active" type="button" data-val="B">一般的な取引先（標準・論理トーン）</button>
-          <button class="chip" type="button" data-val="C">価格に厳しい（データ重視・代替案提示）</button>
+          <button class="chip" type="button" data-val="A">長年の信頼あり（共感・誠実）</button>
+          <button class="chip active" type="button" data-val="B">一般的な取引先（標準・論理）</button>
+          <button class="chip" type="button" data-val="C">価格に厳しい（データ重視・代替案）</button>
         </div>
       </div>
     </div>
@@ -123,10 +180,10 @@ input::placeholder{color:#c7ccd3}
           <div class="pill">生成された文面</div>
           <span id="copyStatus" class="statusMsg">コピーしました</span>
         </div>
-        
-        <div class="tabs" id="outputTabs">
-          <div class="tab active" data-target="document">案内文書（メール・書面）</div>
-          <div class="tab" data-target="script">面談トークスクリプト</div>
+
+        <div class="tabs" id="outputTabs" role="tablist" aria-label="出力切替">
+          <div class="tab active" role="tab" aria-selected="true" tabindex="0" data-target="document">案内文書（メール・書面）</div>
+          <div class="tab" role="tab" aria-selected="false" tabindex="-1" data-target="script">面談トークスクリプト</div>
         </div>
 
         <textarea id="outputArea" class="docArea" readonly></textarea>
@@ -135,25 +192,31 @@ input::placeholder{color:#c7ccd3}
           <button class="btn" id="copyBtn" type="button">クリップボードにコピー</button>
           <button class="btn alt" id="printBtn" type="button">印刷プレビュー</button>
         </div>
-        <div class="hint" style="margin-top:8px;">※生成された文章はコピー後、自社の状況に合わせて微調整してご使用ください。</div>
+        <div class="hint" style="margin-top:8px;">※生成後は、社名・担当者名・具体条件（適用日等）を必ず自社用に微調整してから使用してください。</div>
       </div>
     </div>
   </div>
 </div>
 
 <footer class="mk-mini">
-  © <span id="cpy-year"></span> 税理士法人松本会計事務所
+  © <span id="cpy-year">2026</span>
+  <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
+  <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
+  <span id="build-rev">r02</span>（<span id="last-updated-date"></span>）
 </footer>
+<div class="note">本ツールは文面生成の補助です。最終的な条件提示や交渉は、取引実態・競合・需給・契約条項等も踏まえてご判断ください。</div>
 
 <script>
 (function(){
-  // --- ユーティリティ ---
+  /* --- ユーティリティ --- */
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
-  const yen = n => isFinite(n) ? new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(n) : '—';
   const toNum = v => { const s = String(v||'').replace(/,/g,'').replace(/[^\d.-]/g,''); const n = parseFloat(s); return isFinite(n) ? n : NaN; };
-  
-  // --- DOM要素 ---
+  const yen = n => isFinite(n) ? new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(n) : '—';
+  const clamp = (v,min,max)=>Math.min(max,Math.max(min,v));
+
+  /* --- DOM --- */
   const productName = $('#productName');
   const currentPrice = $('#currentPrice');
   const newPrice = $('#newPrice');
@@ -162,8 +225,28 @@ input::placeholder{color:#c7ccd3}
   const copyBtn = $('#copyBtn');
   const printBtn = $('#printBtn');
   const copyStatus = $('#copyStatus');
+  const resetBtn = $('#resetBtn');
+  const rateHint = $('#rateHint');
+  const validateMsg = $('#validateMsg');
+  const importStatusEl = $('#importStatus');
 
-  // --- 入力のカンマ整形 ---
+  /* --- 入力時に転記ハイライトを消す --- */
+  document.addEventListener('input', (e) => {
+    if(e.target && e.target.classList && e.target.classList.contains('imported-value')){
+      e.target.classList.remove('imported-value');
+    }
+  });
+
+  function showImportStatus(msg){
+    if(!importStatusEl) return;
+    importStatusEl.textContent = msg;
+    importStatusEl.classList.add('show');
+    clearTimeout(showImportStatus._t);
+    showImportStatus._t = setTimeout(()=>importStatusEl.classList.remove('show'), 4200);
+  }
+  function markImported(el){ if(el) el.classList.add('imported-value'); }
+
+  /* --- カンマ整形（blur時のみ） --- */
   const formatInput = (el) => {
     const val = toNum(el.value);
     if(isFinite(val)) el.value = Math.round(val).toLocaleString('ja-JP');
@@ -171,7 +254,7 @@ input::placeholder{color:#c7ccd3}
   currentPrice.addEventListener('blur', () => formatInput(currentPrice));
   newPrice.addEventListener('blur', () => formatInput(newPrice));
 
-  // --- チップの選択制御 ---
+  /* --- チップ選択 --- */
   function setupChips(groupId, multiple) {
     const group = $(groupId);
     group.addEventListener('click', (e) => {
@@ -182,7 +265,7 @@ input::placeholder{color:#c7ccd3}
         } else {
           e.target.classList.toggle('active');
         }
-        generateDocument();
+        generate();
       }
     });
   }
@@ -190,32 +273,71 @@ input::placeholder{color:#c7ccd3}
   setupChips('#effortGroup', true);
   setupChips('#relationGroup', false);
 
-  // --- タブの制御 ---
+  /* --- タブ --- */
   let currentOutputMode = 'document';
   $('#outputTabs').addEventListener('click', (e) => {
     if(e.target.classList.contains('tab')) {
-      $$('.tab').forEach(t => t.classList.remove('active'));
+      $$('#outputTabs .tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); t.tabIndex = -1; });
       e.target.classList.add('active');
+      e.target.setAttribute('aria-selected','true');
+      e.target.tabIndex = 0;
       currentOutputMode = e.target.getAttribute('data-target');
-      generateDocument();
+      generate();
     }
   });
 
-  // --- テキスト生成ロジック ---
   function getSelectedValues(groupId) {
     return Array.from($(groupId).querySelectorAll('.chip.active')).map(c => c.getAttribute('data-val'));
   }
 
-  function generateDocument() {
-    // 値の取得と整形
+  /* --- バリデーション＆改定率表示 --- */
+  function updateRateHint(){
+    const cp = toNum(currentPrice.value);
+    const np = toNum(newPrice.value);
+    if(isFinite(cp) && cp>0 && isFinite(np) && np>=0){
+      const rate = ((np/cp)-1)*100;
+      const diff = np - cp;
+      rateHint.textContent = `改定率：約${Math.round(rate*10)/10}% ／ 差額：${diff>=0?'+':''}${yen(diff)}`;
+    }else{
+      rateHint.textContent = '改定率：— ／ 差額：—';
+    }
+  }
+
+  function validateBasic(){
+    const prod = productName.value.trim();
+    const cp = toNum(currentPrice.value);
+    const np = toNum(newPrice.value);
+
+    let msg = '';
+    if(!prod) msg = '「対象商品・サービス名」が未入力です（空欄のままでも生成はできますが、送付前に必ず埋めてください）。';
+    if(isFinite(cp) && isFinite(np) && cp>0 && np<0) msg = '「改定後単価」に負の値が入っています。';
+    if(isFinite(cp) && isFinite(np) && cp>0 && np===0) msg = '「改定後単価」が0円です。意図した入力か確認してください。';
+    if(isFinite(cp) && isFinite(np) && cp>0 && np/cp < 0.5){
+      msg = '改定率が大きい（-50%未満）ため、先方反発リスクが高い想定です。根拠・代替案を厚めにしてください。';
+    }
+
+    if(msg){
+      validateMsg.style.display = 'block';
+      validateMsg.textContent = msg;
+    }else{
+      validateMsg.style.display = 'none';
+      validateMsg.textContent = '';
+    }
+  }
+
+  /* --- 生成 --- */
+  function generate(){
+    updateRateHint();
+    validateBasic();
+
     const prod = productName.value.trim() || '＿＿＿＿（対象商品・サービス）';
     const cp = toNum(currentPrice.value);
     const np = toNum(newPrice.value);
     const dateStr = effectiveDate.value.trim() || '＿＿年＿＿月＿＿日';
-    
+
     const cpStr = isFinite(cp) ? yen(cp) : '＿＿＿円';
     const npStr = isFinite(np) ? yen(np) : '＿＿＿円';
-    
+
     let rateStr = '';
     if(isFinite(cp) && isFinite(np) && cp > 0) {
       const rate = ((np / cp) - 1) * 100;
@@ -224,10 +346,9 @@ input::placeholder{color:#c7ccd3}
       rateStr = `${cpStr} → ${npStr}`;
     }
 
-    // 要因・努力の結合
     const factors = getSelectedValues('#factorGroup');
     const factorText = factors.length > 0 ? factors.join('および') : '急激な環境変化';
-    
+
     const efforts = getSelectedValues('#effortGroup');
     const effortText = efforts.length > 0 ? efforts.join('や') : '徹底したコスト削減';
 
@@ -236,9 +357,9 @@ input::placeholder{color:#c7ccd3}
     let text = '';
 
     if(currentOutputMode === 'document') {
-      // --- 案内文書生成 ---
       if(relation === 'A') {
-        text = `件名：【重要】価格改定のお願いと、今後のサービス提供につきまして
+        text =
+`件名：【重要】価格改定のお願いと、今後のサービス提供につきまして
 
 〇〇株式会社
 〇〇様
@@ -249,11 +370,12 @@ input::placeholder{color:#c7ccd3}
 平素は格別のお引き立てを賜り、また長年にわたり当社のビジネスを支えていただき、心より感謝申し上げます。
 
 本日は、誠に心苦しいお願いがあり、ご連絡いたしました。
-昨今の${factorText}を受け、当社を取り巻く環境はかつてなく厳しい状況が続いております。
+昨今の${factorText}を受け、当社を取り巻く環境は厳しい状況が続いております。
 
-〇〇様にはご負担をおかけしてはならないと、${effortText}に努め、なんとか価格を据え置いてまいりました。しかしながら、自助努力だけではこれ以上のコスト増を吸収することが極めて困難な限界に達しております。
+〇〇様にはご負担をおかけしてはならないと、${effortText}に努め、なんとか価格を据え置いてまいりました。
+しかしながら、自助努力だけではこれ以上のコスト増を吸収することが困難な限界に達しております。
 
-このままでは、〇〇様へご提供している「${prod}」の品質や安定供給を維持できなくなる恐れがあり、熟慮を重ねた結果、苦渋の決断ではございますが、以下の通り価格改定をお願いせざるを得ないという結論に至りました。
+このままでは、〇〇様へご提供している「${prod}」の品質や安定供給を維持できなくなる恐れがあり、熟慮を重ねた結果、以下の通り価格改定をお願いせざるを得ないという結論に至りました。
 
 【改定内容】
 ・対象：${prod}
@@ -261,12 +383,13 @@ input::placeholder{color:#c7ccd3}
 ・適用時期：${dateStr}
 
 御社にご負担をおかけすることとなり、大変申し訳ございません。
-適正な価格を頂戴することで、今後も〇〇様の事業にこれまで以上の品質とサービスで貢献し続けることをお約束いたします。
+適正な価格を頂戴することで、今後も〇〇様の事業に、これまで以上の品質とサービスで貢献し続ける所存です。
 
-本件につきまして、ご不明な点やご相談がございましたら、遠慮なくお申し付けください。何卒、当社を取り巻く厳しい事情をご賢察いただき、ご理解を賜りますよう伏してお願い申し上げます。`;
-
+本件につきまして、ご不明な点やご相談がございましたら、遠慮なくお申し付けください。
+何卒、諸事情をご賢察いただき、ご理解を賜りますようお願い申し上げます。`;
       } else if(relation === 'B') {
-        text = `件名：【重要】${prod} 価格改定に関するお知らせ
+        text =
+`件名：【重要】${prod} 価格改定に関するお知らせ
 
 〇〇株式会社
 〇〇様
@@ -275,24 +398,24 @@ input::placeholder{color:#c7ccd3}
 [自社名]の[氏名]でございます。
 
 平素は弊社のサービスをご愛顧いただき、厚く御礼申し上げます。
-さて、本日は価格改定に関する重要なお願いがございます。
+さて、本日は価格改定に関するお願いがございます。
 
-すでにご高承の通り、昨今の${factorText}により、各種コストが大幅に上昇しております。
-
+昨今の${factorText}により、各種コストが上昇しております。
 弊社といたしましても、お客様への影響を最小限に抑えるべく、${effortText}など、あらゆる対策を講じてまいりました。
 
-しかしながら、現在の価格体系のままでは従来の品質レベルおよび安定的な提供を維持することが困難な状況となっております。つきましては、誠に不本意ではございますが、下記の通り価格の改定を実施させていただきたく存じます。
+しかしながら、現在の価格体系のままでは従来の品質レベルおよび安定的な提供を維持することが困難な状況となっております。
+つきましては、誠に不本意ではございますが、下記の通り価格の改定を実施させていただきたく存じます。
 
 【改定内容】
 ・対象：${prod}
 ・改定価格：${rateStr}
 ・適用時期：${dateStr}
 
-お客様にはご負担とご迷惑をおかけいたします分、より一層のサービス向上に努めてまいる所存です。
+お客様にはご負担をおかけいたします分、より一層のサービス向上に努めてまいる所存です。
 何卒、諸事情をご理解いただき、今後とも変わらぬご高配を賜りますようお願い申し上げます。`;
-
       } else {
-        text = `件名：【重要】${prod}の適正価格化（価格改定）に関するご相談
+        text =
+`件名：【重要】${prod}の適正価格化（価格改定）に関するご相談
 
 〇〇株式会社
 〇〇様
@@ -300,103 +423,165 @@ input::placeholder{color:#c7ccd3}
 いつも大変お世話になっております。
 [自社名]の[氏名]でございます。
 
-日頃より多大なるご支援を賜り、誠にありがとうございます。
-本日は、今後の継続的なご提供に向けた、価格改定のご相談でご連絡いたしました。
+本日は、今後の継続的なご提供に向けた価格改定のご相談でご連絡いたしました。
+昨今の${factorText}が常態化しており、弊社のコスト構造にも継続的な影響が出ております。
 
-報道等でも報じられております通り、${factorText}が常態化しております。
+弊社におきましても、${effortText}を重ねてまいりましたが、企業努力のみでコスト増を吸収し続けることは困難な局面に入っております。
+このままでは、御社に納品させていただいている「${prod}」の品質や納期に支障が出るリスクがあり、弊社として避けるべき事態です。
 
-弊社におきましても、${effortText}を重ねてまいりましたが、弊社単独の企業努力のみでコスト増を吸収することは、もはや不可能な状況に直面しております。
-
-このままの条件では、御社に納品させていただいている「${prod}」の品質や納期に重大な支障をきたす可能性があり、弊社として絶対に避けなければならない事態です。
-
-御社の事業活動に引き続き高い品質で貢献し続けるための適正価格化として、誠に恐縮ではございますが、以下の通り価格改定の協議をお願いしたく存じます。
+つきましては、継続提供の前提となる適正価格化として、以下の目安で価格改定の協議をお願いしたく存じます。
 
 【お願いしたい改定内容の目安】
 ・対象：${prod}
 ・改定価格（目安）：${rateStr}
 ・適用時期：${dateStr}
 
-御社の厳格なコスト管理方針は重々承知しております。もし上記での全面的なご承認が難しい場合におきましても、以下のような代替案を含め、双方が納得できる着地点を模索したく存じます。
+御社の厳格なコスト管理方針は重々承知しております。
+もし上記での全面的なご承認が難しい場合におきましても、以下のような代替案を含め、双方が納得できる着地点を模索したく存じます。
 
 【ご協議の選択肢（例）】
 ・段階的な価格改定の実施
-・発注ロット・契約期間の見直しによる単価の維持
-・一部仕様・納品条件の緩和によるコスト抑制
+・発注ロット／契約期間の見直しによる単価の維持
+・一部仕様／納品条件の調整によるコスト抑制
 
-近日中に、本件につきまして改めてお打ち合わせの機会をいただけないでしょうか。
+近日中に、本件につきましてお打ち合わせの機会をいただけないでしょうか。
 何卒ご検討のほどよろしくお願い申し上げます。`;
       }
-
     } else {
-      // --- トークスクリプト生成 ---
-      text = `【${relation === 'A' ? '関係性が良好な顧客向け' : (relation === 'B' ? '標準的な取引先向け' : '価格に厳しい顧客向け')} 面談トークスクリプト】
+      const ttl = (relation==='A') ? '関係性が良好な顧客向け' : (relation==='B') ? '標準的な取引先向け' : '価格に厳しい顧客向け';
+      text =
+`【${ttl} 面談トークスクリプト】
 
-■ 1. 冒頭のジャブ（状況の共有）
+■ 1. 冒頭（状況共有）
 「本日はお時間をいただきありがとうございます。実は本日、少し心苦しいご相談がございましてお伺いしました。
-御社もご認識の通りかとは存じますが、昨今の${factorText}の影響が弊社にも大きく及んでおりまして、全社的に非常に厳しい状況となっております。」
+御社もご認識の通りかとは存じますが、昨今の${factorText}の影響が弊社にも及んでおり、厳しい状況が続いております。」
 
 ■ 2. 自助努力の提示と限界
 「もちろん、御社にはご迷惑をおかけできないと、弊社内でも${effortText}などを進め、これまで価格を維持してまいりました。
-しかし、いよいよ社内の努力だけでは吸収できない限界に達してしまいました。」
+ただ、いよいよ社内努力だけでは吸収できない水準に達してしまいました。」
 
-■ 3. 結論（値上げの打診）
-「このままですと、御社にご提供している『${prod}』の品質維持や安定供給に支障をきたす恐れがございます。
-つきましては、大変恐縮ではございますが、${dateStr}より、単価を現在の ${cpStr} から ${npStr} へ見直しをさせていただけないでしょうか。」
+■ 3. 結論（改定の打診）
+「このままですと、御社にご提供している『${prod}』の品質維持や安定供給に支障が出る恐れがございます。
+つきましては、大変恐縮ではございますが、${dateStr}より、単価を現在の ${cpStr} から ${npStr} へ見直しをお願いできないでしょうか。」
 
 ■ 4. 反論への切り返し（想定Q&A）
-${relation === 'C' ? '顧客：「うちは予算が厳しい。見送ってほしい」\n回答：「ご事情は重々承知しております。ただ、このままでは品質の維持がお約束できない状況です。もし単価維持をご希望される場合は、例えば納期条件の緩和や、発注ロットの調整など、別の形でのコスト抑制案をご協議させていただけないでしょうか。」' : '顧客：「他社はまだ値上げしていないよ」\n回答：「他社様の状況は存じ上げませんが、弊社といたしましては、現在の品質を落とさずに御社へサービスを提供し続けるために、今回ギリギリのラインで算出した適正価格となります。どうかご斟酌いただけないでしょうか。」'}
-`;
+${
+  (relation === 'C')
+  ? `顧客：「うちは予算が厳しい。見送ってほしい」
+回答：「ご事情は重々承知しております。ただ、このままでは品質維持がお約束できない状況です。
+もし単価維持をご希望される場合は、例えば納期条件の緩和、発注ロット調整、契約期間の見直しなど、別の形での負担調整をご協議できないでしょうか。」`
+  : `顧客：「他社はまだ値上げしていないよ」
+回答：「他社様の状況は存じ上げませんが、弊社としては現状品質を維持したまま提供を継続するために、今回ギリギリのラインで算出した水準です。どうかご斟酌いただけないでしょうか。」`
+}
+
+■ 5. クロージング（次アクション）
+「本日いただいたご意見を踏まえ、御社のご事情に沿った着地点（段階改定／条件調整等）も含めて整理し、改めてご提案いたします。」`;
     }
 
     outputArea.value = text;
   }
 
-  // --- イベントリスナー設定 ---
-  const inputs = [productName, currentPrice, newPrice, effectiveDate];
-  inputs.forEach(el => el.addEventListener('input', generateDocument));
+  /* --- コピー処理（A） --- */
+  function showCopied(){
+    copyStatus.classList.add('show');
+    clearTimeout(showCopied._t);
+    showCopied._t = setTimeout(() => copyStatus.classList.remove('show'), 2000);
+  }
 
-  // --- URLパラメータの取得（価格改定検討ツールからの連携） ---
-  function getUrlParams() {
+  async function copyText(text){
+    // 1) Clipboard API
+    if(navigator.clipboard && window.isSecureContext){
+      try{ await navigator.clipboard.writeText(text); return true; }catch(e){}
+    }
+    // 2) Fallback: execCommand
+    try{
+      outputArea.removeAttribute('readonly'); // 一部環境でselectできない対策
+      outputArea.select();
+      outputArea.setSelectionRange(0, outputArea.value.length);
+      const ok = document.execCommand('copy');
+      outputArea.setAttribute('readonly','');
+      window.getSelection().removeAllRanges();
+      return !!ok;
+    }catch(e){
+      try{ outputArea.setAttribute('readonly',''); }catch(_){}
+      return false;
+    }
+  }
+
+  copyBtn.addEventListener('click', async () => {
+    const ok = await copyText(outputArea.value || '');
+    if(ok) showCopied();
+  });
+
+  printBtn.addEventListener('click', () => { try{ window.print(); }catch(e){} });
+
+  /* --- 入力イベント --- */
+  [productName, currentPrice, newPrice, effectiveDate].forEach(el => el.addEventListener('input', generate));
+
+  /* --- URLパラメータ転記（B） --- */
+  function getUrlParams(){
     const params = new URLSearchParams(window.location.search);
     let hasParam = false;
-    
-    // 単価の取得（price または P）
+
+    // 価格改定検討ツール系：price/P と chgAbs/P2 を想定（既存互換）
     const p = params.get('price') || params.get('P');
-    if (p && isFinite(toNum(p))) {
+    if(p && isFinite(toNum(p))){
       currentPrice.value = Math.round(toNum(p)).toLocaleString('ja-JP');
+      markImported(currentPrice);
       hasParam = true;
     }
-    
-    // 改定後単価の取得（P2 または chgAbs）
     const p2 = params.get('P2') || params.get('chgAbs');
-    if (p2 && isFinite(toNum(p2))) {
+    if(p2 && isFinite(toNum(p2))){
       newPrice.value = Math.round(toNum(p2)).toLocaleString('ja-JP');
+      markImported(newPrice);
       hasParam = true;
     }
 
+    // 任意：product / effectiveDate
+    const prod = params.get('product') || params.get('prod');
+    if(prod){
+      productName.value = String(prod);
+      markImported(productName);
+      hasParam = true;
+    }
+    const dt = params.get('date') || params.get('effectiveDate');
+    if(dt){
+      effectiveDate.value = String(dt);
+      markImported(effectiveDate);
+      hasParam = true;
+    }
+
+    if(hasParam){
+      showImportStatus('✅ 転記：URLパラメータから数値を取り込みました。');
+    }
     return hasParam;
   }
 
-  // --- コピー＆印刷アクション ---
-  copyBtn.addEventListener('click', () => {
-    outputArea.select();
-    document.execCommand('copy');
-    window.getSelection().removeAllRanges();
-    
-    copyStatus.classList.add('show');
-    setTimeout(() => copyStatus.classList.remove('show'), 2000);
+  /* --- リセット --- */
+  resetBtn.addEventListener('click', () => {
+    [productName,currentPrice,newPrice,effectiveDate].forEach(el=>{
+      el.value='';
+      el.classList.remove('imported-value');
+    });
+    generate();
   });
 
-  printBtn.addEventListener('click', () => {
-    window.print();
-  });
+  /* --- フッタ日付（C） --- */
+  try{
+    $('#cpy-year').textContent = String(new Date().getFullYear());
+    const ld = new Date(document.lastModified);
+    const z = n => String(n).padStart(2,'0');
+    const ymd = isNaN(ld.getTime()) ? '' : `${ld.getFullYear()}-${z(ld.getMonth()+1)}-${z(ld.getDate())}`;
+    $('#last-updated-date').textContent = ymd;
+  }catch(e){}
 
-  // --- 初期化 ---
-  $('#cpy-year').textContent = new Date().getFullYear();
+  /* --- 初期化 --- */
   getUrlParams();
-  generateDocument();
+  generate();
 
 })();
 </script>
+
+<script src="https://takatrp.github.io/tool-portal/mk-nav.js" defer></script>
 </body>
 </html>
