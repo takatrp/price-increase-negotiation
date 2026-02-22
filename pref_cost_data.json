@@ -78,6 +78,13 @@
       "wage_asof": null,
       "min_wage": { "new": 1051, "old": 986, "inc": 65, "eff": "2025-11-16" }
     },
+    "和歌山": {
+      "cpi_yoy": null,
+      "cpi_asof": null,
+      "wage_yoy": null,
+      "wage_asof": null,
+      "min_wage": { "new": 1045, "old": 980, "inc": 65, "eff": "2025-11-01" }
+    },
     "岡山": {
       "cpi_yoy": null,
       "cpi_asof": null,
