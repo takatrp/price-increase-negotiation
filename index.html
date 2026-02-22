@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <!--
   値上げ交渉ナビゲーター
-  internal version: r03
+  internal version: r04
   last updated: auto (document.lastModified)
 
-  反映内容（今回）：
-  1) GA4（gtag.js）削除
-  2) 「値上げの背景（外部要因）」を細分化（要因チップを拡充＋補足欄）
-  3) 都道府県別データの読み込み・反映（最低賃金は内蔵データ／CPI・賃上げ率等はJSON読込で自動反映できる枠組みを実装）
-     - 内蔵：都道府県別 最低賃金（新・旧・引上げ額・発効予定日）
-     - 任意：pref_cost_data.json（同階層 or URL）をfetchしてCPI等を反映（キー例はUI内に表示）
+  r03 → r04 変更点：
+  - 都道府県は「兵庫・鳥取・島根」のみに限定（誤操作防止・運用対象に最適化）
+  - 最低賃金内蔵データも3県のみ（根拠：厚労省「令和7年度 地域別最低賃金全国一覧」）
+  - 初回の ./pref_cost_data.json 自動読込は失敗しても強いエラー表示にしない（未配置でも使える）
 
   メモ：
-  - 本ツールはクライアントサイド（ブラウザ）で動きます。
-  - 「最新の物価上昇率（CPI）」「都道府県別の賃上げ率」等は、(a) 事前にJSONとして用意して配信する方式が堅牢です（APIキー露出やCORS問題を回避）。
+  - CPI/賃上げ率等は pref_cost_data.json を同階層に置けば自動反映できます。
 -->
 <html lang="ja">
 <head>
@@ -218,7 +215,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
             <div class="small" style="margin-bottom:6px;"><b>JSONキー例（最小）</b></div>
             <pre class="sample" id="jsonSample"></pre>
           </div>
-          <div class="small">※キーは「北海道 / 青森 / … / 東京 / 大阪 / 京都 / …」のように、都道府県名（都・道・府・県を除いた形）でもOKにしてあります。</div>
+          <div class="small">※キーは「兵庫 / 鳥取 / 島根」のように、都道府県名（都・道・府・県を除いた形）で入れてください。</div>
         </details>
 
         <div class="divider"></div>
@@ -295,7 +292,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r03</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r04</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終的な条件提示や交渉は、取引実態・競合・需給・契約条項等も踏まえてご判断ください。</div>
 
@@ -303,110 +300,22 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
 (function(){
   /* =========================
      0) 参考データ（内蔵：最低賃金）
-     - キー：都道府県名（都・道・府・県を除いた表記、北海道はそのまま）
+     - 対象：兵庫・鳥取・島根のみ
+     - 根拠（例）：厚生労働省「令和7年度 地域別最低賃金全国一覧」
+       https://www.mhlw.go.jp/content/11201250/001566192.pdf
      ========================= */
   const PREFS = [
-    {k:'北海道', l:'北海道'},
-    {k:'青森', l:'青森県'},
-    {k:'岩手', l:'岩手県'},
-    {k:'宮城', l:'宮城県'},
-    {k:'秋田', l:'秋田県'},
-    {k:'山形', l:'山形県'},
-    {k:'福島', l:'福島県'},
-    {k:'茨城', l:'茨城県'},
-    {k:'栃木', l:'栃木県'},
-    {k:'群馬', l:'群馬県'},
-    {k:'埼玉', l:'埼玉県'},
-    {k:'千葉', l:'千葉県'},
-    {k:'東京', l:'東京都'},
-    {k:'神奈川', l:'神奈川県'},
-    {k:'新潟', l:'新潟県'},
-    {k:'富山', l:'富山県'},
-    {k:'石川', l:'石川県'},
-    {k:'福井', l:'福井県'},
-    {k:'山梨', l:'山梨県'},
-    {k:'長野', l:'長野県'},
-    {k:'岐阜', l:'岐阜県'},
-    {k:'静岡', l:'静岡県'},
-    {k:'愛知', l:'愛知県'},
-    {k:'三重', l:'三重県'},
-    {k:'滋賀', l:'滋賀県'},
-    {k:'京都', l:'京都府'},
-    {k:'大阪', l:'大阪府'},
     {k:'兵庫', l:'兵庫県'},
-    {k:'奈良', l:'奈良県'},
-    {k:'和歌山', l:'和歌山県'},
     {k:'鳥取', l:'鳥取県'},
-    {k:'島根', l:'島根県'},
-    {k:'岡山', l:'岡山県'},
-    {k:'広島', l:'広島県'},
-    {k:'山口', l:'山口県'},
-    {k:'徳島', l:'徳島県'},
-    {k:'香川', l:'香川県'},
-    {k:'愛媛', l:'愛媛県'},
-    {k:'高知', l:'高知県'},
-    {k:'福岡', l:'福岡県'},
-    {k:'佐賀', l:'佐賀県'},
-    {k:'長崎', l:'長崎県'},
-    {k:'熊本', l:'熊本県'},
-    {k:'大分', l:'大分県'},
-    {k:'宮崎', l:'宮崎県'},
-    {k:'鹿児島', l:'鹿児島県'},
-    {k:'沖縄', l:'沖縄県'}
+    {k:'島根', l:'島根県'}
   ];
   const PREF_LABEL = Object.fromEntries(PREFS.map(x=>[x.k,x.l]));
 
-  // 参考：地域別最低賃金（新/旧/引上げ額/発効予定日）
-  // ※値は「答申状況」掲載の一覧に基づく（2025年度想定）
+  // 地域別最低賃金（新/旧/引上げ額/発効予定日）
   const MIN_WAGE = {
-    "全国加重平均": {n:1121,o:1055,inc:66,eff:"2025-10-01"},
-    "北海道": {n:1075,o:1010,inc:65,eff:"2025-10-04"},
-    "青森": {n:1029,o:953,inc:76,eff:"2025-11-21"},
-    "岩手": {n:1031,o:952,inc:79,eff:"2025-12-01"},
-    "宮城": {n:1038,o:973,inc:65,eff:"2025-10-04"},
-    "秋田": {n:1031,o:951,inc:80,eff:"2026-03-31"},
-    "山形": {n:1032,o:955,inc:77,eff:"2025-12-23"},
-    "福島": {n:1033,o:955,inc:78,eff:"2026-01-01"},
-    "茨城": {n:1074,o:1005,inc:69,eff:"2025-10-12"},
-    "栃木": {n:1068,o:1004,inc:64,eff:"2025-10-01"},
-    "群馬": {n:1063,o:985,inc:78,eff:"2026-03-01"},
-    "埼玉": {n:1141,o:1078,inc:63,eff:"2025-11-01"},
-    "千葉": {n:1140,o:1076,inc:64,eff:"2025-10-03"},
-    "東京": {n:1226,o:1163,inc:63,eff:"2025-10-03"},
-    "神奈川": {n:1225,o:1162,inc:63,eff:"2025-10-04"},
-    "新潟": {n:1050,o:985,inc:65,eff:"2025-10-02"},
-    "富山": {n:1062,o:998,inc:64,eff:"2025-10-12"},
-    "石川": {n:1054,o:984,inc:70,eff:"2025-10-08"},
-    "福井": {n:1053,o:984,inc:69,eff:"2025-10-08"},
-    "山梨": {n:1052,o:988,inc:64,eff:"2025-12-01"},
-    "長野": {n:1061,o:998,inc:63,eff:"2025-10-03"},
-    "岐阜": {n:1065,o:1001,inc:64,eff:"2025-10-18"},
-    "静岡": {n:1097,o:1034,inc:63,eff:"2025-11-01"},
-    "愛知": {n:1140,o:1077,inc:63,eff:"2025-10-18"},
-    "三重": {n:1087,o:1023,inc:64,eff:"2025-11-21"},
-    "滋賀": {n:1080,o:1017,inc:63,eff:"2025-10-05"},
-    "京都": {n:1122,o:1058,inc:64,eff:"2025-11-21"},
-    "大阪": {n:1177,o:1114,inc:63,eff:"2025-10-16"},
     "兵庫": {n:1116,o:1052,inc:64,eff:"2025-10-04"},
-    "奈良": {n:1051,o:986,inc:65,eff:"2025-11-16"},
-    "和歌山": {n:1045,o:980,inc:65,eff:"2025-11-01"},
     "鳥取": {n:1030,o:957,inc:73,eff:"2025-10-04"},
-    "島根": {n:1033,o:962,inc:71,eff:"2025-11-17"},
-    "岡山": {n:1047,o:982,inc:65,eff:"2025-12-01"},
-    "広島": {n:1085,o:1020,inc:65,eff:"2025-11-01"},
-    "山口": {n:1043,o:979,inc:64,eff:"2025-10-16"},
-    "徳島": {n:1046,o:980,inc:66,eff:"2026-01-01"},
-    "香川": {n:1036,o:970,inc:66,eff:"2025-10-18"},
-    "愛媛": {n:1033,o:956,inc:77,eff:"2025-12-01"},
-    "高知": {n:1023,o:952,inc:71,eff:"2025-12-01"},
-    "福岡": {n:1057,o:992,inc:65,eff:"2025-11-16"},
-    "佐賀": {n:1030,o:956,inc:74,eff:"2025-11-21"},
-    "長崎": {n:1031,o:953,inc:78,eff:"2025-12-01"},
-    "熊本": {n:1034,o:952,inc:82,eff:"2026-01-01"},
-    "大分": {n:1035,o:954,inc:81,eff:"2026-01-01"},
-    "宮崎": {n:1023,o:952,inc:71,eff:"2025-11-16"},
-    "鹿児島": {n:1026,o:953,inc:73,eff:"2025-11-01"},
-    "沖縄": {n:1023,o:952,inc:71,eff:"2025-12-01"}
+    "島根": {n:1033,o:962,inc:71,eff:"2025-11-17"}
   };
 
   /* --- ユーティリティ --- */
@@ -579,10 +488,11 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   let COST_DATA = null; // {meta, national, prefs}
   const SAMPLE_JSON = {
     meta: { updated: "2026-02-22", note: "任意：統計データをここに集約（例）" },
-    national: { cpi_yoy: 2.3, cpi_asof: "2026年1月（前年同月比）", wage_yoy: 3.2, wage_asof: "2025年度（賃上げ）" },
+    national: { cpi_yoy: 1.5, cpi_asof: "2026年1月（前年同月比）", wage_yoy: null, wage_asof: null },
     prefs: {
-      "兵庫": { cpi_yoy: 2.1, wage_yoy: 3.0 },
-      "東京": { cpi_yoy: 2.6, wage_yoy: 3.5 }
+      "兵庫": { cpi_yoy: null, wage_yoy: null },
+      "鳥取": { cpi_yoy: null, wage_yoy: null },
+      "島根": { cpi_yoy: null, wage_yoy: null }
     }
   };
 
@@ -613,7 +523,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     if(!COST_DATA || !COST_DATA.prefs) return null;
     const direct = COST_DATA.prefs[prefKey];
     if(direct) return direct;
-    // keyが「東京都」等で来るケースも吸収
     for(const key in COST_DATA.prefs){
       if(normalizePrefKey(key) === prefKey) return COST_DATA.prefs[key];
     }
@@ -623,20 +532,24 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   function setLocal(key, val){ try{ localStorage.setItem(key, val); }catch(e){} }
   function getLocal(key){ try{ return localStorage.getItem(key) || ''; }catch(e){ return ''; } }
 
-  async function loadCostData(url){
+  async function loadCostData(url, silent){
     const u = (url && url.trim()) ? url.trim() : './pref_cost_data.json';
-    setStatus('読み込み中…', true);
+    if(!silent) setStatus('読み込み中…', true);
     try{
       const json = await fetchJson(u);
       COST_DATA = json;
       setStatus('読み込みOK（' + u + '）', true);
       setLocal('mk_cost_data_url', u);
       renderPrefPanel();
-      autoFillFromData(true); // 読み込み直後は空欄を提案
+      autoFillFromData(true);
       generate();
     }catch(e){
       COST_DATA = null;
-      setStatus('読み込み失敗：' + e.message + '（URL/配置/CORSをご確認ください）', false);
+      if(silent){
+        setStatus('（外部データ未読込）', true);
+      }else{
+        setStatus('読み込み失敗：' + e.message + '（URL/配置/CORSをご確認ください）', false);
+      }
       renderPrefPanel();
       generate();
     }
@@ -703,7 +616,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     // 人件費：pref → national → 最低賃金% の順で提案
     if(pd && isFinite(toNum(pd.wage_yoy))) setIf(wageRate, toNum(pd.wage_yoy));
     else if(nat && isFinite(toNum(nat.wage_yoy))) setIf(wageRate, toNum(nat.wage_yoy));
-    else if(w && isFinite(w.pct)) setIf(wageRate, pct1(w.pct)); // 参考：最低賃金上昇率
+    else if(w && isFinite(w.pct)) setIf(wageRate, pct1(w.pct));
 
     if(pd && pd.wage_asof) setIf(wageAsOf, pd.wage_asof);
     else if(nat && nat.wage_asof) setIf(wageAsOf, nat.wage_asof);
@@ -716,7 +629,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const lines = [];
 
     const w = minWageInfo(key);
-    // 最低賃金は「入力不要の参考」として強い根拠になるため、常に候補に入れる（ただしユーザーが外したい場合は後で編集可）
     if(w){
       lines.push(`${label}の最低賃金：${w.o.toLocaleString('ja-JP')}円 → ${w.n.toLocaleString('ja-JP')}円（+${w.inc}円、+${pct1(w.pct)}%）〔発効予定：${fmtYMD(w.eff)}〕`);
     }
@@ -734,7 +646,19 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     }
 
     if(includeSources.checked){
-      lines.push(`出典（簡易）：最低賃金は厚生労働省の地域別最低賃金一覧、CPI/賃上げ率等はe-Stat等の公的統計（※本ツールは入力/JSON読込値を引用）`);
+      // JSON側のsourcesがあればそれを優先
+      const pd = getPrefData(key);
+      const nat = COST_DATA && COST_DATA.national ? COST_DATA.national : null;
+
+      const sCpi = (pd && pd.sources && pd.sources.cpi) || (nat && nat.sources && nat.sources.cpi) || null;
+      const sWage = (pd && pd.sources && pd.sources.wage) || (nat && nat.sources && nat.sources.wage) || null;
+
+      if(sCpi) lines.push(`出典（CPI）：${sCpi}`);
+      if(sWage) lines.push(`出典（賃上げ率）：${sWage}`);
+
+      if(!sCpi && !sWage){
+        lines.push(`出典（簡易）：最低賃金は厚生労働省の地域別最低賃金一覧、CPI/賃上げ率等はe-Stat等の公的統計（※本ツールは入力/JSON読込値を引用）`);
+      }
     }
     return lines;
   }
@@ -946,13 +870,12 @@ ${
   prefSelect.addEventListener('change', () => {
     setLocal('mk_pref_key', prefSelect.value);
     renderPrefPanel();
-    // 変更時は「空欄だけ」自動提案
     autoFillFromData(true);
     generate();
   });
 
   /* --- JSON ロード --- */
-  loadDataBtn.addEventListener('click', () => loadCostData(dataUrl.value));
+  loadDataBtn.addEventListener('click', () => loadCostData(dataUrl.value, false));
   clearDataBtn.addEventListener('click', () => clearCostData());
 
   /* --- URLパラメータ転記 --- */
@@ -1003,11 +926,8 @@ ${
   }
 
   /* --- リセット --- */
-  function resetChips(groupId, multiple){
+  function resetChips(groupId){
     const g = $(groupId);
-    // HTMLのactiveを「初期状態」とする（ロード後にDOMを書き換えない運用のため）
-    // ここでは一旦全解除→data-default属性があれば採用、なければ「元のactiveを温存」する運用にせず、
-    // 明示的に初期状態へ戻すため、固定でセット。
     const chips = Array.from(g.querySelectorAll('.chip'));
     chips.forEach(c=>c.classList.remove('active'));
     if(groupId==='#relationGroup'){
@@ -1033,10 +953,9 @@ ${
     includeEvidence.checked = true;
     includeSources.checked = false;
 
-    // 都道府県はユーザーの設定を残す（操作ストレスを減らす）
-    resetChips('#factorGroup', true);
-    resetChips('#effortGroup', true);
-    resetChips('#relationGroup', false);
+    resetChips('#factorGroup');
+    resetChips('#effortGroup');
+    resetChips('#relationGroup');
 
     renderPrefPanel();
     autoFillFromData(true);
@@ -1059,23 +978,20 @@ ${
   /* --- 初期化 --- */
   buildPrefOptions();
 
-  // 都道府県はローカル保存優先（なければ兵庫）
   const savedPref = getLocal('mk_pref_key');
   if(savedPref && PREF_LABEL[savedPref]) prefSelect.value = savedPref;
   else prefSelect.value = '兵庫';
 
-  // 前回のJSON URL
   const savedUrl = getLocal('mk_cost_data_url');
   if(savedUrl) dataUrl.value = savedUrl;
 
   renderPrefPanel();
   getUrlParams();
 
-  // 初回：空欄だけ自動提案（最低賃金%など）
   autoFillFromData(true);
 
-  // 可能なら ./pref_cost_data.json を自動試行（失敗してもOK）
-  loadCostData(savedUrl || './pref_cost_data.json');
+  // 初回：./pref_cost_data.json を静かに試行（未配置でもエラー強調しない）
+  loadCostData(savedUrl || './pref_cost_data.json', true);
 
   generate();
 
