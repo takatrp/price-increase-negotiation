@@ -129,7 +129,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
       <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56">
     </a>
-    <div class="title">値上げ交渉ナビゲーター <span class="badge ok">r11</span></div>
+    <div class="title">値上げ交渉ナビゲーター <span class="badge ok">r12</span></div>
     <div class="headRight">
       <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
     </div>
@@ -249,9 +249,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
             <label style="display:flex;gap:10px;align-items:center;margin:0;font-weight:900;">
               <input type="checkbox" id="embedNumbersInLetter" checked style="width:auto;"> 本文に根拠数値（%・最低賃金等）を自然に織り込み、末尾に参考データを付与する
             </label>
-            <label style="display:flex;gap:10px;align-items:center;margin-top:8px;font-weight:900;">
-              <input type="checkbox" id="includeCpiSinceInLetter" style="width:auto;"> 末尾の参考データに「累積の物価上昇（概算）」も入れる
-            </label>
 
             <div class="divider"></div>
 
@@ -293,14 +290,14 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
           <button class="chip" type="button" data-val="物流費・運賃の上昇">物流</button>
           <button class="chip" type="button" data-val="エネルギー（電気・ガス・燃料）価格の上昇">エネルギー</button>
           <button class="chip active" type="button" data-val="人件費（賃上げ・採用難）による負担増">人件費</button>
-          <button class="chip" type="button" data-val="最低賃金の改定（都道府県別）">最低賃金</button>
+          <button class="chip" type="button" data-val="最低賃金の改定">最低賃金</button>
           <button class="chip" type="button" data-val="IT/サブスク費用の増加">IT/サブスク</button>
           <button class="chip" type="button" data-val="金利上昇・資金調達コスト増">金利</button>
         </div>
 
         <label for="extraFactors">補足（任意）</label>
-        <textarea id="extraFactors" rows="2" placeholder="例）主要仕入先からの値上げ通知（+8%）、採用単価の上昇、燃料サーチャージ継続 等"></textarea>
-        <div class="hint">※「自社に固有の事実」を一文入れると説得力が上がります。</div>
+        <textarea id="extraFactors" rows="2" placeholder="例）主要仕入先からの値上げ通知（+8%）、採用単価の上昇、度重なる税制改正への対応コスト 等"></textarea>
+        <div class="hint">※入力すると「〜に加え、〇〇」と自然に文章へ組み込まれます。</div>
       </div>
 
       <div class="card">
@@ -372,7 +369,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r11</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r12</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -436,12 +433,12 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     if(!m) return String(s);
     return `${m[1]}年${parseInt(m[2],10)}月`;
   };
+  
+  // 配列をシンプルな読点で結合するよう変更（「および」「等」は状況に応じて手動付与が自然なため）
   const joinJa = (arr) => {
     const a = (arr||[]).filter(Boolean);
     if(a.length===0) return '';
-    if(a.length===1) return a[0];
-    if(a.length===2) return a[0] + "および" + a[1];
-    return a.slice(0,-1).join("、") + "等";
+    return a.join("、");
   };
 
   /* --- DOM --- */
@@ -474,7 +471,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   const wageScopeBadge = $('#wageScopeBadge');
 
   const embedNumbersInLetter = $('#embedNumbersInLetter');
-  const includeCpiSinceInLetter = $('#includeCpiSinceInLetter');
 
   const cpiSinceView = $('#cpiSinceView');
   const cpiSinceBadge = $('#cpiSinceBadge');
@@ -923,8 +919,8 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const wageLine = isFinite(h) ? `・人件費上昇率（参考）：前年比 +${pct1(h)}%（対象：${hAsOf || '未入力'}）` : '';
 
     const x = calcCpiSince();
-    const cpiSinceLine = (includeCpiSinceInLetter.checked && decidedYM && x)
-      ? `・累積の物価上昇（概算）：約${pct1(x.cum)}%（現行価格決定の${decidedYM}から現在まで）` : '';
+    const cpiSinceLine = (decidedYM && x && x.cum > 0)
+      ? `・累積物価上昇率：約${pct1(x.cum)}%（現行価格決定の${decidedYM}から現在まで）` : '';
 
     const lines = [mwLine, cpiLine, wageLine, cpiSinceLine].filter(Boolean);
     if(lines.length === 0) return '';
@@ -1078,7 +1074,9 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const factors = getSelectedValues('#factorGroup');
     const extra = (extraFactors.value||'').trim();
     const factorText = factors.length > 0 ? joinJa(factors) : '原材料費・物流費・人件費等の上昇';
-    const factorTail = extra ? `（補足：${extra}）` : '';
+    
+    // 補足がある場合は「～に加え、〇〇」と結合
+    const combinedFactors = extra ? `${factorText}に加え、${extra}` : factorText;
 
     const efforts = getSelectedValues('#effortGroup');
     const effortText = efforts.length > 0 ? joinJa(efforts) : '徹底したコスト削減';
@@ -1088,7 +1086,15 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const naturalEvidence = buildNaturalEvidencePhrase();      
     const referenceBlock = buildReferenceBlock(decidedYM);
 
-    const decidedLine = decidedYM ? `現行価格は${decidedYM}に決定以来、可能な限り据え置いてまいりました。` : '';
+    let decidedLine = '';
+    if (decidedYM) {
+      const x = calcCpiSince();
+      if (x && x.cum > 0) {
+        decidedLine = `現行価格は${decidedYM}に決定以来、可能な限り据え置いてまいりましたが、それ以来、現在までの累積物価上昇率は${pct1(x.cum)}%を超えております。`;
+      } else {
+        decidedLine = `現行価格は${decidedYM}に決定以来、可能な限り据え置いてまいりました。`;
+      }
+    }
 
     let letter = '';
     if(relation === 'A') {
@@ -1104,7 +1110,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
 平素より格別のご高配を賜り、心より御礼申し上げます。
 
 本日は、誠に心苦しいお願いがありご連絡いたしました。
-昨今の${factorText}${factorTail}により、当社を取り巻くコスト環境が継続的に厳しくなっております。
+昨今の${combinedFactors}により、当社を取り巻くコスト環境が継続的に厳しくなっております。
 ${naturalEvidence ? naturalEvidence : ''}
 
 ${decidedLine}
@@ -1133,7 +1139,7 @@ ${decidedLine}
 [自社名]の[氏名]でございます。
 
 平素は弊社サービスをご利用いただき誠にありがとうございます。
-さて、昨今の${factorText}${factorTail}により、各種コストが上昇しております。
+さて、昨今の${combinedFactors}により、各種コストが上昇しております。
 ${naturalEvidence ? naturalEvidence : ''}
 
 ${decidedLine}
@@ -1159,7 +1165,7 @@ ${decidedLine}
 [自社名]の[氏名]でございます。
 
 本日は、今後の継続提供の前提となる「適正価格化」について、ご相談申し上げます。
-昨今の${factorText}${factorTail}が常態化しており、当社のコスト構造にも継続的な影響が出ております。
+昨今の${combinedFactors}が常態化しており、当社のコスト構造にも継続的な影響が出ております。
 ${naturalEvidence ? naturalEvidence : ''}
 
 ${decidedLine}
@@ -1186,11 +1192,11 @@ ${decidedLine}
 
 ■ 1. 冒頭（状況共有）
 「本日はお時間をいただきありがとうございます。実は本日、少し心苦しいご相談がございます。
-昨今の${factorText}${factorTail}の影響が弊社にも及び、コスト環境が厳しい状況です。」
+昨今の${combinedFactors}の影響が弊社にも及び、コスト環境が厳しい状況です。」
 
 ■ 2. 根拠の提示（短く・自然に）
 ${naturalEvidence ? `「${naturalEvidence}」` : '「外部環境の変化が続いています。」'}
-${decidedYM ? `「また、現行価格は${decidedYM}に決定以来、可能な限り据え置いてきました。」` : ''}
+${decidedYM ? `「また、${decidedLine}」` : ''}
 
 ■ 3. 自助努力の提示と限界
 「もちろん御社にご迷惑をおかけできないと、${effortText}を続けてきましたが、
@@ -1269,7 +1275,7 @@ ${decidedYM ? `「また、現行価格は${decidedYM}に決定以来、可能�
   printBtn.addEventListener('click', () => { try{ window.print(); }catch(e){} });
 
   [productName, currentPriceAsOf, effectiveDate, extraFactors,
-   embedNumbersInLetter, includeCpiSinceInLetter, linkRates, cpiRate, wageRate, cpiAsOf, wageAsOf]
+   embedNumbersInLetter, linkRates, cpiRate, wageRate, cpiAsOf, wageAsOf]
     .forEach(el => el.addEventListener('input', generate));
   
   currentPrice.addEventListener('blur', generate);
@@ -1361,7 +1367,6 @@ ${decidedYM ? `「また、現行価格は${decidedYM}に決定以来、可能�
     });
 
     embedNumbersInLetter.checked = true;
-    includeCpiSinceInLetter.checked = false;
     linkRates.checked = true;
 
     resetChips('#factorGroup');
