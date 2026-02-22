@@ -129,7 +129,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
       <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56">
     </a>
-    <div class="title">値上げ交渉ナビゲーター <span class="badge ok">r08</span></div>
+    <div class="title">値上げ交渉ナビゲーター <span class="badge ok">r09</span></div>
     <div class="headRight">
       <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
     </div>
@@ -145,7 +145,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
         <div class="pill">STEP 1：改定内容</div>
 
         <label for="productName">対象商品・サービス名</label>
-        <input type="text" id="productName" placeholder="例）顧問報酬、保守費用、〇〇部品" />
+        <input type="text" id="productName" placeholder="例）保守費用、〇〇部品" />
 
         <div class="inputGrid">
           <div>
@@ -374,7 +374,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r08</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r09</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -388,23 +388,29 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   try{ document.documentElement.classList.toggle('isAdmin', !!IS_ADMIN); }catch(e){}
 
   /* =========================
-     1) 対象都道府県（関西＋中国＋和歌山）
+     1) 対象都道府県（JISコード順）
      ========================= */
   const PREFS = [
-    {k:'鳥取', l:'鳥取県'},
-    {k:'島根', l:'島根県'},
-    {k:'岡山', l:'岡山県'},
-    {k:'広島', l:'広島県'},
-    {k:'山口', l:'山口県'},
-    {k:'兵庫', l:'兵庫県'},
-    {k:'大阪', l:'大阪府'},
-    {k:'京都', l:'京都府'},
-    {k:'滋賀', l:'滋賀県'},
-    {k:'奈良', l:'奈良県'},
-    {k:'和歌山', l:'和歌山県'}
+    {k:'北海道', l:'北海道'}, {k:'青森', l:'青森県'}, {k:'岩手', l:'岩手県'},
+    {k:'宮城', l:'宮城県'}, {k:'秋田', l:'秋田県'}, {k:'山形', l:'山形県'},
+    {k:'福島', l:'福島県'}, {k:'茨城', l:'茨城県'}, {k:'栃木', l:'栃木県'},
+    {k:'群馬', l:'群馬県'}, {k:'埼玉', l:'埼玉県'}, {k:'千葉', l:'千葉県'},
+    {k:'東京', l:'東京都'}, {k:'神奈川', l:'神奈川県'}, {k:'新潟', l:'新潟県'},
+    {k:'富山', l:'富山県'}, {k:'石川', l:'石川県'}, {k:'福井', l:'福井県'},
+    {k:'山梨', l:'山梨県'}, {k:'長野', l:'長野県'}, {k:'岐阜', l:'岐阜県'},
+    {k:'静岡', l:'静岡県'}, {k:'愛知', l:'愛知県'}, {k:'三重', l:'三重県'},
+    {k:'滋賀', l:'滋賀県'}, {k:'京都', l:'京都府'}, {k:'大阪', l:'大阪府'},
+    {k:'兵庫', l:'兵庫県'}, {k:'奈良', l:'奈良県'}, {k:'和歌山', l:'和歌山県'},
+    {k:'鳥取', l:'鳥取県'}, {k:'島根', l:'島根県'}, {k:'岡山', l:'岡山県'},
+    {k:'広島', l:'広島県'}, {k:'山口', l:'山口県'}, {k:'徳島', l:'徳島県'},
+    {k:'香川', l:'香川県'}, {k:'愛媛', l:'愛媛県'}, {k:'高知', l:'高知県'},
+    {k:'福岡', l:'福岡県'}, {k:'佐賀', l:'佐賀県'}, {k:'長崎', l:'長崎県'},
+    {k:'熊本', l:'熊本県'}, {k:'大分', l:'大分県'}, {k:'宮崎', l:'宮崎県'},
+    {k:'鹿児島', l:'鹿児島県'}, {k:'沖縄', l:'沖縄県'}
   ];
   const PREF_LABEL = Object.fromEntries(PREFS.map(x=>[x.k,x.l]));
 
+  // 既存内蔵データ
   const MIN_WAGE = {
     "兵庫": {n:1116,o:1052,inc:64,eff:"2025-10-04"},
     "鳥取": {n:1030,o:957,inc:73,eff:"2025-10-04"},
@@ -523,12 +529,39 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   }
   function markImported(el){ if(el) el.classList.add('imported-value'); }
 
-  const formatYenInput = (el) => {
-    const val = toNum(el.value);
-    if(isFinite(val)) el.value = Math.round(val).toLocaleString('ja-JP');
+  /* リアルタイムカンマ整形関数 */
+  const formatYenRealtime = (e) => {
+    const el = e.target;
+    let raw = el.value.replace(/[^\d.-]/g, '');
+    if(!raw) { el.value = ''; return; }
+    
+    // 現在のカーソル位置を取得
+    let pos = el.selectionStart;
+    let oldLen = el.value.length;
+
+    let parts = raw.split('.');
+    let intPart = parts[0];
+    let decPart = parts.length > 1 ? '.' + parts[1] : '';
+
+    if (intPart === '' || intPart === '-') {
+      el.value = raw;
+      return;
+    }
+
+    let num = parseInt(intPart, 10);
+    if(isNaN(num)) return;
+    
+    let formatted = num.toLocaleString('ja-JP') + decPart;
+    el.value = formatted;
+
+    // フォーマット後のカーソル位置を調整
+    let newLen = el.value.length;
+    let diff = newLen - oldLen;
+    try { el.setSelectionRange(pos + diff, pos + diff); } catch(err){}
   };
-  currentPrice.addEventListener('blur', () => formatYenInput(currentPrice));
-  newPrice.addEventListener('blur', () => formatYenInput(newPrice));
+
+  currentPrice.addEventListener('input', formatYenRealtime);
+  newPrice.addEventListener('input', formatYenRealtime);
 
   const formatPctInput = (el) => {
     const v = toNum(el.value);
@@ -714,7 +747,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     if(w){
       const incStr = (w.inc!==null && w.inc!==undefined) ? `+${Math.round(w.inc)}円` : '—';
       minWageView.textContent =
-        `${Math.round(w.o).toLocaleString('ja-JP')}円 → ${Math.round(w.n).toLocaleString('ja-JP')}円（${incStr}、+${pct1(w.pct)}%）／発効予定：${fmtYMD(w.eff)}`;
+        `${Math.round(w.o).toLocaleString('ja-JP')}円 → ${Math.round(w.n).toLocaleString('ja-JP')}円（${incStr}、前年度比 +${pct1(w.pct)}%）／発効予定：${fmtYMD(w.eff)}`;
 
       if(w.source === 'json'){
         minWageBadge.textContent = 'JSON';
@@ -809,31 +842,30 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   });
 
   /* =========================
-     6) 実際のCPI推移に基づく累積概算
+     6) 実際のCPI推移に基づく累積概算（2000年〜）
      ========================= */
   function getHistoricalCpi(year) {
     const CPI = {
-      2010: 94.0, 2011: 93.7, 2012: 93.6,
-      2013: 94.6, 2014: 97.2, 2015: 98.0,
-      2016: 97.7, 2017: 97.8, 2018: 98.7,
-      2019: 99.3, 2020: 100.0, 2021: 99.8,
-      2022: 102.1, 2023: 105.3, 2024: 108.2,
+      2000: 99.5, 2001: 98.7, 2002: 97.8, 2003: 97.5, 2004: 97.4,
+      2005: 97.3, 2006: 97.4, 2007: 97.4, 2008: 98.9, 2009: 97.6,
+      2010: 96.6, 2011: 96.3, 2012: 96.2, 2013: 96.6, 2014: 99.1,
+      2015: 99.6, 2016: 99.3, 2017: 99.5, 2018: 100.4, 2019: 101.0,
+      2020: 100.0, 2021: 99.8, 2022: 102.1, 2023: 105.3, 2024: 108.2,
       2025: 110.6
     };
-    if (year < 2010) return CPI[2010];
+    if (year < 2000) return CPI[2000];
     if (CPI[year]) return CPI[year];
     
-    // 2026年以降は、直近の cpiRate を使って推計
     const maxYear = 2025;
     const baseCpi = CPI[maxYear];
     const diffYears = year - maxYear;
     const rate = toNum(cpiRate.value);
-    const r = isFinite(rate) ? rate : 2.0; // 未入力時は2.0%と仮定
+    const r = isFinite(rate) ? rate : 2.0; 
     return baseCpi * Math.pow(1 + r / 100, diffYears);
   }
 
   function calcCpiSince(){
-    const base = (currentPriceAsOf.value||'').trim(); // YYYY-MM
+    const base = (currentPriceAsOf.value||'').trim(); 
     if(!base) return null;
 
     const m = base.match(/^(\d{4})-(\d{2})$/);
@@ -848,7 +880,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const months = (ny - by)*12 + (nm - bm);
     if(months <= 0) return { months: 0, cum: 0 };
 
-    // 年次をまたぐ簡易的な線形補間
     const getCpiMonthly = (y, mo) => {
       const cpi_y = getHistoricalCpi(y);
       const cpi_next_y = getHistoricalCpi(y + 1);
@@ -882,20 +913,20 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   }
 
   /* =========================
-     8) 本文に自然に織り込む短文（細かな数値は除き簡潔に）
+     8) 本文に自然に織り込む短文（比較対象の明記）
      ========================= */
   function buildNaturalEvidencePhrase(){
     if(!embedNumbersInLetter.checked) return '';
     const key = prefSelect.value || '鳥取';
 
     const w = minWageInfo(key);
-    const mw = w ? `最低賃金（+${pct1(w.pct)}%）` : '';
+    const mw = w ? `最低賃金（前年度比 +${pct1(w.pct)}%）` : '';
 
     const p = toNum(cpiRate.value);
-    const price = isFinite(p) ? `物価（+${pct1(p)}%）` : '';
+    const price = isFinite(p) ? `物価（前年同月比 +${pct1(p)}%）` : '';
 
     const h = toNum(wageRate.value);
-    const labor = isFinite(h) ? `人件費（+${pct1(h)}%）` : '';
+    const labor = isFinite(h) ? `人件費（前年比 +${pct1(h)}%）` : '';
 
     const bits = [mw, price, labor].filter(Boolean);
     if(bits.length===0) return '';
@@ -908,7 +939,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const prefLabel = PREF_LABEL[key] || key;
     
     const w = minWageInfo(key);
-    const mwLine = w ? `・最低賃金（${prefLabel}）：${Math.round(w.o)}円 → ${Math.round(w.n)}円（発効：${fmtYMD(w.eff)}）` : '';
+    const mwLine = w ? `・最低賃金（${prefLabel}）：${Math.round(w.o)}円 → ${Math.round(w.n)}円（前年度比 +${pct1(w.pct)}%、発効：${fmtYMD(w.eff)}）` : '';
 
     const p = toNum(cpiRate.value);
     const pAsOf = (cpiAsOf.value||'').trim();
@@ -917,7 +948,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
 
     const h = toNum(wageRate.value);
     const hAsOf = (wageAsOf.value||'').trim();
-    const wageLine = isFinite(h) ? `・人件費上昇率（参考）：+${pct1(h)}%（対象：${hAsOf || '未入力'}）` : '';
+    const wageLine = isFinite(h) ? `・人件費上昇率（参考）：前年比 +${pct1(h)}%（対象：${hAsOf || '未入力'}）` : '';
 
     const x = calcCpiSince();
     const cpiSinceLine = (includeCpiSinceInLetter.checked && decidedYM && x)
@@ -945,28 +976,29 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     let rateStr = `${cpStr} → ${npStr}`;
     if(isFinite(cp) && isFinite(np) && cp>0){
       const r = ((np/cp)-1)*100;
-      rateStr = `約${pct1(r)}%（${cpStr} → ${npStr}）`;
+      const sign = r >= 0 ? '増' : '減';
+      rateStr = `${cpStr} → ${npStr}（約${pct1(Math.abs(r))}%${sign}）`;
     }
 
     const decidedYM = fmtYM(currentPriceAsOf.value);
 
     const w = minWageInfo(key);
     const mwLine = w
-      ? `最低賃金（${prefLabel}）：${Math.round(w.o)}円 → ${Math.round(w.n)}円（+${Math.round(w.inc)}円、+${pct1(w.pct)}%）／発効予定：${fmtYMD(w.eff)}（${w.source==='json'?'JSON':'内蔵'}）`
+      ? `最低賃金（${prefLabel}）：${Math.round(w.o)}円 → ${Math.round(w.n)}円（+${Math.round(w.inc)}円、前年度比 +${pct1(w.pct)}%）／発効予定：${fmtYMD(w.eff)}（${w.source==='json'?'JSON':'内蔵'}）`
       : `最低賃金（${prefLabel}）：未設定（JSON更新後に反映）`;
 
     const p = toNum(cpiRate.value);
     const pAsOf = (cpiAsOf.value||'').trim();
     const pScope = (cpiRate.dataset.origin==='pref') ? '都道府県別' : (cpiRate.dataset.origin==='national') ? '全国値' : (cpiRate.dataset.origin==='manual') ? '手入力' : '未設定';
     const cpiLine = isFinite(p)
-      ? `CPI（消費者物価指数）参考：+${pct1(p)}%（${pAsOf||'対象未入力'}）／スコープ：${pScope}`
+      ? `CPI（消費者物価指数）参考：前年同月比 +${pct1(p)}%（${pAsOf||'対象未入力'}）／スコープ：${pScope}`
       : `CPI（消費者物価指数）参考：未設定`;
 
     const h = toNum(wageRate.value);
     const hAsOf = (wageAsOf.value||'').trim();
     const hScope = (wageRate.dataset.origin==='pref') ? '都道府県別' : (wageRate.dataset.origin==='national') ? '全国値' : (wageRate.dataset.origin==='manual') ? '手入力' : '未設定';
     const wageLine = isFinite(h)
-      ? `人件費上昇率（参考）：+${pct1(h)}%（${hAsOf||'対象未入力'}）／スコープ：${hScope}`
+      ? `人件費上昇率（参考）：前年比 +${pct1(h)}%（${hAsOf||'対象未入力'}）／スコープ：${hScope}`
       : `人件費上昇率（参考）：未設定`;
 
     const x = calcCpiSince();
@@ -975,7 +1007,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       : `累積CPI（概算）：算出不可（現行価格の決定時期が未入力）`;
 
     const cpiSinceHow = (decidedYM && x)
-      ? `算出式（概算）：実際の消費者物価指数（コアCPI）の年次推移データに基づく変動率`
+      ? `算出式（概算）：実際の消費者物価指数（コアCPI）の過去の年次推移データに基づく変動率`
       : `算出式：—`;
 
     const src = getCpiSource();
@@ -1068,7 +1100,8 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     let rateStr = `${cpStr} → ${npStr}`;
     if(isFinite(cp) && isFinite(np) && cp > 0) {
       const rate = ((np / cp) - 1) * 100;
-      rateStr = `約${pct1(rate)}%（${cpStr} → ${npStr}）`;
+      const sign = rate >= 0 ? '増' : '減';
+      rateStr = `${cpStr} → ${npStr}（約${pct1(Math.abs(rate))}%${sign}）`;
     }
 
     const factors = getSelectedValues('#factorGroup');
@@ -1194,7 +1227,7 @@ ${decidedYM ? `「また、現行価格は${decidedYM}に決定以来、可能�
 
 ■ 4. 結論（改定の打診）
 「このままですと『${prod}』の品質維持や提供体制に支障が出る恐れがあります。
-つきましては、${dateStr}より、${cpStr} → ${npStr}（${rateStr}）の見直しをご相談できないでしょうか。」
+つきましては、${dateStr}より、【 ${rateStr} 】への見直しをご相談できないでしょうか。」
 
 ■ 5. 反論への切り返し（例）
 顧客：「予算が厳しい。難しい」
@@ -1265,9 +1298,13 @@ ${decidedYM ? `「また、現行価格は${decidedYM}に決定以来、可能�
 
   printBtn.addEventListener('click', () => { try{ window.print(); }catch(e){} });
 
-  [productName, currentPrice, newPrice, currentPriceAsOf, effectiveDate, extraFactors,
+  [productName, currentPriceAsOf, effectiveDate, extraFactors,
    embedNumbersInLetter, includeCpiSinceInLetter, linkRates, cpiRate, wageRate, cpiAsOf, wageAsOf]
     .forEach(el => el.addEventListener('input', generate));
+  
+  // 金額系はblurでも再計算するよう念のためバインド
+  currentPrice.addEventListener('blur', generate);
+  newPrice.addEventListener('blur', generate);
 
   linkRates.addEventListener('change', ()=>{
     renderAllByPref(true);
