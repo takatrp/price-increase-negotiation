@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <!--
   値上げ交渉ナビゲーター
-  internal version: r04
+  internal version: r05
   last updated: auto (document.lastModified)
 
-  r03 → r04 変更点：
-  - 都道府県は「兵庫・鳥取・島根」のみに限定（誤操作防止・運用対象に最適化）
-  - 最低賃金内蔵データも3県のみ（根拠：厚労省「令和7年度 地域別最低賃金全国一覧」）
-  - 初回の ./pref_cost_data.json 自動読込は失敗しても強いエラー表示にしない（未配置でも使える）
+  r04 → r05 変更点：
+  - 【最低賃金】pref_cost_data.json 内の min_wage を優先して表示（JSON > 内蔵）
+  - 【管理モード】データ読み込みパネル（details#dataLoader）を管理モード時のみ表示
+      * URLに ?admin=1 を付けると表示（例：.../index.html?admin=1）
+      * それ以外は非表示（ただしJSONの自動読込は継続して行う）
 
   メモ：
   - CPI/賃上げ率等は pref_cost_data.json を同階層に置けば自動反映できます。
+  - 最低賃金も pref_cost_data.json に入っていればそれを優先します。
 -->
 <html lang="ja">
 <head>
@@ -102,6 +104,10 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
 .inlineChk label{margin:0;font-weight:800;color:#0f172a;font-size:.84rem;display:flex;gap:8px;align-items:center}
 .inlineChk input{width:auto}
 
+/* 管理モード：adminOnly を表示 */
+.adminOnly{display:none !important;}
+.isAdmin .adminOnly{display:block !important;}
+
 /* 印刷 */
 @media print{
   .miniActions, .tabs, .chipGroup, button, details, .inlineChk { display:none !important; }
@@ -165,7 +171,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
             <span id="minWageView">—</span>
             <span class="badge" id="minWageBadge">未取得</span>
           </div>
-          <div class="small" id="minWageNote">※最低賃金は内蔵データ（都道府県別）。CPI等は下の「データ読み込み」で自動反映できます。</div>
+          <div class="small" id="minWageNote">※最低賃金はJSON優先（未読込時は内蔵値）。CPI等もJSON読込で自動反映できます。</div>
         </div>
 
         <div class="inputGrid" style="margin-top:10px;">
@@ -198,9 +204,10 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
           <button class="btn ghost sm" id="autoFillBtn" type="button">自動提案（空欄のみ）</button>
         </div>
 
-        <details id="dataLoader">
+        <!-- ★ 管理モード時のみ表示 -->
+        <details id="dataLoader" class="adminOnly">
           <summary>都道府県データを読み込み（JSON）</summary>
-          <div class="hint">同階層の <span class="kbd">pref_cost_data.json</span> またはURLから読み込みます（CPI/賃上げ率など）。</div>
+          <div class="hint">同階層の <span class="kbd">pref_cost_data.json</span> またはURLから読み込みます（CPI/賃上げ率/最低賃金など）。</div>
 
           <label for="dataUrl">JSONのURL（空欄なら ./pref_cost_data.json を試行）</label>
           <input type="text" id="dataUrl" placeholder="例）https://.../pref_cost_data.json" />
@@ -292,17 +299,24 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r04</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r05</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終的な条件提示や交渉は、取引実態・競合・需給・契約条項等も踏まえてご判断ください。</div>
 
 <script>
 (function(){
   /* =========================
-     0) 参考データ（内蔵：最低賃金）
-     - 対象：兵庫・鳥取・島根のみ
-     - 根拠（例）：厚生労働省「令和7年度 地域別最低賃金全国一覧」
-       https://www.mhlw.go.jp/content/11201250/001566192.pdf
+     0) 管理モード判定
+     - ?admin=1 のときのみ管理パネル表示
+     ========================= */
+  const qs = new URLSearchParams(window.location.search);
+  const IS_ADMIN = (qs.get('admin') === '1');
+  try{ document.documentElement.classList.toggle('isAdmin', !!IS_ADMIN); }catch(e){}
+
+  /* =========================
+     1) 参考データ（内蔵：最低賃金）
+     - 対象：兵庫・鳥取・島根のみ（UIはr04方針を維持）
+     - min_wage が JSON にあれば JSON を優先表示する（r05）
      ========================= */
   const PREFS = [
     {k:'兵庫', l:'兵庫県'},
@@ -311,7 +325,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   ];
   const PREF_LABEL = Object.fromEntries(PREFS.map(x=>[x.k,x.l]));
 
-  // 地域別最低賃金（新/旧/引上げ額/発効予定日）
+  // 地域別最低賃金（新/旧/引上げ額/発効予定日）※内蔵フォールバック
   const MIN_WAGE = {
     "兵庫": {n:1116,o:1052,inc:64,eff:"2025-10-04"},
     "鳥取": {n:1030,o:957,inc:73,eff:"2025-10-04"},
@@ -366,6 +380,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   const includeSources = $('#includeSources');
   const autoFillBtn = $('#autoFillBtn');
 
+  // 管理パネル（adminOnly：非管理モードでは非表示だがDOMは存在）
   const dataUrl = $('#dataUrl');
   const loadDataBtn = $('#loadDataBtn');
   const clearDataBtn = $('#clearDataBtn');
@@ -470,7 +485,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   }
 
   /* =========================
-     1) 都道府県 UI 初期化
+     2) 都道府県 UI 初期化
      ========================= */
   function buildPrefOptions(){
     prefSelect.innerHTML = '';
@@ -483,20 +498,28 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   }
 
   /* =========================
-     2) JSON 読み込み（任意）
+     3) JSON 読み込み（任意）
      ========================= */
   let COST_DATA = null; // {meta, national, prefs}
   const SAMPLE_JSON = {
-    meta: { updated: "2026-02-22", note: "任意：統計データをここに集約（例）" },
+    schema_version: 1,
+    meta: {
+      updated: "2026-02-22",
+      note: "任意：統計データをここに集約（例）",
+      sources: {
+        min_wage: { publisher: "厚生労働省", title: "地域別最低賃金（答申等）", url: "https://www.mhlw.go.jp/" }
+      }
+    },
     national: { cpi_yoy: 1.5, cpi_asof: "2026年1月（前年同月比）", wage_yoy: null, wage_asof: null },
     prefs: {
-      "兵庫": { cpi_yoy: null, wage_yoy: null },
-      "鳥取": { cpi_yoy: null, wage_yoy: null },
-      "島根": { cpi_yoy: null, wage_yoy: null }
+      "兵庫": { cpi_yoy: null, wage_yoy: null, min_wage: { new: 1116, old: 1052, inc: 64, eff: "2025-10-04" } },
+      "鳥取": { cpi_yoy: null, wage_yoy: null, min_wage: { new: 1030, old: 957, inc: 73, eff: "2025-10-04" } },
+      "島根": { cpi_yoy: null, wage_yoy: null, min_wage: { new: 1033, old: 962, inc: 71, eff: "2025-11-17" } }
     }
   };
 
   function setStatus(msg, ok){
+    if(!dataLoadStatus) return;
     dataLoadStatus.textContent = msg || '';
     dataLoadStatus.style.color = ok ? '#0f172a' : '#b91c1c';
   }
@@ -511,7 +534,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   function normalizePrefKey(k){
     if(!k) return '';
     let s = String(k).trim();
-    s = s.replace(/[都道府県]$/,''); // 末尾の都道府県を落とす
+    s = s.replace(/[都道府県]$/,''); // 末尾の都道府県を落とす（例：大阪府→大阪）
     if(s==="東京都") s="東京";
     if(s==="大阪府") s="大阪";
     if(s==="京都府") s="京都";
@@ -563,28 +586,92 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   }
 
   /* =========================
-     3) 最低賃金パネル描画＆自動提案
+     4) 最低賃金（JSON優先）パネル描画＆自動提案
      ========================= */
-  function minWageInfo(prefKey){
+
+  // JSONから最低賃金を取得（あれば）
+  function getMinWageFromJson(prefKey){
+    const pd = getPrefData(prefKey);
+    if(!pd || !pd.min_wage) return null;
+
+    const w = pd.min_wage;
+
+    const n = toNum(w.new ?? w.n ?? w.N);
+    const o = toNum(w.old ?? w.o ?? w.O);
+    const inc = toNum(w.inc ?? w.diff ?? w.delta);
+
+    // inc が無ければ new-old から補完
+    let inc2 = isFinite(inc) ? inc : (isFinite(n) && isFinite(o) ? (n - o) : NaN);
+
+    // eff（発効予定日）
+    const eff = w.eff ?? w.effective ?? w.effective_date ?? null;
+
+    if(!isFinite(n) || !isFinite(o)) return null;
+
+    const pct = (o > 0) ? (inc2 / o * 100) : NaN;
+
+    return {
+      n, o, inc: isFinite(inc2) ? inc2 : null,
+      eff: eff ? String(eff) : null,
+      pct,
+      source: 'json'
+    };
+  }
+
+  // 内蔵（フォールバック）
+  function getMinWageFromBuiltin(prefKey){
     const w = MIN_WAGE[prefKey];
     if(!w || !isFinite(w.n) || !isFinite(w.o)) return null;
-    const p = (w.o>0) ? (w.inc / w.o * 100) : NaN;
+    const pct = (w.o>0) ? (w.inc / w.o * 100) : NaN;
+    return { n:w.n, o:w.o, inc:w.inc, eff:w.eff, pct, source:'builtin' };
+  }
+
+  // 優先順位：JSON > 内蔵
+  function minWageInfo(prefKey){
+    const fromJson = getMinWageFromJson(prefKey);
+    const w = fromJson || getMinWageFromBuiltin(prefKey);
+    if(!w) return null;
     return {
       ...w,
-      pct: p,
       label: PREF_LABEL[prefKey] || prefKey
     };
+  }
+
+  function getMinWageSourceText(){
+    // JSON meta.sources.min_wage があれば優先
+    const s = COST_DATA && COST_DATA.meta && COST_DATA.meta.sources && COST_DATA.meta.sources.min_wage
+      ? COST_DATA.meta.sources.min_wage : null;
+    if(s){
+      const parts = [];
+      if(s.publisher) parts.push(s.publisher);
+      if(s.title) parts.push(s.title);
+      if(s.url) parts.push(s.url);
+      return parts.filter(Boolean).join('｜');
+    }
+    // ない場合は簡易表記
+    return '厚生労働省（地域別最低賃金）';
   }
 
   function renderPrefPanel(){
     const key = prefSelect.value || '兵庫';
     const w = minWageInfo(key);
+
     if(w){
-      minWageView.textContent = `${w.o.toLocaleString('ja-JP')}円 → ${w.n.toLocaleString('ja-JP')}円（+${w.inc}円、+${pct1(w.pct)}%）／発効予定：${fmtYMD(w.eff)}`;
-      minWageBadge.textContent = '内蔵';
-      minWageBadge.style.borderColor = '#d1d5db';
-      minWageBadge.style.color = '#334155';
-      minWageNote.textContent = '※最低賃金は内蔵データ（都道府県別）。CPI/賃上げ率はJSON読込で自動反映できます。';
+      const incStr = (w.inc!==null && w.inc!==undefined) ? `+${Math.round(w.inc)}円` : '—';
+      minWageView.textContent =
+        `${Math.round(w.o).toLocaleString('ja-JP')}円 → ${Math.round(w.n).toLocaleString('ja-JP')}円（${incStr}、+${pct1(w.pct)}%）／発効予定：${fmtYMD(w.eff)}`;
+
+      if(w.source === 'json'){
+        minWageBadge.textContent = 'JSON';
+        minWageBadge.style.color = '#0f172a';
+        minWageBadge.style.borderColor = '#94a3b8';
+        minWageNote.textContent = '※最低賃金はJSON優先（未読込時は内蔵値）。CPI等もJSON読込で自動反映できます。';
+      }else{
+        minWageBadge.textContent = '内蔵';
+        minWageBadge.style.borderColor = '#d1d5db';
+        minWageBadge.style.color = '#334155';
+        minWageNote.textContent = '※最低賃金はJSON優先（未読込時は内蔵値）。CPI等もJSON読込で自動反映できます。';
+      }
     }else{
       minWageView.textContent = '—';
       minWageBadge.textContent = '未取得';
@@ -613,7 +700,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     if(pd && pd.cpi_asof) setIf(cpiAsOf, pd.cpi_asof);
     else if(nat && nat.cpi_asof) setIf(cpiAsOf, nat.cpi_asof);
 
-    // 人件費：pref → national → 最低賃金% の順で提案
+    // 人件費：pref → national → 最低賃金% の順で提案（最低賃金%はJSON/内蔵どちらでも可）
     if(pd && isFinite(toNum(pd.wage_yoy))) setIf(wageRate, toNum(pd.wage_yoy));
     else if(nat && isFinite(toNum(nat.wage_yoy))) setIf(wageRate, toNum(nat.wage_yoy));
     else if(w && isFinite(w.pct)) setIf(wageRate, pct1(w.pct));
@@ -630,7 +717,9 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
 
     const w = minWageInfo(key);
     if(w){
-      lines.push(`${label}の最低賃金：${w.o.toLocaleString('ja-JP')}円 → ${w.n.toLocaleString('ja-JP')}円（+${w.inc}円、+${pct1(w.pct)}%）〔発効予定：${fmtYMD(w.eff)}〕`);
+      const incStr = (w.inc!==null && w.inc!==undefined) ? `+${Math.round(w.inc)}円` : '—';
+      const tag = (w.source==='json') ? '（JSON）' : '（内蔵）';
+      lines.push(`${label}の最低賃金：${Math.round(w.o).toLocaleString('ja-JP')}円 → ${Math.round(w.n).toLocaleString('ja-JP')}円（${incStr}、+${pct1(w.pct)}%）〔発効予定：${fmtYMD(w.eff)}〕${tag}`);
     }
 
     const cpi = toNum(cpiRate.value);
@@ -653,13 +742,17 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       const sCpi = (pd && pd.sources && pd.sources.cpi) || (nat && nat.sources && nat.sources.cpi) || null;
       const sWage = (pd && pd.sources && pd.sources.wage) || (nat && nat.sources && nat.sources.wage) || null;
 
+      // 最低賃金（JSON meta.sources を優先）
+      lines.push(`出典（最低賃金）：${getMinWageSourceText()}`);
+
       if(sCpi) lines.push(`出典（CPI）：${sCpi}`);
       if(sWage) lines.push(`出典（賃上げ率）：${sWage}`);
 
       if(!sCpi && !sWage){
-        lines.push(`出典（簡易）：最低賃金は厚生労働省の地域別最低賃金一覧、CPI/賃上げ率等はe-Stat等の公的統計（※本ツールは入力/JSON読込値を引用）`);
+        lines.push(`出典（簡易）：CPI/賃上げ率等は公的統計（※本ツールは入力/JSON読込値を引用）`);
       }
     }
+
     return lines;
   }
 
@@ -874,9 +967,9 @@ ${
     generate();
   });
 
-  /* --- JSON ロード --- */
-  loadDataBtn.addEventListener('click', () => loadCostData(dataUrl.value, false));
-  clearDataBtn.addEventListener('click', () => clearCostData());
+  /* --- JSON ロード（管理モードでも非管理モードでも動作は保持） --- */
+  if(loadDataBtn) loadDataBtn.addEventListener('click', () => loadCostData(dataUrl.value, false));
+  if(clearDataBtn) clearDataBtn.addEventListener('click', () => clearCostData());
 
   /* --- URLパラメータ転記 --- */
   function getUrlParams(){
@@ -970,9 +1063,9 @@ ${
     $('#last-updated-date').textContent = ymd;
   }catch(e){}
 
-  /* --- JSONサンプル表示 --- */
+  /* --- JSONサンプル表示（管理モードで見る用） --- */
   try{
-    jsonSample.textContent = JSON.stringify(SAMPLE_JSON, null, 2);
+    if(jsonSample) jsonSample.textContent = JSON.stringify(SAMPLE_JSON, null, 2);
   }catch(e){}
 
   /* --- 初期化 --- */
@@ -983,7 +1076,7 @@ ${
   else prefSelect.value = '兵庫';
 
   const savedUrl = getLocal('mk_cost_data_url');
-  if(savedUrl) dataUrl.value = savedUrl;
+  if(dataUrl && savedUrl) dataUrl.value = savedUrl;
 
   renderPrefPanel();
   getUrlParams();
