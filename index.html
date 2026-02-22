@@ -130,7 +130,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
       <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56">
     </a>
-    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r20</span></div>
+    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r21</span></div>
     <div class="headRight">
       <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
     </div>
@@ -275,7 +275,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
             <div class="dataRow">
               <span class="dataKey">都道府県変更に連動</span>
               <label style="display:flex;gap:10px;align-items:center;margin:0;font-weight:900;">
-                <input type="checkbox" id="linkRates" checked style="width:auto;"> 連動する（推奨）
+                <input type="checkbox" id="linkRates" checked style="width:auto;"> 連推する（推奨）
               </label>
               <span class="badge warn" id="linkNoteBadge">全国値が多い</span>
             </div>
@@ -336,7 +336,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
         </div>
 
         <label for="extraFactors">補足（任意）</label>
-        <textarea id="extraFactors" rows="2" placeholder="例）主要仕入先からの値上げ通知（+8%）、採用単価の上昇、度重なる税制改正への対応コスト 等"></textarea>
+        <textarea id="extraFactors" rows="2" placeholder="例）主要仕入先からの値上げ通知（+8%）、採用単価の上昇 等"></textarea>
         <div class="hint">※入力すると「〜に加え、〇〇」と自然に文章へ組み込まれます。</div>
       </div>
 
@@ -424,7 +424,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r20</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r21</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -866,7 +866,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       }
     }else{
       cpiRate.readOnly = false; cpiAsOf.readOnly = false;
-      wageRate.readOnly = false; wageAsOf.readOnly = false;
+      wageRate.readOnly = false wageAsOf.readOnly = false;
       setScopeBadge(cpiScopeBadge, 'manual');
       setScopeBadge(wageScopeBadge, 'manual');
     }
@@ -1195,6 +1195,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const efforts = getSelectedValues('#effortGroup');
     const effortText = efforts.length>0 ? joinJa(efforts) : '（未選択）';
 
+    // 顧客タイプの日本語化
     const customerTypes = getSelectedValues('#customerGroup');
     const customerLabels = {
       'strategic': '戦略顧客（最重要）',
@@ -1270,7 +1271,10 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     let decidedLine = '';
     if (decidedYM) {
       const x = calcCpiSince();
-      if (x && x.cum > 0) {
+      const mwX = calcMwSince();
+      if (x && x.cum > 0 && mwX && mwX.cum > 0) {
+        decidedLine = `現行価格は${decidedYM}に決定以来、可能な限り据え置いてまいりましたが、それ以来、現在までの累積物価上昇率は${pct1(x.cum)}%を超えております。また、その間の最低賃金上昇率は${pct1(mwX.cum)}％を超えております。`;
+      } else if (x && x.cum > 0) {
         decidedLine = `現行価格は${decidedYM}に決定以来、可能な限り据え置いてまいりましたが、それ以来、現在までの累積物価上昇率は${pct1(x.cum)}%を超えております。`;
       } else {
         decidedLine = `現行価格は${decidedYM}に決定以来、可能な限り据え置いてまいりました。`;
@@ -1386,7 +1390,10 @@ ${decidedLine}
 
     let decidedTalk = decidedYM ? `「また、現行価格は${decidedYM}に決定以来、可能な限り据え置いてきました。」` : '';
     const xTalk = calcCpiSince();
-    if(decidedYM && xTalk && xTalk.cum > 0){
+    const mwXTalk = calcMwSince();
+    if(decidedYM && xTalk && xTalk.cum > 0 && mwXTalk && mwXTalk.cum > 0){
+       decidedTalk = `「また、現行価格は${decidedYM}に決定以来、可能な限り据え置いてきましたが、それ以来の累積物価上昇率は${pct1(xTalk.cum)}%を超え、最低賃金上昇率も${pct1(mwXTalk.cum)}％を超えています。」`;
+    } else if(decidedYM && xTalk && xTalk.cum > 0){
        decidedTalk = `「また、現行価格は${decidedYM}に決定以来、可能な限り据え置いてきましたが、それ以来の累積物価上昇率は${pct1(xTalk.cum)}%を超えています。」`;
     }
 
