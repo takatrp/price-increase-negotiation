@@ -130,7 +130,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
       <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56">
     </a>
-    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r17</span></div>
+    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r18</span></div>
     <div class="headRight">
       <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
     </div>
@@ -211,6 +211,14 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
             <span class="badge warn" id="cpiSinceBadge">任意</span>
           </div>
           <div class="small">※実際の消費者物価指数および最低賃金（対象都道府県）の過去推移データを用いた概算です。</div>
+          
+          <details style="border:none; padding:0; background:transparent !important; margin-top:6px;">
+            <summary style="font-size:0.8rem; font-weight:normal; color:#578899; cursor:pointer; text-decoration:underline;">計算過程を確認する</summary>
+            <div id="calcDetailBox" class="mutedBox" style="font-size:0.75rem; margin-top:4px; line-height:1.5;">
+              （年月を入力すると計算過程が表示されます）
+            </div>
+          </details>
+
           <div class="sourceLink">
             <span class="badge">根拠</span>
             <a href="https://www.stat.go.jp/data/cpi/sokuhou/tsuki/pdf/doukou.pdf" target="_blank" rel="noopener">総務省統計局</a> /
@@ -416,7 +424,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r17</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r18</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -898,7 +906,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const nm = now.getMonth();
 
     const months = (ny - by)*12 + (nm - bm);
-    if(months <= 0) return { months: 0, cum: 0 };
+    if(months <= 0) return { months: 0, cum: 0, baseCpi: 0, nowCpi: 0, by, bm, ny, nm };
 
     const getCpiMonthly = (y, mo) => {
       const cpi_y = getHistoricalCpi(y);
@@ -910,7 +918,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const nowCpi = getCpiMonthly(ny, nm);
 
     const cum = (nowCpi / baseCpi - 1) * 100;
-    return { months, cum };
+    return { months, cum, baseCpi, nowCpi, by, bm, ny, nm };
   }
 
   /* =========================
@@ -944,28 +952,47 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const baseMw = getHistoricalMinWageForPref(prefKey, by);
     const nowMw = getHistoricalMinWageForPref(prefKey, ny);
 
-    if(!baseMw || !nowMw) return { cum: 0 };
+    if(!baseMw || !nowMw) return { cum: 0, baseMw: 0, nowMw: 0, by, ny, prefKey };
 
     const cum = (nowMw / baseMw - 1) * 100;
-    return { cum: cum > 0 ? cum : 0 };
+    return { cum: cum > 0 ? cum : 0, baseMw, nowMw, by, ny, prefKey };
   }
 
   function updateCpiSinceView(){
     const x = calcCpiSince();
     const mwX = calcMwSince();
+    const calcDetailBox = $('#calcDetailBox');
+
     if(!x || !mwX){
       cpiSinceView.textContent = '物価：— ／ 最低賃金：—';
       cpiSinceBadge.textContent = '任意';
       cpiSinceBadge.className = 'badge warn';
+      if(calcDetailBox) calcDetailBox.innerHTML = '（年月を入力すると計算過程が表示されます）';
       return;
     }
+    
     cpiSinceView.textContent = `物価：約${pct1(x.cum)}% ／ 最低賃金：約${pct1(mwX.cum)}%（${x.months}ヶ月）`;
     cpiSinceBadge.textContent = '概算';
     cpiSinceBadge.className = 'badge warn';
+
+    if(calcDetailBox) {
+      let detailHtml = `<b>【累積CPI（物価）計算過程】</b><br>`;
+      detailHtml += `基準時（${x.by}年${x.bm+1}月）の推定CPI：${x.baseCpi.toFixed(2)}<br>`;
+      detailHtml += `現在（${x.ny}年${x.nm+1}月）の推定CPI：${x.nowCpi.toFixed(2)}<br>`;
+      detailHtml += `計算式：(${x.nowCpi.toFixed(2)} ÷ ${x.baseCpi.toFixed(2)} - 1) × 100 = <b>${x.cum.toFixed(2)}%</b><br><br>`;
+      
+      detailHtml += `<b>【累積最低賃金計算過程】</b><br>`;
+      detailHtml += `対象エリア：${mwX.prefKey}<br>`;
+      detailHtml += `基準年（${mwX.by}年）の最低賃金：${Math.round(mwX.baseMw)}円<br>`;
+      detailHtml += `現在（${mwX.ny}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>`;
+      detailHtml += `計算式：(${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`;
+      
+      calcDetailBox.innerHTML = detailHtml;
+    }
   }
 
   /* =========================
-     値上げ率等の計算と入力チェック
+     値上げ幅の妥当性チェック
      ========================= */
   function updateRateHint(){
     const cp = toNum(currentPrice.value);
@@ -1027,11 +1054,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       validationWarning.textContent = warning.trim();
       validationWarning.style.display = 'block';
     }
-  }
-
-  function renderAllByPref(){
-    renderMinWagePanel();
-    applyLinkedRates();
   }
 
   /* =========================
