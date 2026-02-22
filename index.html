@@ -98,7 +98,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
 .isAdmin .adminOnly{display:block !important;}
 
 /* STEP1：累積物価上昇（概算）リンク */
-.sourceLink{display:inline-flex;gap:6px;align-items:center;font-size:.78rem;margin-top:6px}
+.sourceLink{display:inline-flex;gap:6px;align-items:center;font-size:.78rem;margin-top:6px;flex-wrap:wrap;}
 .sourceLink a{color:#0f172a;text-decoration:underline}
 .sourceLink .badge{padding:2px 6px}
 
@@ -129,7 +129,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
       <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56">
     </a>
-    <div class="title">値上げ交渉ナビゲーター <span class="badge ok">r10</span></div>
+    <div class="title">値上げ交渉ナビゲーター <span class="badge ok">r11</span></div>
     <div class="headRight">
       <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
     </div>
@@ -181,8 +181,8 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
           <div class="small">※実際の消費者物価指数（2020年基準）の過去の推移データを用いた概算です。</div>
           <div class="sourceLink">
             <span class="badge">根拠</span>
-            <a id="cpiSourceAnchor" href="https://www.jil.go.jp/kokunai/statistics/timeseries/xls/g0601.xlsx" target="_blank" rel="noopener">物価統計（出典リンク）</a>
-            <span class="small" id="cpiSourceLabel"></span>
+            <a href="https://www.stat.go.jp/data/cpi/sokuhou/tsuki/pdf/doukou.pdf" target="_blank" rel="noopener">総務省統計局</a> /
+            <a href="https://www.jil.go.jp/kokunai/statistics/timeseries/html/g0601.html" target="_blank" rel="noopener">JILPT</a>
           </div>
         </div>
 
@@ -210,22 +210,20 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
           <div>
             <label for="cpiRate">物価上昇率（%） <span class="badge" id="cpiScopeBadge">—</span></label>
             <input type="text" id="cpiRate" inputmode="decimal" placeholder="例）2.0" />
-            <div class="hint" id="cpiHint">—</div>
           </div>
           <div>
             <label for="wageRate">人件費上昇率（%） <span class="badge" id="wageScopeBadge">—</span></label>
             <input type="text" id="wageRate" inputmode="decimal" placeholder="例）4.6" />
-            <div class="hint" id="wageHint">—</div>
           </div>
         </div>
 
-        <div class="inputGrid">
+        <div class="inputGrid" style="margin-top:12px;">
           <div>
-            <label for="cpiAsOf">物価データの対象</label>
+            <label for="cpiAsOf" style="margin-top:0;">物価データの対象</label>
             <input type="text" id="cpiAsOf" placeholder="例）2026年1月（前年同月比）" />
           </div>
           <div>
-            <label for="wageAsOf">人件費データの対象</label>
+            <label for="wageAsOf" style="margin-top:0;">人件費データの対象</label>
             <input type="text" id="wageAsOf" placeholder="例）2025年春闘（中小）" />
           </div>
         </div>
@@ -374,7 +372,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r10</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r11</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -418,9 +416,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     "広島": {n:1085,o:1020,inc:65,eff:"2025-11-01"},
     "山口": {n:1043,o:979,inc:64,eff:"2025-10-16"}
   };
-
-  const DEFAULT_CPI_SOURCE_URL = 'https://www.jil.go.jp/kokunai/statistics/timeseries/xls/g0601.xlsx';
-  const DEFAULT_CPI_SOURCE_LABEL = '（JILPT 消費者物価指数）';
 
   /* --- ユーティリティ --- */
   const $ = s => document.querySelector(s);
@@ -477,17 +472,12 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   const linkRates = $('#linkRates');
   const cpiScopeBadge = $('#cpiScopeBadge');
   const wageScopeBadge = $('#wageScopeBadge');
-  const cpiHint = $('#cpiHint');
-  const wageHint = $('#wageHint');
 
   const embedNumbersInLetter = $('#embedNumbersInLetter');
   const includeCpiSinceInLetter = $('#includeCpiSinceInLetter');
 
   const cpiSinceView = $('#cpiSinceView');
   const cpiSinceBadge = $('#cpiSinceBadge');
-
-  const cpiSourceAnchor = $('#cpiSourceAnchor');
-  const cpiSourceLabel = $('#cpiSourceLabel');
 
   // ヘルプ
   const helpCpi = $('#helpCpi');
@@ -615,11 +605,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     schema_version: 1,
     meta: {
       updated: "2026-02-22",
-      note: "例：全国値（national）＋都道府県（prefs）。都道府県別が無ければnationalを使用。",
-      sources: {
-        min_wage: { publisher: "厚生労働省", title: "地域別最低賃金", url: "https://www.mhlw.go.jp/" },
-        cpi: { publisher: "総務省統計局", title: "消費者物価指数", url: "https://www.stat.go.jp/" }
-      }
+      note: "例：全国値（national）＋都道府県（prefs）。都道府県別が無ければnationalを使用。"
     },
     national: { cpi_yoy: 2.0, cpi_asof: "2026年1月", wage_yoy: 4.65, wage_asof: "2025年春闘" },
     prefs: { "和歌山": { cpi_yoy: null, wage_yoy: null, min_wage: { new: 0, old: 0, inc: 0, eff: "2025-10-xx" } } }
@@ -689,24 +675,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     setStatus('読込解除しました', true);
     renderAllByPref(true);
     generate();
-  }
-
-  function getCpiSource(){
-    const s = COST_DATA && COST_DATA.meta && COST_DATA.meta.sources && COST_DATA.meta.sources.cpi ? COST_DATA.meta.sources.cpi : null;
-    const url = (s && s.url) ? String(s.url) : DEFAULT_CPI_SOURCE_URL;
-    const label = (s && (s.publisher || s.title)) ? `（${[s.publisher,s.title].filter(Boolean).join('：')}）` : DEFAULT_CPI_SOURCE_LABEL;
-    return { url, label };
-  }
-
-  function renderCpiSourceLink(){
-    const src = getCpiSource();
-    if(cpiSourceAnchor){
-      cpiSourceAnchor.href = src.url;
-      cpiSourceAnchor.textContent = '物価統計（出典リンク）';
-    }
-    if(cpiSourceLabel){
-      cpiSourceLabel.textContent = src.label;
-    }
   }
 
   function getMinWageFromJson(prefKey){
@@ -915,7 +883,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   function renderAllByPref(){
     renderMinWagePanel();
     applyLinkedRates();
-    renderCpiSourceLink();
   }
 
   /* =========================
@@ -949,8 +916,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
 
     const p = toNum(cpiRate.value);
     const pAsOf = (cpiAsOf.value||'').trim();
-    const src = getCpiSource();
-    const cpiLine = isFinite(p) ? `・消費者物価指数：前年同月比 +${pct1(p)}%（対象：${pAsOf || '未入力'}、出典：${src.url}）` : '';
+    const cpiLine = isFinite(p) ? `・消費者物価指数：前年同月比 +${pct1(p)}%（対象：${pAsOf || '未入力'}、出典：総務省統計局 / JILPT）` : '';
 
     const h = toNum(wageRate.value);
     const hAsOf = (wageAsOf.value||'').trim();
@@ -1016,8 +982,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       ? `算出式（概算）：実際の消費者物価指数（JILPT統計データ等）の過去の年次推移データに基づく変動率`
       : `算出式：—`;
 
-    const src = getCpiSource();
-    const srcLine = `出典リンク（物価統計）：${src.url} ${src.label || ''}`;
+    const srcLine = `出典リンク（物価統計）：\n  ・https://www.stat.go.jp/data/cpi/sokuhou/tsuki/pdf/doukou.pdf (総務省統計局)\n  ・https://www.jil.go.jp/kokunai/statistics/timeseries/html/g0601.html (JILPT)`;
 
     const factors = getSelectedValues('#factorGroup');
     const extra = (extraFactors.value||'').trim();
@@ -1258,7 +1223,6 @@ ${decidedYM ? `「また、現行価格は${decidedYM}に決定以来、可能�
     updateRateHint();
     validateBasic();
     updateCpiSinceView();
-    renderCpiSourceLink();
 
     const lt = buildLetterAndTalk();
     const memo = buildMemoText();
