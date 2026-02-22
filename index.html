@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>値上げ交渉ナビゲーター</title>
+<title>値上げ交渉ナビゲーター（近畿・中国版）</title>
 
 <link rel="icon" type="image/png" sizes="192x192" href="favicon192192.png">
 <link rel="apple-touch-icon" sizes="192x192" href="favicon192192.png">
@@ -34,6 +34,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--brand);box-shadow:0 0
 input::placeholder,textarea::placeholder{color:#c7ccd3}
 .hint{font-size:.78rem;color:var(--muted);margin-top:4px}
 .danger{color:var(--warn);font-weight:900;margin-top:8px}
+.warningBox{background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:10px;border-radius:8px;font-size:.82rem;margin-top:8px;white-space:pre-wrap;}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 12px;font-weight:900;font-size:.92rem;cursor:pointer;transition: opacity .2s;}
 .btn:hover{opacity:.9}
@@ -52,7 +53,7 @@ input::placeholder,textarea::placeholder{color:#c7ccd3}
 .tabs{display:flex;border-bottom:2px solid #e5e7eb;margin-bottom:12px}
 .tab{padding:8px 16px;font-size:.9rem;font-weight:900;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
 .tab.active{color:var(--brand);border-bottom-color:var(--brand)}
-.docArea{min-height:420px;line-height:1.65;font-family:inherit;resize:vertical;background:#f8fafc}
+.docArea{min-height:550px;line-height:1.65;font-family:inherit;resize:vertical;background:#f8fafc}
 .statusMsg{font-size:0.85rem;color:var(--ok);font-weight:900;margin-left:auto;opacity:0;transition:opacity .25s;}
 .statusMsg.show{opacity:1;}
 
@@ -129,7 +130,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
       <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56">
     </a>
-    <div class="title">値上げ交渉ナビゲーター <span class="badge ok">r12</span></div>
+    <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r14</span></div>
     <div class="headRight">
       <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
     </div>
@@ -140,6 +141,36 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
 
   <div class="dashboard">
     <div class="colL">
+
+      <div class="card">
+        <div class="pill">STEP 0：契約確認（必須）</div>
+        
+        <label>既存契約における価格改定条項</label>
+        <div class="chipGroup" id="clauseGroup">
+          <button class="chip" type="button" data-val="clause_yes">改定条項あり</button>
+          <button class="chip" type="button" data-val="clause_no">条項なし（要協議）</button>
+          <button class="chip active" type="button" data-val="clause_unknown">未確認</button>
+        </div>
+        
+        <div class="hint" style="color:#ef4444; font-weight:bold;">
+          ⚠️ 価格改定条項がない場合、一方的な値上げは原則不可（民法上は相手の同意が必要）。本ツールで生成する文面は「協議の申し入れ」として使用してください。
+        </div>
+        
+        <details>
+          <summary>独占禁止法の注意点（優越的地位）</summary>
+          <div class="mutedBox">
+            <div class="small">
+              自社が取引上優位な立場にある場合、以下の行為は独禁法違反リスクがあります：
+              <ul style="margin:4px 0 8px; padding-left:20px;">
+                <li>短期間での一方的な価格変更通知</li>
+                <li>受け入れない場合の取引停止示唆</li>
+                <li>協議を経ずに既存注文への適用</li>
+              </ul>
+              <b>対策:</b> 十分な予告期間（60-90日）、丁寧な協議姿勢、段階的改定の提示など
+            </div>
+          </div>
+        </details>
+      </div>
 
       <div class="card">
         <div class="pill">STEP 1：改定内容</div>
@@ -159,6 +190,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
         </div>
 
         <div class="hint" id="rateHint">改定率：— ／ 差額：—</div>
+        <div id="validationWarning" class="warningBox" style="display:none;"></div>
 
         <div class="inputGrid" style="margin-top:8px;">
           <div>
@@ -174,15 +206,15 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
 
         <div class="dataPanel" style="margin-top:10px;">
           <div class="dataRow">
-            <span class="dataKey">現行価格決定時→現在の物価上昇（概算）</span>
-            <span id="cpiSinceView">—</span>
+            <span class="dataKey">現行価格決定時からの累積上昇（概算）</span>
+            <span id="cpiSinceView">物価：— ／ 最低賃金：—</span>
             <span class="badge warn" id="cpiSinceBadge">任意</span>
           </div>
-          <div class="small">※実際の消費者物価指数（2020年基準）の過去の推移データを用いた概算です。</div>
+          <div class="small">※実際の消費者物価指数および最低賃金（対象都道府県）の過去推移データを用いた概算です。</div>
           <div class="sourceLink">
             <span class="badge">根拠</span>
             <a href="https://www.stat.go.jp/data/cpi/sokuhou/tsuki/pdf/doukou.pdf" target="_blank" rel="noopener">総務省統計局</a> /
-            <a href="https://www.jil.go.jp/kokunai/statistics/timeseries/html/g0601.html" target="_blank" rel="noopener">JILPT</a>
+            <a href="https://www.mhlw.go.jp/content/11200000/001571219.xlsx" target="_blank" rel="noopener">厚労省 最低賃金推移</a>
           </div>
         </div>
 
@@ -301,13 +333,28 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       </div>
 
       <div class="card">
-        <div class="pill">STEP 3：文面のトーン</div>
+        <div class="pill">STEP 3：文面のトーン・顧客戦略</div>
         <div class="hint">相手に合わせて調整（1つ選択）</div>
         <div class="chipGroup" id="relationGroup">
           <button class="chip" type="button" data-val="A">信頼あり（共感・誠実）</button>
           <button class="chip active" type="button" data-val="B">標準（論理）</button>
           <button class="chip" type="button" data-val="C">価格に厳しい（データ・代替案）</button>
         </div>
+
+        <details style="margin-top:10px;">
+          <summary>高度な戦略オプション（顧客タイプ）</summary>
+          <label>顧客タイプ（任意）</label>
+          <div class="chipGroup" id="customerGroup">
+            <button class="chip" type="button" data-val="strategic">戦略顧客（最重要）</button>
+            <button class="chip" type="button" data-val="profitable">優良顧客</button>
+            <button class="chip" type="button" data-val="marginal">採算ギリギリ</button>
+            <button class="chip" type="button" data-val="loss">赤字顧客</button>
+          </div>
+          <div class="hint">
+            <b>戦略顧客:</b> 段階改定・条件調整を最優先提示<br>
+            <b>赤字顧客:</b> 改定受入れなければ取引見直しを示唆する協議アプローチ
+          </div>
+        </details>
 
         <details style="margin-top:10px;">
           <summary>自助努力（任意）</summary>
@@ -369,38 +416,37 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r12</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r14</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
 <script>
 (function(){
   /* =========================
-     0) 管理モード判定
+     0) 定数・設定
      ========================= */
   const qs = new URLSearchParams(window.location.search);
   const IS_ADMIN = (qs.get('admin') === '1');
   try{ document.documentElement.classList.toggle('isAdmin', !!IS_ADMIN); }catch(e){}
 
+  const DATA_FRESHNESS = {
+    cpi_base: "2024年12月確定値（2025年以降は推計）",
+    min_wage: "2024年度改定値（各都道府県労働局公示）",
+    last_verified: "2026-02-22"
+  };
+
   /* =========================
-     1) 対象都道府県（関西2府4県＋中国5県を一般的な順で）
+     1) 対象都道府県（近畿・中国エリア）
      ========================= */
   const PREFS = [
-    {k:'滋賀', l:'滋賀県'},
-    {k:'京都', l:'京都府'},
-    {k:'大阪', l:'大阪府'},
-    {k:'兵庫', l:'兵庫県'},
-    {k:'奈良', l:'奈良県'},
-    {k:'和歌山', l:'和歌山県'},
-    {k:'鳥取', l:'鳥取県'},
-    {k:'島根', l:'島根県'},
-    {k:'岡山', l:'岡山県'},
-    {k:'広島', l:'広島県'},
-    {k:'山口', l:'山口県'}
+    {k:'滋賀', l:'滋賀県'}, {k:'京都', l:'京都府'}, {k:'大阪', l:'大阪府'},
+    {k:'兵庫', l:'兵庫県'}, {k:'奈良', l:'奈良県'}, {k:'和歌山', l:'和歌山県'},
+    {k:'鳥取', l:'鳥取県'}, {k:'島根', l:'島根県'}, {k:'岡山', l:'岡山県'},
+    {k:'広島', l:'広島県'}, {k:'山口', l:'山口県'}
   ];
   const PREF_LABEL = Object.fromEntries(PREFS.map(x=>[x.k,x.l]));
 
-  // 既存内蔵データ
+  // 既存内蔵データ (直近の改定情報)
   const MIN_WAGE = {
     "兵庫": {n:1116,o:1052,inc:64,eff:"2025-10-04"},
     "鳥取": {n:1030,o:957,inc:73,eff:"2025-10-04"},
@@ -409,9 +455,25 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     "京都": {n:1122,o:1058,inc:64,eff:"2025-11-21"},
     "大阪": {n:1177,o:1114,inc:63,eff:"2025-10-16"},
     "奈良": {n:1051,o:986,inc:65,eff:"2025-11-16"},
+    "和歌山": {n:1040,o:980,inc:60,eff:"2025-10-01"}, // 仮値
     "岡山": {n:1047,o:982,inc:65,eff:"2025-12-01"},
     "広島": {n:1085,o:1020,inc:65,eff:"2025-11-01"},
     "山口": {n:1043,o:979,inc:64,eff:"2025-10-16"}
+  };
+
+  /* 都道府県別 最低賃金の履歴データ (2010〜2025年) */
+  const MW_HISTORY = {
+    "滋賀": {2010:697, 2011:701, 2012:714, 2013:727, 2014:746, 2015:764, 2016:788, 2017:813, 2018:839, 2019:866, 2020:868, 2021:896, 2022:927, 2023:967, 2024:1017, 2025:1080},
+    "京都": {2010:735, 2011:737, 2012:749, 2013:759, 2014:779, 2015:808, 2016:831, 2017:856, 2018:882, 2019:909, 2020:909, 2021:937, 2022:968, 2023:1008, 2024:1058, 2025:1122},
+    "大阪": {2010:779, 2011:786, 2012:800, 2013:819, 2014:838, 2015:858, 2016:883, 2017:909, 2018:936, 2019:964, 2020:964, 2021:992, 2022:1023, 2023:1064, 2024:1114, 2025:1177},
+    "兵庫": {2010:731, 2011:735, 2012:749, 2013:761, 2014:776, 2015:810, 2016:819, 2017:844, 2018:871, 2019:899, 2020:900, 2021:928, 2022:960, 2023:1001, 2024:1052, 2025:1116},
+    "奈良": {2010:692, 2011:695, 2012:708, 2013:724, 2014:745, 2015:762, 2016:786, 2017:811, 2018:837, 2019:838, 2020:838, 2021:866, 2022:896, 2023:936, 2024:986, 2025:1051},
+    "和歌山":{2010:693, 2011:695, 2012:708, 2013:719, 2014:731, 2015:753, 2016:777, 2017:803, 2018:830, 2019:831, 2020:831, 2021:859, 2022:889, 2023:929, 2024:980, 2025:1040},
+    "鳥取": {2010:645, 2011:645, 2012:652, 2013:664, 2014:677, 2015:693, 2016:715, 2017:738, 2018:762, 2019:790, 2020:792, 2021:821, 2022:854, 2023:900, 2024:957, 2025:1030},
+    "島根": {2010:646, 2011:646, 2012:654, 2013:666, 2014:679, 2015:694, 2016:718, 2017:740, 2018:764, 2019:790, 2020:792, 2021:824, 2022:857, 2023:904, 2024:962, 2025:1033},
+    "岡山": {2010:684, 2011:686, 2012:699, 2013:711, 2014:731, 2015:748, 2016:757, 2017:781, 2018:807, 2019:833, 2020:833, 2021:862, 2022:892, 2023:932, 2024:982, 2025:1047},
+    "広島": {2010:696, 2011:703, 2012:718, 2013:731, 2014:750, 2015:769, 2016:793, 2017:818, 2018:844, 2019:871, 2020:871, 2021:899, 2022:930, 2023:970, 2024:1020, 2025:1085},
+    "山口": {2010:682, 2011:685, 2012:696, 2013:708, 2014:729, 2015:746, 2016:771, 2017:794, 2018:802, 2019:829, 2020:829, 2021:857, 2022:888, 2023:928, 2024:979, 2025:1043}
   };
 
   /* --- ユーティリティ --- */
@@ -434,7 +496,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     return `${m[1]}年${parseInt(m[2],10)}月`;
   };
   
-  // 配列をシンプルな読点で結合するよう変更（「および」「等」は状況に応じて手動付与が自然なため）
   const joinJa = (arr) => {
     const a = (arr||[]).filter(Boolean);
     if(a.length===0) return '';
@@ -455,6 +516,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   const rateHint = $('#rateHint');
   const validateMsg = $('#validateMsg');
   const importStatusEl = $('#importStatus');
+  const validationWarning = $('#validationWarning');
 
   const prefSelect = $('#prefSelect');
   const minWageView = $('#minWageView');
@@ -516,7 +578,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     let raw = el.value.replace(/[^\d.-]/g, '');
     if(!raw) { el.value = ''; return; }
     
-    // 現在のカーソル位置を取得
     let pos = el.selectionStart;
     let oldLen = el.value.length;
 
@@ -535,7 +596,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     let formatted = num.toLocaleString('ja-JP') + decPart;
     el.value = formatted;
 
-    // フォーマット後のカーソル位置を調整
     let newLen = el.value.length;
     let diff = newLen - oldLen;
     try { el.setSelectionRange(pos + diff, pos + diff); } catch(err){}
@@ -553,6 +613,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
 
   function setupChips(groupId, multiple) {
     const group = $(groupId);
+    if(!group) return;
     group.addEventListener('click', (e) => {
       if(e.target.classList.contains('chip')) {
         if(!multiple) {
@@ -565,9 +626,11 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       }
     });
   }
+  setupChips('#clauseGroup', false);
   setupChips('#factorGroup', true);
   setupChips('#effortGroup', true);
   setupChips('#relationGroup', false);
+  setupChips('#customerGroup', false);
 
   $('#outputTabs').addEventListener('click', (e) => {
     if(e.target.classList.contains('tab')) {
@@ -581,7 +644,9 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   });
 
   function getSelectedValues(groupId) {
-    return Array.from($(groupId).querySelectorAll('.chip.active')).map(c => c.getAttribute('data-val'));
+    const g = $(groupId);
+    if(!g) return [];
+    return Array.from(g.querySelectorAll('.chip.active')).map(c => c.getAttribute('data-val'));
   }
 
   function buildPrefOptions(){
@@ -592,7 +657,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       opt.textContent = p.l;
       prefSelect.appendChild(opt);
     }
-    // 初期値を鳥取県にセット
     prefSelect.value = '鳥取';
   }
 
@@ -803,8 +867,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   });
 
   /* =========================
-     6) 実際のCPI推移に基づく累積概算（1970年〜）
-     JILPT統計および総務省統計局 2020年基準 総合指数 年次データ相当
+     6-1) 実際のCPI推移に基づく累積概算（1970年〜）
      ========================= */
   function getHistoricalCpi(year) {
     const CPI = {
@@ -824,7 +887,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     if (year < 1970) return CPI[1970];
     if (CPI[year]) return CPI[year];
     
-    // 2026年以降は、直近の cpiRate を使って推計
     const maxYear = 2025;
     const baseCpi = CPI[maxYear];
     const diffYears = year - maxYear;
@@ -849,7 +911,6 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const months = (ny - by)*12 + (nm - bm);
     if(months <= 0) return { months: 0, cum: 0 };
 
-    // 年次をまたぐ簡易的な線形補間
     const getCpiMonthly = (y, mo) => {
       const cpi_y = getHistoricalCpi(y);
       const cpi_next_y = getHistoricalCpi(y + 1);
@@ -863,15 +924,57 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     return { months, cum };
   }
 
+  /* =========================
+     6-2) エリア別 最低賃金の推移に基づく累積概算
+     ========================= */
+  function getHistoricalMinWageForPref(prefKey, year) {
+    const hist = MW_HISTORY[prefKey];
+    if (hist && hist[year]) {
+      return hist[year];
+    }
+    // データがない場合（2009年以前など）、2010年をベースに年率1.5%減少として大まかに推計
+    if (hist && year < 2010) {
+      const baseMw = hist[2010];
+      return baseMw * Math.pow(0.985, 2010 - year);
+    }
+    // データがない場合（2026年以降など）、直近をベースに年率5%増加として推計
+    if (hist && year > 2025) {
+      const baseMw = hist[2025];
+      return baseMw * Math.pow(1.05, year - 2025);
+    }
+    return null;
+  }
+
+  function calcMwSince() {
+    const base = (currentPriceAsOf.value||'').trim(); 
+    const prefKey = prefSelect.value || '鳥取';
+    if(!base) return null;
+
+    const m = base.match(/^(\d{4})-(\d{2})$/);
+    if(!m) return null;
+
+    const by = parseInt(m[1],10);
+    const ny = new Date().getFullYear();
+
+    const baseMw = getHistoricalMinWageForPref(prefKey, by);
+    const nowMw = getHistoricalMinWageForPref(prefKey, ny);
+
+    if(!baseMw || !nowMw) return { cum: 0 };
+
+    const cum = (nowMw / baseMw - 1) * 100;
+    return { cum: cum > 0 ? cum : 0 };
+  }
+
   function updateCpiSinceView(){
     const x = calcCpiSince();
-    if(!x){
-      cpiSinceView.textContent = '—';
+    const mwX = calcMwSince();
+    if(!x || !mwX){
+      cpiSinceView.textContent = '物価：— ／ 最低賃金：—';
       cpiSinceBadge.textContent = '任意';
       cpiSinceBadge.className = 'badge warn';
       return;
     }
-    cpiSinceView.textContent = `約${pct1(x.cum)}%（${x.months}ヶ月）`;
+    cpiSinceView.textContent = `物価：約${pct1(x.cum)}% ／ 最低賃金：約${pct1(mwX.cum)}%（${x.months}ヶ月）`;
     cpiSinceBadge.textContent = '概算';
     cpiSinceBadge.className = 'badge warn';
   }
@@ -882,7 +985,43 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   }
 
   /* =========================
-     8) 本文に自然に織り込む短文（比較対象の明記）
+     値上げ幅の妥当性チェック
+     ========================= */
+  function validatePriceIncrease() {
+    const cp = toNum(currentPrice.value);
+    const np = toNum(newPrice.value);
+    
+    validationWarning.style.display = 'none';
+    validationWarning.textContent = '';
+    
+    if (!isFinite(cp) || !isFinite(np) || cp <= 0) return;
+    
+    const increaseRate = ((np / cp) - 1) * 100;
+    if (increaseRate <= 0) return;
+
+    const x = calcCpiSince();
+    const cpiCum = x ? x.cum : 0;
+    
+    let warning = '';
+    
+    // 累積物価上昇の2倍を超える場合
+    if (cpiCum > 0 && increaseRate > cpiCum * 2) {
+      warning += `⚠️ 値上げ率（${pct1(increaseRate)}%）が累積物価上昇（約${pct1(cpiCum)}%）の2倍を超えています。顧客への丁寧な説明や原価データの準備をお勧めします。\n`;
+    }
+    
+    // 15%超の値上げ
+    if (increaseRate > 15) {
+      warning += `💡 15%超の大幅な値上げは抵抗が大きい傾向があります。「段階的改定（例：今回7% → 次回更新時8%）」や「サービス条件の調整」の併案提示も有効です。`;
+    }
+    
+    if (warning) {
+      validationWarning.textContent = warning.trim();
+      validationWarning.style.display = 'block';
+    }
+  }
+
+  /* =========================
+     8) 本文に自然に織り込む短文
      ========================= */
   function buildNaturalEvidencePhrase(){
     if(!embedNumbersInLetter.checked) return '';
@@ -903,26 +1042,34 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   }
 
   function buildReferenceBlock(decidedYM){
-    if(!embedNumbersInLetter.checked) return '';
     const key = prefSelect.value || '鳥取';
     const prefLabel = PREF_LABEL[key] || key;
     
-    const w = minWageInfo(key);
-    const mwLine = w ? `・最低賃金（${prefLabel}）：${Math.round(w.o)}円 → ${Math.round(w.n)}円（前年度比 +${pct1(w.pct)}%、発効：${fmtYMD(w.eff)}）` : '';
+    const lines = [];
 
-    const p = toNum(cpiRate.value);
-    const pAsOf = (cpiAsOf.value||'').trim();
-    const cpiLine = isFinite(p) ? `・消費者物価指数：前年同月比 +${pct1(p)}%（対象：${pAsOf || '未入力'}、出典：総務省統計局 / JILPT）` : '';
+    if(embedNumbersInLetter.checked) {
+      const w = minWageInfo(key);
+      if (w) lines.push(`・最低賃金（${prefLabel}）：${Math.round(w.o)}円 → ${Math.round(w.n)}円（前年度比 +${pct1(w.pct)}%、発効：${fmtYMD(w.eff)}）`);
 
-    const h = toNum(wageRate.value);
-    const hAsOf = (wageAsOf.value||'').trim();
-    const wageLine = isFinite(h) ? `・人件費上昇率（参考）：前年比 +${pct1(h)}%（対象：${hAsOf || '未入力'}）` : '';
+      const p = toNum(cpiRate.value);
+      const pAsOf = (cpiAsOf.value||'').trim();
+      if (isFinite(p)) lines.push(`・消費者物価指数：前年同月比 +${pct1(p)}%（対象：${pAsOf || '未入力'}、出典：総務省統計局 / JILPT）`);
+
+      const h = toNum(wageRate.value);
+      const hAsOf = (wageAsOf.value||'').trim();
+      if (isFinite(h)) lines.push(`・人件費上昇率（参考）：前年比 +${pct1(h)}%（対象：${hAsOf || '未入力'}）`);
+    }
 
     const x = calcCpiSince();
-    const cpiSinceLine = (decidedYM && x && x.cum > 0)
-      ? `・累積物価上昇率：約${pct1(x.cum)}%（現行価格決定の${decidedYM}から現在まで）` : '';
+    if (decidedYM && x && x.cum > 0) {
+      lines.push(`・累積物価上昇率：約${pct1(x.cum)}%（現行価格決定の${decidedYM}から現在まで）`);
+    }
 
-    const lines = [mwLine, cpiLine, wageLine, cpiSinceLine].filter(Boolean);
+    const mwX = calcMwSince();
+    if (decidedYM && mwX && mwX.cum > 0) {
+      lines.push(`・累積最低賃金上昇率：約${pct1(mwX.cum)}%（現行価格決定の${decidedYM}から現在まで、${prefLabel}）`);
+    }
+
     if(lines.length === 0) return '';
     return `\n\n--------------------------------------------------\n※参考データ\n${lines.join('\n')}`;
   }
@@ -950,6 +1097,10 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
 
     const decidedYM = fmtYM(currentPriceAsOf.value);
 
+    const clauseArr = getSelectedValues('#clauseGroup');
+    const clauseType = clauseArr[0] || '未確認';
+    const clauseStr = clauseType === 'clause_yes' ? 'あり（通知のみで可の可能性）' : clauseType === 'clause_no' ? 'なし（合意・協議が必須）' : '未確認（要確認）';
+
     const w = minWageInfo(key);
     const mwLine = w
       ? `最低賃金（${prefLabel}）：${Math.round(w.o)}円 → ${Math.round(w.n)}円（+${Math.round(w.inc)}円、前年度比 +${pct1(w.pct)}%）／発効予定：${fmtYMD(w.eff)}（${w.source==='json'?'JSON':'内蔵'}）`
@@ -972,13 +1123,18 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const x = calcCpiSince();
     const cpiSinceLine = (decidedYM && x)
       ? `累積CPI（概算）：現行価格=${decidedYM}決定 → 現在まで 約${pct1(x.cum)}%（${x.months}ヶ月）`
-      : `累積CPI（概算）：算出不可（現行価格の決定時期が未入力）`;
+      : `累積CPI（概算）：算出不可`;
+
+    const mwX = calcMwSince();
+    const mwSinceLine = (decidedYM && mwX)
+      ? `累積最低賃金（概算）：現行価格=${decidedYM}決定 → 現在まで 約${pct1(mwX.cum)}%（${prefLabel}）`
+      : `累積最低賃金（概算）：算出不可`;
 
     const cpiSinceHow = (decidedYM && x)
-      ? `算出式（概算）：実際の消費者物価指数（JILPT統計データ等）の過去の年次推移データに基づく変動率`
+      ? `算出式（概算）：消費者物価指数およびエリア別最低賃金の過去年次推移データに基づく変動率`
       : `算出式：—`;
 
-    const srcLine = `出典リンク（物価統計）：\n  ・https://www.stat.go.jp/data/cpi/sokuhou/tsuki/pdf/doukou.pdf (総務省統計局)\n  ・https://www.jil.go.jp/kokunai/statistics/timeseries/html/g0601.html (JILPT)`;
+    const srcLine = `出典リンク（物価統計・最低賃金）：\n  ・https://www.stat.go.jp/data/cpi/sokuhou/tsuki/pdf/doukou.pdf (総務省統計局)\n  ・https://www.jil.go.jp/kokunai/statistics/timeseries/html/g0601.html (JILPT)\n  ・https://www.mhlw.go.jp/content/11200000/001571219.xlsx (厚労省)`;
 
     const factors = getSelectedValues('#factorGroup');
     const extra = (extraFactors.value||'').trim();
@@ -988,16 +1144,24 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const efforts = getSelectedValues('#effortGroup');
     const effortText = efforts.length>0 ? joinJa(efforts) : '（未選択）';
 
+    const customerTypes = getSelectedValues('#customerGroup');
+    const customerTypeStr = customerTypes.length > 0 ? customerTypes[0] : '指定なし';
+
+    const dataFreshnessNote = `\n【データ鮮度】${DATA_FRESHNESS.last_verified}時点\n- CPI: ${DATA_FRESHNESS.cpi_base}\n- 最低賃金: ${DATA_FRESHNESS.min_wage}\n※最新データは厚生労働省・総務省の公式発表を必ず確認してください。`;
+
     return [
       `【対象】${prod}`,
       `【改定】${rateStr} ／ 適用：${dateStr}`,
       decidedYM ? `【現行価格の決定時期】${decidedYM}` : `【現行価格の決定時期】未入力`,
+      `【契約における改定条項】${clauseStr}`,
+      `【顧客タイプ（戦略）】${customerTypeStr}`,
       ``,
       `■ 根拠（説明用メモ）`,
       `- ${mwLine}`,
       `- ${cpiLine}`,
       `- ${wageLine}`,
       `- ${cpiSinceLine}`,
+      `- ${mwSinceLine}`,
       `  ${cpiSinceHow}`,
       `- ${srcLine}`,
       ``,
@@ -1007,53 +1171,13 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       ``,
       `■ 自助努力（選択）`,
       `- ${effortText}`,
-      ``,
-      `■ 想定質問→回答（短文テンプレ）`,
-      `Q. なぜ今、値上げが必要？`,
-      `A. 「外部環境として最低賃金改定・物価上昇・人件費上昇が継続しており、社内努力だけでは吸収が難しくなっています。品質維持のため、適正価格化が必要です。」`,
-      ``,
-      `Q. “CPIって何？”（専門用語を避けて）`,
-      `A. 「公的統計で示される、モノやサービスの価格の上がり下がりの指標です。ここでは前年同月比の上昇率を参考にしています。」`,
-      ``,
-      `Q. 累積ってどう計算した？`,
-      `A. 「過去の実際の消費者物価指数（2020年基準）の推移データに基づき、現行価格決定時から現在までの変動率を概算しています。」`
+      dataFreshnessNote
     ].join('\n');
   }
 
   /* =========================
      10) 本文・トーク生成
      ========================= */
-  function updateRateHint(){
-    const cp = toNum(currentPrice.value);
-    const np = toNum(newPrice.value);
-    if(isFinite(cp) && cp>0 && isFinite(np) && np>=0){
-      const rate = ((np/cp)-1)*100;
-      const diff = np - cp;
-      rateHint.textContent = `改定率：約${pct1(rate)}% ／ 差額：${diff>=0?'+':''}${yen(diff)}`;
-    }else{
-      rateHint.textContent = '改定率：— ／ 差額：—';
-    }
-  }
-
-  function validateBasic(){
-    const prod = productName.value.trim();
-    const cp = toNum(currentPrice.value);
-    const np = toNum(newPrice.value);
-
-    let msg = '';
-    if(!prod) msg = '「対象商品・サービス名」が未入力です（送付前に必ず埋めてください）。';
-    if(isFinite(cp) && isFinite(np) && cp>0 && np<0) msg = '「改定後単価」に負の値が入っています。';
-    if(isFinite(cp) && isFinite(np) && cp>0 && np===0) msg = '「改定後単価」が0円です。意図した入力か確認してください。';
-
-    if(msg){
-      validateMsg.style.display = 'block';
-      validateMsg.textContent = msg;
-    }else{
-      validateMsg.style.display = 'none';
-      validateMsg.textContent = '';
-    }
-  }
-
   function buildLetterAndTalk(){
     const prod = productName.value.trim() || '＿＿＿＿（対象商品・サービス）';
     const cp = toNum(currentPrice.value);
@@ -1187,6 +1311,29 @@ ${decidedLine}
     }
 
     const ttl = (relation==='A') ? '信頼関係がある顧客向け' : (relation==='B') ? '標準の取引先向け' : '価格に厳しい顧客向け';
+    
+    // 想定反論への切り返しの拡充
+    const objectionHandling = `
+■ 5. 想定反論への切り返し（追加パターン）
+
+【反論1】「他社はまだ上げていない」
+回答例: 「他社様の状況は存じ上げませんが、当社の原価構造では現行価格の維持が限界です。品質を落とさず提供を続けるには、適正価格への見直しが不可欠とご理解ください。」
+
+【反論2】「そちらの都合でしょう」
+回答例: 「最低賃金改定・物価上昇は公的統計でも明らかな外部要因です（資料提示）。当社だけの都合ではなく、業界全体が直面している構造的な課題です。」
+
+【反論3】「契約期間中の変更は認められない」
+回答例: 「現契約は○年○月までと承知しております。本日は次回更新時の価格についてご相談です。（または：事情変更の原則に基づき、契約期間中でも協議をお願いできればと存じます）」
+
+【反論4】「値上げなら取引停止も検討する」
+回答例: 「それは大変残念です。ただ、現行価格では赤字が続き、いずれ提供体制の維持が困難です。取引継続を前提に、段階改定や条件調整など、何か折衷案を探れませんでしょうか。」`;
+
+    let decidedTalk = decidedYM ? `「また、現行価格は${decidedYM}に決定以来、可能な限り据え置いてきました。」` : '';
+    const xTalk = calcCpiSince();
+    if(decidedYM && xTalk && xTalk.cum > 0){
+       decidedTalk = `「また、現行価格は${decidedYM}に決定以来、可能な限り据え置いてきましたが、それ以来の累積物価上昇率は${pct1(xTalk.cum)}%を超えています。」`;
+    }
+
     const talk =
 `【${ttl} 面談トーク】
 
@@ -1196,7 +1343,7 @@ ${decidedLine}
 
 ■ 2. 根拠の提示（短く・自然に）
 ${naturalEvidence ? `「${naturalEvidence}」` : '「外部環境の変化が続いています。」'}
-${decidedYM ? `「また、${decidedLine}」` : ''}
+${decidedTalk}
 
 ■ 3. 自助努力の提示と限界
 「もちろん御社にご迷惑をおかけできないと、${effortText}を続けてきましたが、
@@ -1205,11 +1352,7 @@ ${decidedYM ? `「また、${decidedLine}」` : ''}
 ■ 4. 結論（改定の打診）
 「このままですと『${prod}』の品質維持や提供体制に支障が出る恐れがあります。
 つきましては、${dateStr}より、【 ${rateStr} 】への見直しをご相談できないでしょうか。」
-
-■ 5. 反論への切り返し（例）
-顧客：「予算が厳しい。難しい」
-回答：「ご事情は承知しております。もし単価の一括改定が難しければ、
-段階改定／条件調整（ロット・契約期間・一部仕様）など、別の形での負担調整をご一緒に検討できませんか。」
+${objectionHandling}
 
 ■ 6. クロージング（次アクション）
 「本日いただいたご意見を踏まえ、着地点案（段階改定／条件調整等）を整理して改めてご提案します。」`;
@@ -1228,6 +1371,7 @@ ${decidedYM ? `「また、${decidedLine}」` : ''}
   function generate(){
     updateRateHint();
     validateBasic();
+    validatePriceIncrease();
     updateCpiSinceView();
 
     const lt = buildLetterAndTalk();
@@ -1343,8 +1487,14 @@ ${decidedYM ? `「また、${decidedLine}」` : ''}
 
   function resetChips(groupId){
     const g = $(groupId);
+    if(!g) return;
     const chips = Array.from(g.querySelectorAll('.chip'));
     chips.forEach(c=>c.classList.remove('active'));
+    if(groupId==='#clauseGroup'){
+      const c = chips.find(x=>x.getAttribute('data-val')==='clause_unknown');
+      if(c) c.classList.add('active');
+      return;
+    }
     if(groupId==='#relationGroup'){
       const b = chips.find(x=>x.getAttribute('data-val')==='B');
       if(b) b.classList.add('active');
@@ -1368,10 +1518,14 @@ ${decidedYM ? `「また、${decidedLine}」` : ''}
 
     embedNumbersInLetter.checked = true;
     linkRates.checked = true;
+    
+    validationWarning.style.display = 'none';
 
+    resetChips('#clauseGroup');
     resetChips('#factorGroup');
     resetChips('#effortGroup');
     resetChips('#relationGroup');
+    resetChips('#customerGroup');
 
     prefSelect.value = '鳥取';
     setLocal('mk_pref_key','鳥取');
