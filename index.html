@@ -129,7 +129,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
       <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56">
     </a>
-    <div class="title">値上げ交渉ナビゲーター <span class="badge ok">r09</span></div>
+    <div class="title">値上げ交渉ナビゲーター <span class="badge ok">r10</span></div>
     <div class="headRight">
       <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
     </div>
@@ -178,10 +178,10 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
             <span id="cpiSinceView">—</span>
             <span class="badge warn" id="cpiSinceBadge">任意</span>
           </div>
-          <div class="small">※実際の消費者物価指数（2020年基準）の推移データを用いた概算です。</div>
+          <div class="small">※実際の消費者物価指数（2020年基準）の過去の推移データを用いた概算です。</div>
           <div class="sourceLink">
             <span class="badge">根拠</span>
-            <a id="cpiSourceAnchor" href="#" target="_blank" rel="noopener">物価統計（出典リンク）</a>
+            <a id="cpiSourceAnchor" href="https://www.jil.go.jp/kokunai/statistics/timeseries/xls/g0601.xlsx" target="_blank" rel="noopener">物価統計（出典リンク）</a>
             <span class="small" id="cpiSourceLabel"></span>
           </div>
         </div>
@@ -374,7 +374,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
   <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-  <span id="build-rev">r09</span>（<span id="last-updated-date"></span>）
+  <span id="build-rev">r10</span>（<span id="last-updated-date"></span>）
 </footer>
 <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -388,25 +388,20 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   try{ document.documentElement.classList.toggle('isAdmin', !!IS_ADMIN); }catch(e){}
 
   /* =========================
-     1) 対象都道府県（JISコード順）
+     1) 対象都道府県（関西2府4県＋中国5県を一般的な順で）
      ========================= */
   const PREFS = [
-    {k:'北海道', l:'北海道'}, {k:'青森', l:'青森県'}, {k:'岩手', l:'岩手県'},
-    {k:'宮城', l:'宮城県'}, {k:'秋田', l:'秋田県'}, {k:'山形', l:'山形県'},
-    {k:'福島', l:'福島県'}, {k:'茨城', l:'茨城県'}, {k:'栃木', l:'栃木県'},
-    {k:'群馬', l:'群馬県'}, {k:'埼玉', l:'埼玉県'}, {k:'千葉', l:'千葉県'},
-    {k:'東京', l:'東京都'}, {k:'神奈川', l:'神奈川県'}, {k:'新潟', l:'新潟県'},
-    {k:'富山', l:'富山県'}, {k:'石川', l:'石川県'}, {k:'福井', l:'福井県'},
-    {k:'山梨', l:'山梨県'}, {k:'長野', l:'長野県'}, {k:'岐阜', l:'岐阜県'},
-    {k:'静岡', l:'静岡県'}, {k:'愛知', l:'愛知県'}, {k:'三重', l:'三重県'},
-    {k:'滋賀', l:'滋賀県'}, {k:'京都', l:'京都府'}, {k:'大阪', l:'大阪府'},
-    {k:'兵庫', l:'兵庫県'}, {k:'奈良', l:'奈良県'}, {k:'和歌山', l:'和歌山県'},
-    {k:'鳥取', l:'鳥取県'}, {k:'島根', l:'島根県'}, {k:'岡山', l:'岡山県'},
-    {k:'広島', l:'広島県'}, {k:'山口', l:'山口県'}, {k:'徳島', l:'徳島県'},
-    {k:'香川', l:'香川県'}, {k:'愛媛', l:'愛媛県'}, {k:'高知', l:'高知県'},
-    {k:'福岡', l:'福岡県'}, {k:'佐賀', l:'佐賀県'}, {k:'長崎', l:'長崎県'},
-    {k:'熊本', l:'熊本県'}, {k:'大分', l:'大分県'}, {k:'宮崎', l:'宮崎県'},
-    {k:'鹿児島', l:'鹿児島県'}, {k:'沖縄', l:'沖縄県'}
+    {k:'滋賀', l:'滋賀県'},
+    {k:'京都', l:'京都府'},
+    {k:'大阪', l:'大阪府'},
+    {k:'兵庫', l:'兵庫県'},
+    {k:'奈良', l:'奈良県'},
+    {k:'和歌山', l:'和歌山県'},
+    {k:'鳥取', l:'鳥取県'},
+    {k:'島根', l:'島根県'},
+    {k:'岡山', l:'岡山県'},
+    {k:'広島', l:'広島県'},
+    {k:'山口', l:'山口県'}
   ];
   const PREF_LABEL = Object.fromEntries(PREFS.map(x=>[x.k,x.l]));
 
@@ -424,8 +419,8 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     "山口": {n:1043,o:979,inc:64,eff:"2025-10-16"}
   };
 
-  const DEFAULT_CPI_SOURCE_URL = 'https://www.stat.go.jp/data/cpi/sokuhou/tsuki/pdf/doukou.pdf';
-  const DEFAULT_CPI_SOURCE_LABEL = '（総務省統計局：物価統計）';
+  const DEFAULT_CPI_SOURCE_URL = 'https://www.jil.go.jp/kokunai/statistics/timeseries/xls/g0601.xlsx';
+  const DEFAULT_CPI_SOURCE_LABEL = '（JILPT 消費者物価指数）';
 
   /* --- ユーティリティ --- */
   const $ = s => document.querySelector(s);
@@ -611,6 +606,8 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       opt.textContent = p.l;
       prefSelect.appendChild(opt);
     }
+    // 初期値を鳥取県にセット
+    prefSelect.value = '鳥取';
   }
 
   let COST_DATA = null; 
@@ -842,20 +839,28 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
   });
 
   /* =========================
-     6) 実際のCPI推移に基づく累積概算（2000年〜）
+     6) 実際のCPI推移に基づく累積概算（1970年〜）
+     JILPT統計および総務省統計局 2020年基準 総合指数 年次データ相当
      ========================= */
   function getHistoricalCpi(year) {
     const CPI = {
-      2000: 99.5, 2001: 98.7, 2002: 97.8, 2003: 97.5, 2004: 97.4,
-      2005: 97.3, 2006: 97.4, 2007: 97.4, 2008: 98.9, 2009: 97.6,
-      2010: 96.6, 2011: 96.3, 2012: 96.2, 2013: 96.6, 2014: 99.1,
-      2015: 99.6, 2016: 99.3, 2017: 99.5, 2018: 100.4, 2019: 101.0,
-      2020: 100.0, 2021: 99.8, 2022: 102.1, 2023: 105.3, 2024: 108.2,
-      2025: 110.6
+      1970: 31.4, 1971: 33.3, 1972: 34.8, 1973: 38.9, 1974: 47.9,
+      1975: 53.6, 1976: 58.6, 1977: 63.3, 1978: 65.7, 1979: 68.1,
+      1980: 73.4, 1981: 77.0, 1982: 79.1, 1983: 80.6, 1984: 82.4,
+      1985: 84.1, 1986: 84.6, 1987: 84.7, 1988: 85.3, 1989: 87.2,
+      1990: 89.9, 1991: 92.8, 1992: 94.4, 1993: 95.6, 1994: 96.2,
+      1995: 96.1, 1996: 96.3, 1997: 98.0, 1998: 98.6, 1999: 98.3,
+      2000: 97.6, 2001: 96.8, 2002: 95.9, 2003: 95.6, 2004: 95.6,
+      2005: 95.3, 2006: 95.6, 2007: 95.6, 2008: 96.9, 2009: 95.6,
+      2010: 94.9, 2011: 94.6, 2012: 94.6, 2013: 95.0, 2014: 97.6,
+      2015: 98.4, 2016: 98.3, 2017: 98.8, 2018: 99.8, 2019: 100.3,
+      2020: 100.0, 2021: 99.8, 2022: 102.3, 2023: 105.6, 2024: 108.5,
+      2025: 111.9
     };
-    if (year < 2000) return CPI[2000];
+    if (year < 1970) return CPI[1970];
     if (CPI[year]) return CPI[year];
     
+    // 2026年以降は、直近の cpiRate を使って推計
     const maxYear = 2025;
     const baseCpi = CPI[maxYear];
     const diffYears = year - maxYear;
@@ -880,6 +885,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
     const months = (ny - by)*12 + (nm - bm);
     if(months <= 0) return { months: 0, cum: 0 };
 
+    // 年次をまたぐ簡易的な線形補間
     const getCpiMonthly = (y, mo) => {
       const cpi_y = getHistoricalCpi(y);
       const cpi_next_y = getHistoricalCpi(y + 1);
@@ -1007,7 +1013,7 @@ pre.sample{white-space:pre-wrap;margin:0;font-size:.78rem;color:#334155}
       : `累積CPI（概算）：算出不可（現行価格の決定時期が未入力）`;
 
     const cpiSinceHow = (decidedYM && x)
-      ? `算出式（概算）：実際の消費者物価指数（コアCPI）の過去の年次推移データに基づく変動率`
+      ? `算出式（概算）：実際の消費者物価指数（JILPT統計データ等）の過去の年次推移データに基づく変動率`
       : `算出式：—`;
 
     const src = getCpiSource();
@@ -1302,7 +1308,6 @@ ${decidedYM ? `「また、現行価格は${decidedYM}に決定以来、可能�
    embedNumbersInLetter, includeCpiSinceInLetter, linkRates, cpiRate, wageRate, cpiAsOf, wageAsOf]
     .forEach(el => el.addEventListener('input', generate));
   
-  // 金額系はblurでも再計算するよう念のためバインド
   currentPrice.addEventListener('blur', generate);
   newPrice.addEventListener('blur', generate);
 
