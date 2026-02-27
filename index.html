@@ -175,6 +175,20 @@
         <div class="card">
           <div class="pill">STEP 1：改定内容</div>
 
+          <div class="inputGrid">
+            <div>
+              <label for="companyName">自社名（または屋号）</label>
+              <input type="text" id="companyName" placeholder="例）株式会社サンプル商会" />
+            </div>
+            <div>
+              <label for="senderName">氏名</label>
+              <input type="text" id="senderName" placeholder="例）山田 太郎" />
+            </div>
+          </div>
+
+          <label for="prefSelect">主な提供エリア（都道府県）</label>
+          <select id="prefSelect" aria-label="都道府県選択"></select>
+
           <label for="productName">対象商品・サービス名</label>
           <input type="text" id="productName" placeholder="例）保守費用、〇〇部品" />
 
@@ -207,7 +221,7 @@
           <div class="dataPanel" style="margin-top:10px;">
             <div class="dataRow">
               <span class="dataKey">現行価格決定時からの累積上昇（概算）</span>
-              <span id="cpiSinceView">物価：— ／ 最低賃金：—</span>
+              <span id="cpiSinceView"><b>物価：— ／ 最低賃金：—</b></span>
               <span class="badge warn" id="cpiSinceBadge">任意</span>
             </div>
             <div class="small">※実際の消費者物価指数および最低賃金（対象都道府県）の過去推移データを用いた概算です。</div>
@@ -231,9 +245,6 @@
 
         <div class="card">
           <div class="pill">STEP 2：背景（外部要因＋根拠データ）</div>
-
-          <label for="prefSelect">主な提供エリア（都道府県）</label>
-          <select id="prefSelect" aria-label="都道府県選択"></select>
 
           <div class="dataPanel" aria-label="参考データ（最低賃金など）">
             <div class="dataRow">
@@ -351,7 +362,7 @@
 
           <details style="margin-top:10px;">
             <summary>高度な戦略オプション（顧客タイプ）</summary>
-            <label>顧客タイプ（任意）</label>
+            <label>顧客タイプ（必須）</label>
             <div class="chipGroup" id="customerGroup">
               <button class="chip" type="button" data-val="strategic">戦略顧客（最重要）</button>
               <button class="chip" type="button" data-val="profitable">優良顧客</button>
@@ -365,7 +376,7 @@
           </details>
 
           <details style="margin-top:10px;">
-            <summary>自助努力（任意）</summary>
+            <summary>自助努力（必須）</summary>
             <div class="hint">これまでの努力（複数可）</div>
             <div class="chipGroup" id="effortGroup">
               <button class="chip active" type="button" data-val="徹底した経費削減">経費削減</button>
@@ -373,6 +384,8 @@
               <button class="chip" type="button" data-val="仕入先の見直し・統合">仕入先見直し</button>
               <button class="chip active" type="button" data-val="数年間にわたる価格据え置き">価格据え置き</button>
             </div>
+            <label for="effortFreeText">自助努力（自由入力・必須）</label>
+            <textarea id="effortFreeText" rows="2" placeholder="例）配送ルートの見直し、作業工程の標準化による残業削減 等"></textarea>
           </details>
         </div>
 
@@ -395,9 +408,9 @@
 
           <div class="miniActions">
             <button class="btn" id="copyBtn" type="button">現在の表示をコピー</button>
-            <button class="btn alt" id="printBtn" type="button">印刷（本文＋根拠メモ）</button>
+            <button class="btn alt" id="printBtn" type="button">印刷（案内文＋面談トーク+根拠メモ）</button>
           </div>
-          <div class="hint" style="margin-top:8px;">※印刷は「本文」と「根拠メモ（社内用）」を明確に分けて出力します。</div>
+          <div class="hint" style="margin-top:8px;">※印刷は「案内文」と「面談トーク+根拠メモ（社内用）」を出力します。</div>
         </div>
       </div>
     </div>
@@ -405,17 +418,17 @@
 
   <div id="printPack">
     <div class="printSection">
-      <div class="printH1">【お客さまにお渡しする本文】</div>
-      <div class="printSub">※このページは顧客向け（根拠メモは次ページ）</div>
+      <div class="printH1">【案内文】</div>
+      <div class="printSub">※お客さまにお渡しする文面</div>
       <div class="printText" id="printLetter"></div>
     </div>
 
     <div class="printDivider"></div>
 
     <div class="printSection">
-      <div class="printH1">【社内用：根拠メモ（カンニングペーパー）】</div>
-      <div class="printSub">※お客さまには渡さない想定。根拠を問われた際の説明用。</div>
-      <div class="printText" id="printMemo"></div>
+      <div class="printH1">【面談トーク+根拠メモ】</div>
+      <div class="printSub">※社内用。面談時の説明台本と根拠整理。</div>
+      <div class="printText" id="printTalkMemo"></div>
     </div>
   </div>
 
@@ -547,6 +560,8 @@
     }
 
     /* --- DOM --- */
+    const companyName = $('#companyName');
+    const senderName = $('#senderName');
     const productName = $('#productName');
     const currentPrice = $('#currentPrice');
     const newPrice = $('#newPrice');
@@ -593,9 +608,10 @@
     const jsonSample = $('#jsonSample');
 
     const extraFactors = $('#extraFactors');
+    const effortFreeText = $('#effortFreeText');
 
     const printLetter = $('#printLetter');
-    const printMemo = $('#printMemo');
+    const printTalkMemo = $('#printTalkMemo');
 
     let currentOutputMode = 'letter';
 
@@ -1009,14 +1025,14 @@
       const calcDetailBox = $('#calcDetailBox');
 
       if(!x || !mwX){
-        cpiSinceView.textContent = '物価：— ／ 最低賃金：—';
+        cpiSinceView.innerHTML = '<b>物価：— ／ 最低賃金：—</b>';
         cpiSinceBadge.textContent = '任意';
         cpiSinceBadge.className = 'badge warn';
         if(calcDetailBox) calcDetailBox.innerHTML = '（年月を入力すると計算過程が表示されます）';
         return;
       }
 
-      cpiSinceView.textContent = `物価：約${pct1(x.cum)}% ／ 最低賃金：約${pct1(mwX.cum)}%（${x.months}ヶ月）`;
+      cpiSinceView.innerHTML = `<b>物価：約${pct1(x.cum)}% ／ 最低賃金：約${pct1(mwX.cum)}%（${x.months}ヶ月）</b>`;
       cpiSinceBadge.textContent = '概算';
       cpiSinceBadge.className = 'badge warn';
 
@@ -1055,9 +1071,14 @@
       const prod = productName.value.trim();
       const cp = toNum(currentPrice.value);
       const np = toNum(newPrice.value);
+      const customerType = getSelectedValues('#customerGroup')[0] || '';
+      const efforts = getSelectedValues('#effortGroup');
+      const effortFree = (effortFreeText.value || '').trim();
 
       let msg = '';
       if(!prod) msg = '「対象商品・サービス名」が未入力です（送付前に必ず埋めてください）。';
+      if(!customerType) msg = '「顧客タイプ」は必須です。1つ選択してください。';
+      if(efforts.length === 0 || !effortFree) msg = '「自助努力」は必須です。選択に加えて自由入力も記入してください。';
       if(isFinite(cp) && isFinite(np) && cp>0 && np<0) msg = '「改定後単価」に負の値が入っています。';
       if(isFinite(cp) && isFinite(np) && cp>0 && np===0) msg = '「改定後単価」が0円です。意図した入力か確認してください。';
 
@@ -1233,7 +1254,9 @@
       if (ap && ap.years >= 0.5) {
         efforts = efforts.map(e => e === '数年間にわたる価格据え置き' ? `約${ap.yearsStr}年の価格据え置き` : e);
       }
-      const effortText = efforts.length>0 ? joinJa(efforts) : '（未選択）';
+      const effortFree = (effortFreeText.value||'').trim();
+      const effortJoined = efforts.length>0 ? joinJa(efforts) : '';
+      const effortText = [effortJoined, effortFree].filter(Boolean).join('／') || '（未選択）';
 
       const customerTypes = getSelectedValues('#customerGroup');
       const customerLabels = {
@@ -1303,9 +1326,19 @@
       if (ap && ap.years >= 0.5) {
         efforts = efforts.map(e => e === '数年間にわたる価格据え置き' ? `約${ap.yearsStr}年の価格据え置き` : e);
       }
-      const effortText = efforts.length > 0 ? joinJa(efforts) : '徹底したコスト削減';
+      const effortFree = (effortFreeText.value||'').trim();
+      const effortJoined = efforts.length > 0 ? joinJa(efforts) : '';
+      const effortText = [effortJoined, effortFree].filter(Boolean).join('／') || '徹底したコスト削減';
 
       const relation = getSelectedValues('#relationGroup')[0] || 'B';
+      const customerType = getSelectedValues('#customerGroup')[0] || '';
+      const customerStrategyMap = {
+        strategic: '重要なお取引先として、継続供給を最優先にした協議案（段階的改定・条件調整）を前提にご相談いたします。',
+        profitable: 'これまでの取引実績を踏まえ、品質維持と安定供給の両立を重視した改定案としてご相談いたします。',
+        marginal: '採算の均衡を回復するため、条件見直しを含めた現実的な改定案としてご相談いたします。',
+        loss: '継続提供のための最低条件として、価格改定を中心に取引条件全体の見直しをご相談いたします。'
+      };
+      const customerStrategy = customerStrategyMap[customerType] || '取引継続に向けた現実的な改定案としてご相談いたします。';
 
       const naturalEvidence = buildNaturalEvidencePhrase();
       const referenceBlock = buildReferenceBlock(decidedYM);
@@ -1335,7 +1368,7 @@
 〇〇様
 
 いつも大変お世話になっております。
-[自社名]の[氏名]でございます。
+${companyName.value.trim() || '[自社名]'}の${senderName.value.trim() || '[氏名]'}でございます。
 
 平素より格別のご高配を賜り、心より御礼申し上げます。
 
@@ -1347,6 +1380,8 @@ ${decidedLine}
 当社としても、${effortText}を重ね、品質・提供体制を維持する努力を続けてまいりましたが、現行価格のままでは安定的な提供の継続が困難な局面となりました。
 
 つきましては、誠に恐縮ではございますが、以下のとおり価格改定をお願い申し上げます。
+
+${customerStrategy}
 
 【改定内容】
 ・対象：${prod}
@@ -1366,7 +1401,7 @@ ${decidedLine}
 〇〇様
 
 いつも大変お世話になっております。
-[自社名]の[氏名]でございます。
+${companyName.value.trim() || '[自社名]'}の${senderName.value.trim() || '[氏名]'}でございます。
 
 平素は弊社サービスをご利用いただき誠にありがとうございます。
 さて、昨今の${combinedFactors}により、各種コストが上昇しております。
@@ -1376,6 +1411,8 @@ ${decidedLine}
 弊社としても、${effortText}など可能な対策を講じてまいりましたが、現行価格のままでは従来の品質および安定供給の維持が困難となりました。
 
 つきましては、誠に不本意ではございますが、下記の通り価格改定を実施させていただきたく存じます。
+
+${customerStrategy}
 
 【改定内容】
 ・対象：${prod}
@@ -1392,7 +1429,7 @@ ${decidedLine}
 〇〇様
 
 いつも大変お世話になっております。
-[自社名]の[氏名]でございます。
+${companyName.value.trim() || '[自社名]'}の${senderName.value.trim() || '[氏名]'}でございます。
 
 本日は、今後の継続提供の前提となる「適正価格化」について、ご相談申し上げます。
 昨今の${combinedFactors}が常態化しており、当社のコスト構造にも継続的な影響が出ております。
@@ -1403,6 +1440,8 @@ ${decidedLine}
 このままでは『${prod}』の品質・提供体制に支障が出るリスクがあるため、避けるべきと判断しております。
 
 つきましては、以下の目安で価格改定の協議をお願いしたく存じます。
+
+${customerStrategy}
 
 【お願いしたい改定内容（目安）】
 ・対象：${prod}
@@ -1419,7 +1458,7 @@ ${decidedLine}
       const ttl = (relation==='A') ? '信頼関係がある顧客向け' : (relation==='B') ? '標準の取引先向け' : '価格に厳しい顧客向け';
 
       const objectionHandling = `
-■ 5. 想定反論への切り返し（追加パターン）
+■ 6. 想定反論への切り返し（追加パターン）
 
 【反論1】「他社はまだ上げていない」
 回答例: 「他社様の状況は存じ上げませんが、当社の原価構造では現行価格の維持が限界です。品質を落とさず提供を続けるには、適正価格への見直しが不可欠とご理解ください。」
@@ -1463,12 +1502,15 @@ ${decidedTalk}
 「もちろん御社にご迷惑をおかけできないと、${effortText}を続けてきましたが、
 社内努力だけでは吸収できない水準になりました。」
 
-■ 4. 結論（改定の打診）
+■ 4. 顧客タイプ別の進め方
+「${customerStrategy}」
+
+■ 5. 結論（改定の打診）
 「このままですと『${prod}』の品質維持や提供体制に支障が出る恐れがあります。
 つきましては、${dateStr}より、【 ${rateStr} 】への見直しをご相談できないでしょうか。」
 ${objectionHandling}
 
-■ 6. クロージング（次アクション）
+■ 7. クロージング（次アクション）
 「本日いただいたご意見を踏まえ、着地点案（段階改定／条件調整等）を整理して改めてご提案します。」`;
 
       return { letter, talk };
@@ -1499,7 +1541,7 @@ ${objectionHandling}
         renderOutput();
 
         if(printLetter) printLetter.textContent = CACHE.letter || '';
-        if(printMemo) printMemo.textContent = CACHE.memo || '';
+        if(printTalkMemo) printTalkMemo.textContent = `${CACHE.talk || ''}\n\n----------------------------------------\n\n${CACHE.memo || ''}`;
       } catch (err) {
         console.error(err);
         if(outputArea) outputArea.value = '※文面生成中にエラーが発生しました。\n' + err.message;
@@ -1537,7 +1579,7 @@ ${objectionHandling}
 
     printBtn.addEventListener('click', () => { try{ window.print(); }catch(e){} });
 
-    [productName, currentPriceAsOf, effectiveDate, extraFactors,
+    [companyName, senderName, productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText,
      embedNumbersInLetter, linkRates, cpiRate, wageRate, cpiAsOf, wageAsOf]
       .forEach(el => el.addEventListener('input', generate));
 
@@ -1627,7 +1669,7 @@ ${objectionHandling}
     }
 
     resetBtn.addEventListener('click', () => {
-      [productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors].forEach(el=>{
+      [companyName,senderName,productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText].forEach(el=>{
         el.value='';
         el.classList.remove('imported-value');
       });
