@@ -89,6 +89,7 @@
 
     .quietLaw summary{font-size:.82rem;color:#64748b;font-weight:700}
     .quietLaw .mutedBox{background:#f9fafb;border-color:#e5e7eb;color:#6b7280;font-size:.78rem}
+    .cumValue{display:inline-block;font-size:1.35rem;font-weight:900;color:#0f172a;letter-spacing:.01em}
 
     /* インポートハイライト */
     input.imported-value, select.imported-value, textarea.imported-value{
@@ -142,7 +143,7 @@
       <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
         <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56" />
       </a>
-      <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r26</span></div>
+      <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r27</span></div>
       <div class="headRight">
         <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
       </div>
@@ -382,7 +383,7 @@
             <button class="chip" type="button" data-val="C">価格に厳しい（データ・代替案）</button>
           </div>
 
-          <details style="margin-top:10px;">
+          <details style="margin-top:10px;" open>
             <summary>高度な戦略オプション（顧客タイプ）</summary>
             <label>顧客タイプ</label>
             <div class="chipGroup" id="customerGroup">
@@ -397,13 +398,17 @@
             </div>
           </details>
 
-          <details style="margin-top:10px;">
+          <details style="margin-top:10px;" open>
             <summary>自助努力</summary>
             <div class="hint">これまでの努力（複数可）</div>
             <div class="chipGroup" id="effortGroup">
               <button class="chip active" type="button" data-val="徹底した経費削減">経費削減</button>
               <button class="chip" type="button" data-val="業務のDX化・効率化">DX・効率化</button>
               <button class="chip" type="button" data-val="仕入先の見直し・統合">仕入先見直し</button>
+              <button class="chip" type="button" data-val="在庫・発注精度の改善">在庫最適化</button>
+              <button class="chip" type="button" data-val="歩留まり改善・廃棄ロス削減">歩留まり改善</button>
+              <button class="chip" type="button" data-val="設備更新による省人化・省エネ化">設備更新</button>
+              <button class="chip" type="button" data-val="共同配送・配送頻度最適化">共同配送</button>
               <button class="chip active" type="button" data-val="数年間にわたる価格据え置き">価格据え置き</button>
             </div>
             <label for="effortFreeText">自助努力（自由入力）</label>
@@ -490,7 +495,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">r26</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">r27</span>（<span id="last-updated-date"></span>）
   </footer>
   <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -902,7 +907,7 @@
       if(w){
         const incStr = (w.inc!==null && w.inc!==undefined) ? `+${Math.round(w.inc)}円` : '—';
         minWageView.textContent =
-          `${Math.round(w.o).toLocaleString('ja-JP')}円 → ${Math.round(w.n).toLocaleString('ja-JP')}円（${incStr}、前年度比 +${pct1(w.pct)}%）／発効予定：${fmtYMD(w.eff)}`;
+          `${w.label}：${Math.round(w.o).toLocaleString('ja-JP')}円 → ${Math.round(w.n).toLocaleString('ja-JP')}円（${incStr}、前年度比 +${pct1(w.pct)}%）／発効予定：${fmtYMD(w.eff)}`;
 
         if(w.source === 'json'){
           minWageBadge.textContent = 'JSON';
@@ -1090,24 +1095,16 @@
       const calcDetailBoxModal = $('#calcDetailBoxModal');
 
       if(!x || !mwX){
-        [cpiSinceView, cpiSinceViewModal].forEach(el => { if(el) el.innerHTML = '<b>物価：— ／ 最低賃金：—</b>'; });
-        [cpiSinceBadge, cpiSinceBadgeModal].forEach(el => {
-          if(!el) return;
-          el.textContent = '任意';
-          el.className = 'badge warn';
-        });
-        [calcDetailBox, calcDetailBoxModal].forEach(el => { if(el) el.innerHTML = '（年月を入力すると計算過程が表示されます）'; });
+        cpiSinceView.innerHTML = '<span class="cumValue">物価：— ／ 最低賃金：—</span>';
+        cpiSinceBadge.textContent = '任意';
+        cpiSinceBadge.className = 'badge warn';
+        if(calcDetailBox) calcDetailBox.innerHTML = '（年月を入力すると計算過程が表示されます）';
         return;
       }
 
-      [cpiSinceView, cpiSinceViewModal].forEach(el => {
-        if(el) el.innerHTML = `<b>物価：約${pct1(x.cum)}% ／ 最低賃金：約${pct1(mwX.cum)}%（${x.months}ヶ月）</b>`;
-      });
-      [cpiSinceBadge, cpiSinceBadgeModal].forEach(el => {
-        if(!el) return;
-        el.textContent = '概算';
-        el.className = 'badge warn';
-      });
+      cpiSinceView.innerHTML = `<span class="cumValue">物価：約${pct1(x.cum)}% ／ 最低賃金：約${pct1(mwX.cum)}%</span><b>（${x.months}ヶ月）</b>`;
+      cpiSinceBadge.textContent = '概算';
+      cpiSinceBadge.className = 'badge warn';
 
       if(calcDetailBox || calcDetailBoxModal) {
         let detailHtml = `<b>【累積物価上昇率（CPI）の計算式】</b><br>`;
@@ -1787,6 +1784,8 @@ ${objectionHandling}
         el.classList.remove('imported-value');
       });
       closeExternalFactorsModal();
+
+      if(partnerHonorific) partnerHonorific.value = '様';
 
       if(partnerHonorific) partnerHonorific.value = '様';
 
