@@ -78,6 +78,12 @@
     .small{font-size:.78rem;color:#64748b}
     .divider{height:1px;background:#e5e7eb;margin:12px 0}
 
+    .modalOverlay{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:999}
+    .modalOverlay.show{display:flex}
+    .modalDialog{width:min(980px,92vw);max-height:88vh;overflow:auto;background:#fff;border-radius:14px;box-shadow:0 20px 40px rgba(0,0,0,.22);padding:14px}
+    .modalHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;background:#fff;padding-bottom:10px}
+    .iconBtn{border:1px solid #d1d5db;background:#fff;border-radius:8px;padding:4px 10px;font-weight:900;cursor:pointer}
+
     /* インポートハイライト */
     input.imported-value, select.imported-value, textarea.imported-value{
       background-color:#fff9e6 !important;border-color:#f2c94c !important;color:var(--warn);font-weight:900;
@@ -175,19 +181,19 @@
         <div class="card">
           <div class="pill">STEP 1：改定内容</div>
 
-          <div class="inputGrid">
-            <div>
-              <label for="companyName">自社名（または屋号）</label>
-              <input type="text" id="companyName" placeholder="例）株式会社サンプル商会" />
-            </div>
-            <div>
-              <label for="senderName">氏名</label>
-              <input type="text" id="senderName" placeholder="例）山田 太郎" />
-            </div>
-          </div>
-
           <label for="prefSelect">主な提供エリア（都道府県）</label>
           <select id="prefSelect" aria-label="都道府県選択"></select>
+
+          <div class="inputGrid" style="margin-top:8px;">
+            <div>
+              <label for="currentPriceAsOf">現行価格の決定時期（年月）</label>
+              <input type="month" id="currentPriceAsOf" />
+              <div class="hint">入力すると「外部要因（参考）」を表示します。</div>
+            </div>
+            <div style="display:flex;align-items:flex-end;">
+              <button class="btn ghost" id="openExternalFactorsBtn" type="button">外部要因を確認</button>
+            </div>
+          </div>
 
           <label for="productName">対象商品・サービス名</label>
           <input type="text" id="productName" placeholder="例）保守費用、〇〇部品" />
@@ -207,11 +213,6 @@
           <div id="validationWarning" class="warningBox" style="display:none;"></div>
 
           <div class="inputGrid" style="margin-top:8px;">
-            <div>
-              <label for="currentPriceAsOf">現行価格の決定時期（年月）</label>
-              <input type="month" id="currentPriceAsOf" />
-              <div class="hint">本文に自然に織り込めます（例：2024-04）。</div>
-            </div>
             <div>
               <label for="effectiveDate">適用開始時期</label>
               <input type="text" id="effectiveDate" placeholder="例）2026年4月1日 ご注文分より" />
@@ -245,6 +246,19 @@
 
         <div class="card">
           <div class="pill">STEP 2：背景（外部要因＋根拠データ）</div>
+          <div class="hint">「外部要因」ボタンから、いつでも参照・編集できます。</div>
+          <button class="btn" id="openExternalFactorsBtn2" type="button">外部要因を開く</button>
+        </div>
+
+        <div id="externalFactorsModal" class="modalOverlay" aria-hidden="true">
+          <div class="modalDialog" role="dialog" aria-modal="true" aria-label="外部要因">
+            <div class="modalHeader">
+              <div class="pill" style="margin:0;">外部要因（参考）</div>
+              <div style="display:flex;gap:8px;">
+                <button class="iconBtn" id="closeExternalFactorsX" type="button">×</button>
+                <button class="btn alt sm" id="closeExternalFactorsBtn" type="button">閉じる</button>
+              </div>
+            </div>
 
           <div class="dataPanel" aria-label="参考データ（最低賃金など）">
             <div class="dataRow">
@@ -349,6 +363,7 @@
           <label for="extraFactors">補足（任意）</label>
           <textarea id="extraFactors" rows="2" placeholder="例）主要仕入先からの値上げ通知（+8%）、採用単価の上昇 等"></textarea>
           <div class="hint">※入力すると「〜に加え、〇〇」と自然に文章へ組み込まれます。</div>
+          </div>
         </div>
 
         <div class="card">
@@ -560,8 +575,6 @@
     }
 
     /* --- DOM --- */
-    const companyName = $('#companyName');
-    const senderName = $('#senderName');
     const productName = $('#productName');
     const currentPrice = $('#currentPrice');
     const newPrice = $('#newPrice');
@@ -609,6 +622,11 @@
 
     const extraFactors = $('#extraFactors');
     const effortFreeText = $('#effortFreeText');
+    const externalFactorsModal = $('#externalFactorsModal');
+    const openExternalFactorsBtn = $('#openExternalFactorsBtn');
+    const openExternalFactorsBtn2 = $('#openExternalFactorsBtn2');
+    const closeExternalFactorsBtn = $('#closeExternalFactorsBtn');
+    const closeExternalFactorsX = $('#closeExternalFactorsX');
 
     const printLetter = $('#printLetter');
     const printTalkMemo = $('#printTalkMemo');
@@ -1368,7 +1386,7 @@
 〇〇様
 
 いつも大変お世話になっております。
-${companyName.value.trim() || '[自社名]'}の${senderName.value.trim() || '[氏名]'}でございます。
+弊社営業担当でございます。
 
 平素より格別のご高配を賜り、心より御礼申し上げます。
 
@@ -1401,7 +1419,7 @@ ${customerStrategy}
 〇〇様
 
 いつも大変お世話になっております。
-${companyName.value.trim() || '[自社名]'}の${senderName.value.trim() || '[氏名]'}でございます。
+弊社営業担当でございます。
 
 平素は弊社サービスをご利用いただき誠にありがとうございます。
 さて、昨今の${combinedFactors}により、各種コストが上昇しております。
@@ -1429,7 +1447,7 @@ ${customerStrategy}
 〇〇様
 
 いつも大変お世話になっております。
-${companyName.value.trim() || '[自社名]'}の${senderName.value.trim() || '[氏名]'}でございます。
+弊社営業担当でございます。
 
 本日は、今後の継続提供の前提となる「適正価格化」について、ご相談申し上げます。
 昨今の${combinedFactors}が常態化しており、当社のコスト構造にも継続的な影響が出ております。
@@ -1548,6 +1566,18 @@ ${objectionHandling}
       }
     }
 
+    function openExternalFactorsModal(){
+      if(!externalFactorsModal) return;
+      externalFactorsModal.classList.add('show');
+      externalFactorsModal.setAttribute('aria-hidden','false');
+    }
+
+    function closeExternalFactorsModal(){
+      if(!externalFactorsModal) return;
+      externalFactorsModal.classList.remove('show');
+      externalFactorsModal.setAttribute('aria-hidden','true');
+    }
+
     function showCopied(){
       copyStatus.classList.add('show');
       clearTimeout(showCopied._t);
@@ -1579,9 +1609,21 @@ ${objectionHandling}
 
     printBtn.addEventListener('click', () => { try{ window.print(); }catch(e){} });
 
-    [companyName, senderName, productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText,
+    [productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText,
      embedNumbersInLetter, linkRates, cpiRate, wageRate, cpiAsOf, wageAsOf]
       .forEach(el => el.addEventListener('input', generate));
+
+    if(openExternalFactorsBtn) openExternalFactorsBtn.addEventListener('click', openExternalFactorsModal);
+    if(openExternalFactorsBtn2) openExternalFactorsBtn2.addEventListener('click', openExternalFactorsModal);
+    if(closeExternalFactorsBtn) closeExternalFactorsBtn.addEventListener('click', closeExternalFactorsModal);
+    if(closeExternalFactorsX) closeExternalFactorsX.addEventListener('click', closeExternalFactorsModal);
+    if(externalFactorsModal) externalFactorsModal.addEventListener('click', (e)=>{
+      if(e.target === externalFactorsModal) closeExternalFactorsModal();
+    });
+
+    currentPriceAsOf.addEventListener('change', () => {
+      if((currentPriceAsOf.value || '').trim()) openExternalFactorsModal();
+    });
 
     linkRates.addEventListener('change', ()=>{
       renderAllByPref();
@@ -1669,10 +1711,11 @@ ${objectionHandling}
     }
 
     resetBtn.addEventListener('click', () => {
-      [companyName,senderName,productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText].forEach(el=>{
+      [productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText].forEach(el=>{
         el.value='';
         el.classList.remove('imported-value');
       });
+      closeExternalFactorsModal();
 
       embedNumbersInLetter.checked = true;
       linkRates.checked = true;
