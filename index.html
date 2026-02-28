@@ -78,6 +78,9 @@
     .small{font-size:.78rem;color:#64748b}
     .divider{height:1px;background:#e5e7eb;margin:12px 0}
 
+    .btn.emphasis{background:#f59e0b;color:#111827;border:1px solid #d97706;}
+.btn.emphasis:hover{opacity:1;background:#fbbf24;}
+
     /* インポートハイライト */
     input.imported-value, select.imported-value, textarea.imported-value{
       background-color:#fff9e6 !important;border-color:#f2c94c !important;color:var(--warn);font-weight:900;
@@ -130,7 +133,7 @@
       <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
         <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56" />
       </a>
-      <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r24</span></div>
+      <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r25</span></div>
       <div class="headRight">
         <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
       </div>
@@ -175,19 +178,19 @@
         <div class="card">
           <div class="pill">STEP 1：改定内容</div>
 
-          <div class="inputGrid">
-            <div>
-              <label for="companyName">自社名（または屋号）</label>
-              <input type="text" id="companyName" placeholder="例）株式会社サンプル商会" />
-            </div>
-            <div>
-              <label for="senderName">氏名</label>
-              <input type="text" id="senderName" placeholder="例）山田 太郎" />
-            </div>
-          </div>
-
           <label for="prefSelect">主な提供エリア（都道府県）</label>
           <select id="prefSelect" aria-label="都道府県選択"></select>
+
+          <div class="inputGrid" style="margin-top:8px;">
+            <div>
+              <label for="currentPriceAsOf">現行価格の決定時期（年月）</label>
+              <input type="month" id="currentPriceAsOf" />
+              <div class="hint">STEP2の「外部環境」セクションで根拠データを確認できます。</div>
+            </div>
+            <div style="display:flex;align-items:flex-end;">
+              <button class="btn emphasis" id="openExternalFactorsBtn" type="button">外部環境を確認</button>
+            </div>
+          </div>
 
           <label for="productName">対象商品・サービス名</label>
           <input type="text" id="productName" placeholder="例）保守費用、〇〇部品" />
@@ -208,15 +211,20 @@
 
           <div class="inputGrid" style="margin-top:8px;">
             <div>
-              <label for="currentPriceAsOf">現行価格の決定時期（年月）</label>
-              <input type="month" id="currentPriceAsOf" />
-              <div class="hint">本文に自然に織り込めます（例：2024-04）。</div>
-            </div>
-            <div>
               <label for="effectiveDate">適用開始時期</label>
               <input type="text" id="effectiveDate" placeholder="例）2026年4月1日 ご注文分より" />
             </div>
           </div>
+
+          
+
+          <div id="validateMsg" class="danger" style="display:none;"></div>
+        </div>
+
+        <div class="card" id="externalEnvSection">
+          <div class="pill">STEP 2：背景（外部環境＋根拠データ）</div>
+          <div class="hint">STEP1の「外部環境を確認」ボタンで、このセクションへ移動できます。</div>
+          <button class="btn emphasis" id="openExternalFactorsBtn2" type="button">外部環境を確認</button>
 
           <div class="dataPanel" style="margin-top:10px;">
             <div class="dataRow">
@@ -239,12 +247,6 @@
               <a href="https://www.mhlw.go.jp/content/11200000/001571219.xlsx" target="_blank" rel="noopener">厚労省 最低賃金推移</a>
             </div>
           </div>
-
-          <div id="validateMsg" class="danger" style="display:none;"></div>
-        </div>
-
-        <div class="card">
-          <div class="pill">STEP 2：背景（外部要因＋根拠データ）</div>
 
           <div class="dataPanel" aria-label="参考データ（最低賃金など）">
             <div class="dataRow">
@@ -335,7 +337,7 @@
 
           <div class="divider"></div>
 
-          <div class="hint">外部要因：該当するものを選択（複数可）</div>
+          <div class="hint">外部環境：該当するものを選択（複数可）</div>
           <div class="chipGroup" id="factorGroup">
             <button class="chip active" type="button" data-val="原材料・仕入コストの上昇">原材料・仕入</button>
             <button class="chip" type="button" data-val="物流費・運賃の上昇">物流</button>
@@ -350,7 +352,6 @@
           <textarea id="extraFactors" rows="2" placeholder="例）主要仕入先からの値上げ通知（+8%）、採用単価の上昇 等"></textarea>
           <div class="hint">※入力すると「〜に加え、〇〇」と自然に文章へ組み込まれます。</div>
         </div>
-
         <div class="card">
           <div class="pill">STEP 3：文面のトーン・顧客戦略</div>
           <div class="hint">相手に合わせて調整（1つ選択）</div>
@@ -398,6 +399,37 @@
             <span id="copyStatus" class="statusMsg">コピーしました</span>
           </div>
 
+          <div class="inputGrid" style="margin-top:8px;">
+            <div>
+              <label for="partnerCompany" style="margin-top:0;">相手社名</label>
+              <input type="text" id="partnerCompany" placeholder="例）〇〇株式会社" />
+            </div>
+            <div>
+              <label for="partnerPerson" style="margin-top:0;">相手担当者</label>
+              <input type="text" id="partnerPerson" placeholder="例）山田" />
+              <div class="inputGrid" style="margin-top:6px;gap:8px;grid-template-columns:1fr 1fr;">
+                <select id="partnerHonorific" aria-label="敬称選択">
+                  <option value="様">様</option>
+                  <option value="御中">御中</option>
+                  <option value="各位">各位</option>
+                  <option value="先生">先生</option>
+                  <option value="custom">任意入力</option>
+                </select>
+                <input type="text" id="partnerHonorificCustom" placeholder="任意の敬称（例：殿）" />
+              </div>
+            </div>
+          </div>
+          <div class="inputGrid" style="margin-top:8px;">
+            <div>
+              <label for="ownCompany" style="margin-top:0;">自社社名</label>
+              <input type="text" id="ownCompany" placeholder="例）株式会社サンプル商会" />
+            </div>
+            <div>
+              <label for="ownPerson" style="margin-top:0;">自社担当者</label>
+              <input type="text" id="ownPerson" placeholder="例）山田 太郎" />
+            </div>
+          </div>
+
           <div class="tabs" id="outputTabs" role="tablist" aria-label="出力切替">
             <div class="tab active" role="tab" aria-selected="true" tabindex="0" data-target="letter">案内文（顧客に渡す）</div>
             <div class="tab" role="tab" aria-selected="false" tabindex="-1" data-target="talk">面談トーク</div>
@@ -437,7 +469,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">r24</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">r25</span>（<span id="last-updated-date"></span>）
   </footer>
   <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -560,14 +592,18 @@
     }
 
     /* --- DOM --- */
-    const companyName = $('#companyName');
-    const senderName = $('#senderName');
     const productName = $('#productName');
     const currentPrice = $('#currentPrice');
     const newPrice = $('#newPrice');
     const currentPriceAsOf = $('#currentPriceAsOf');
     const effectiveDate = $('#effectiveDate');
     const outputArea = $('#outputArea');
+    const partnerCompany = $('#partnerCompany');
+    const partnerPerson = $('#partnerPerson');
+    const partnerHonorific = $('#partnerHonorific');
+    const partnerHonorificCustom = $('#partnerHonorificCustom');
+    const ownCompany = $('#ownCompany');
+    const ownPerson = $('#ownPerson');
     const copyBtn = $('#copyBtn');
     const printBtn = $('#printBtn');
     const copyStatus = $('#copyStatus');
@@ -609,6 +645,9 @@
 
     const extraFactors = $('#extraFactors');
     const effortFreeText = $('#effortFreeText');
+    const openExternalFactorsBtn = $('#openExternalFactorsBtn');
+    const openExternalFactorsBtn2 = $('#openExternalFactorsBtn2');
+    const externalEnvSection = $('#externalEnvSection');
 
     const printLetter = $('#printLetter');
     const printTalkMemo = $('#printTalkMemo');
@@ -1285,7 +1324,7 @@
         `  ${cpiSinceHow}`,
         `- ${srcLine}`,
         ``,
-        `■ 外部要因（選択）`,
+        `■ 外部環境（選択）`,
         `- ${factorText}`,
         `- ${extraText}`,
         ``,
@@ -1304,6 +1343,14 @@
       const np = toNum(newPrice.value);
       const dateStr = effectiveDate.value.trim() || '＿＿年＿＿月＿＿日';
       const decidedYM = fmtYM(currentPriceAsOf.value);
+      const partnerCompanyStr = (partnerCompany && partnerCompany.value.trim()) || '〇〇株式会社';
+      const partnerPersonName = (partnerPerson && partnerPerson.value.trim()) || '〇〇';
+      const selectedHonorific = (partnerHonorific && partnerHonorific.value) || '様';
+      const customHonorific = (partnerHonorificCustom && partnerHonorificCustom.value.trim()) || '';
+      const partnerHonorificStr = selectedHonorific === 'custom' ? (customHonorific || '様') : selectedHonorific;
+      const partnerPersonStr = `${partnerPersonName}${partnerHonorificStr}`;
+      const ownCompanyStr = (ownCompany && ownCompany.value.trim()) || '弊社';
+      const ownPersonStr = (ownPerson && ownPerson.value.trim()) || '営業担当';
 
       const cpStr = isFinite(cp) ? yen(cp) : '＿＿＿円';
       const npStr = isFinite(np) ? yen(np) : '＿＿＿円';
@@ -1364,11 +1411,11 @@
         letter =
 `件名：【重要】価格改定のお願い（${prod}）
 
-〇〇株式会社
-〇〇様
+${partnerCompanyStr}
+${partnerPersonStr}
 
 いつも大変お世話になっております。
-${companyName.value.trim() || '[自社名]'}の${senderName.value.trim() || '[氏名]'}でございます。
+${ownCompanyStr}の${ownPersonStr}でございます。
 
 平素より格別のご高配を賜り、心より御礼申し上げます。
 
@@ -1397,11 +1444,11 @@ ${customerStrategy}
         letter =
 `件名：【重要】${prod} 価格改定のお願い
 
-〇〇株式会社
-〇〇様
+${partnerCompanyStr}
+${partnerPersonStr}
 
 いつも大変お世話になっております。
-${companyName.value.trim() || '[自社名]'}の${senderName.value.trim() || '[氏名]'}でございます。
+${ownCompanyStr}の${ownPersonStr}でございます。
 
 平素は弊社サービスをご利用いただき誠にありがとうございます。
 さて、昨今の${combinedFactors}により、各種コストが上昇しております。
@@ -1425,11 +1472,11 @@ ${customerStrategy}
         letter =
 `件名：【ご相談】${prod}の適正価格化（価格改定）について
 
-〇〇株式会社
-〇〇様
+${partnerCompanyStr}
+${partnerPersonStr}
 
 いつも大変お世話になっております。
-${companyName.value.trim() || '[自社名]'}の${senderName.value.trim() || '[氏名]'}でございます。
+${ownCompanyStr}の${ownPersonStr}でございます。
 
 本日は、今後の継続提供の前提となる「適正価格化」について、ご相談申し上げます。
 昨今の${combinedFactors}が常態化しており、当社のコスト構造にも継続的な影響が出ております。
@@ -1464,7 +1511,7 @@ ${customerStrategy}
 回答例: 「他社様の状況は存じ上げませんが、当社の原価構造では現行価格の維持が限界です。品質を落とさず提供を続けるには、適正価格への見直しが不可欠とご理解ください。」
 
 【反論2】「そちらの都合でしょう」
-回答例: 「最低賃金改定・物価上昇は公的統計でも明らかな外部要因です（資料提示）。当社だけの都合ではなく、業界全体が直面している構造的な課題です。」
+回答例: 「最低賃金改定・物価上昇は公的統計でも明らかな外部環境です（資料提示）。当社だけの都合ではなく、業界全体が直面している構造的な課題です。」
 
 【反論3】「契約期間中の変更は認められない」
 回答例: 「現契約は○年○月までと承知しております。本日は次回更新時の価格についてご相談です。（または：事情変更の原則に基づき、契約期間中でも協議をお願いできればと存じます）」
@@ -1548,6 +1595,18 @@ ${objectionHandling}
       }
     }
 
+    function scrollToExternalEnv(){
+      if(!externalEnvSection) return;
+      externalEnvSection.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    function syncHonorificInput(){
+      if(!partnerHonorificCustom || !partnerHonorific) return;
+      const useCustom = partnerHonorific.value === 'custom';
+      partnerHonorificCustom.style.display = useCustom ? 'block' : 'none';
+      if(!useCustom) partnerHonorificCustom.value = '';
+    }
+
     function showCopied(){
       copyStatus.classList.add('show');
       clearTimeout(showCopied._t);
@@ -1579,9 +1638,14 @@ ${objectionHandling}
 
     printBtn.addEventListener('click', () => { try{ window.print(); }catch(e){} });
 
-    [companyName, senderName, productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText,
+    [partnerCompany, partnerPerson, partnerHonorific, partnerHonorificCustom, ownCompany, ownPerson,
+     productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText,
      embedNumbersInLetter, linkRates, cpiRate, wageRate, cpiAsOf, wageAsOf]
       .forEach(el => el.addEventListener('input', generate));
+
+    if(openExternalFactorsBtn) openExternalFactorsBtn.addEventListener('click', scrollToExternalEnv);
+    if(openExternalFactorsBtn2) openExternalFactorsBtn2.addEventListener('click', scrollToExternalEnv);
+    if(partnerHonorific) partnerHonorific.addEventListener('change', () => { syncHonorificInput(); generate(); });
 
     linkRates.addEventListener('change', ()=>{
       renderAllByPref();
@@ -1669,10 +1733,12 @@ ${objectionHandling}
     }
 
     resetBtn.addEventListener('click', () => {
-      [companyName,senderName,productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText].forEach(el=>{
+      [partnerCompany,partnerPerson,partnerHonorificCustom,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText].forEach(el=>{
         el.value='';
         el.classList.remove('imported-value');
       });
+
+      if(partnerHonorific) partnerHonorific.value = '様';
 
       embedNumbersInLetter.checked = true;
       linkRates.checked = true;
@@ -1727,6 +1793,7 @@ ${objectionHandling}
 
     renderAllByPref();
     getUrlParams();
+    syncHonorificInput();
 
     generate();
 
