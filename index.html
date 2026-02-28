@@ -657,6 +657,8 @@
 
     const cpiSinceView = $('#cpiSinceView');
     const cpiSinceBadge = $('#cpiSinceBadge');
+    const cpiSinceViewModal = $('#cpiSinceViewModal');
+    const cpiSinceBadgeModal = $('#cpiSinceBadgeModal');
 
     const helpCpi = $('#helpCpi');
     const helpWage = $('#helpWage');
@@ -1090,6 +1092,7 @@
       const x = calcCpiSince();
       const mwX = calcMwSince();
       const calcDetailBox = $('#calcDetailBox');
+      const calcDetailBoxModal = $('#calcDetailBoxModal');
 
       if(!x || !mwX){
         cpiSinceView.innerHTML = '<span class="cumValue">物価：— ／ 最低賃金：—</span>';
@@ -1103,7 +1106,7 @@
       cpiSinceBadge.textContent = '概算';
       cpiSinceBadge.className = 'badge warn';
 
-      if(calcDetailBox) {
+      if(calcDetailBox || calcDetailBoxModal) {
         let detailHtml = `<b>【累積物価上昇率（CPI）の計算式】</b><br>`;
         detailHtml += `基準時（${x.by}年${x.bm+1}月）の推定CPI：${x.baseCpi.toFixed(2)}<br>`;
         detailHtml += `現在（${x.ny}年${x.nm+1}月）の推定CPI：${x.nowCpi.toFixed(2)}<br>`;
@@ -1115,7 +1118,8 @@
         detailHtml += `現在（${mwX.ny}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>`;
         detailHtml += `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`;
 
-        calcDetailBox.innerHTML = detailHtml;
+        if(calcDetailBox) calcDetailBox.innerHTML = detailHtml;
+        if(calcDetailBoxModal) calcDetailBoxModal.innerHTML = detailHtml;
       }
     }
 
@@ -1779,6 +1783,11 @@ ${objectionHandling}
         el.value='';
         el.classList.remove('imported-value');
       });
+      closeExternalFactorsModal();
+
+      if(partnerHonorific) partnerHonorific.value = '様';
+
+      if(partnerHonorific) partnerHonorific.value = '様';
 
       if(partnerHonorific) partnerHonorific.value = '様';
 
