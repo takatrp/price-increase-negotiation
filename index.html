@@ -260,6 +260,28 @@
               </div>
             </div>
 
+          <div class="dataPanel" style="margin-top:0;">
+            <div class="dataRow">
+              <span class="dataKey">現行価格決定時からの累積上昇（概算）</span>
+              <span id="cpiSinceViewModal"><b>物価：— ／ 最低賃金：—</b></span>
+              <span class="badge warn" id="cpiSinceBadgeModal">任意</span>
+            </div>
+            <div class="small">※実際の消費者物価指数および最低賃金（対象都道府県）の過去推移データを用いた概算です。</div>
+
+            <details style="border:none; padding:0; background:transparent !important; margin-top:6px;">
+              <summary style="font-size:0.8rem; font-weight:normal; color:#578899; cursor:pointer; text-decoration:underline;">計算過程を確認する</summary>
+              <div id="calcDetailBoxModal" class="mutedBox" style="font-size:0.75rem; margin-top:4px; line-height:1.5;">
+                （年月を入力すると計算過程が表示されます）
+              </div>
+            </details>
+
+            <div class="sourceLink">
+              <span class="badge">根拠</span>
+              <a href="https://www.stat.go.jp/data/cpi/sokuhou/tsuki/pdf/doukou.pdf" target="_blank" rel="noopener">総務省統計局</a> /
+              <a href="https://www.mhlw.go.jp/content/11200000/001571219.xlsx" target="_blank" rel="noopener">厚労省 最低賃金推移</a>
+            </div>
+          </div>
+
           <div class="dataPanel" aria-label="参考データ（最低賃金など）">
             <div class="dataRow">
               <span class="dataKey">最低賃金（参考）</span>
@@ -411,6 +433,27 @@
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:0;">
             <div class="pill">生成出力</div>
             <span id="copyStatus" class="statusMsg">コピーしました</span>
+          </div>
+
+          <div class="inputGrid" style="margin-top:8px;">
+            <div>
+              <label for="partnerCompany" style="margin-top:0;">相手社名</label>
+              <input type="text" id="partnerCompany" placeholder="例）〇〇株式会社" />
+            </div>
+            <div>
+              <label for="partnerPerson" style="margin-top:0;">相手担当者</label>
+              <input type="text" id="partnerPerson" placeholder="例）〇〇様" />
+            </div>
+          </div>
+          <div class="inputGrid" style="margin-top:8px;">
+            <div>
+              <label for="ownCompany" style="margin-top:0;">自社社名</label>
+              <input type="text" id="ownCompany" placeholder="例）株式会社サンプル商会" />
+            </div>
+            <div>
+              <label for="ownPerson" style="margin-top:0;">自社担当者</label>
+              <input type="text" id="ownPerson" placeholder="例）山田 太郎" />
+            </div>
           </div>
 
           <div class="tabs" id="outputTabs" role="tablist" aria-label="出力切替">
@@ -581,6 +624,10 @@
     const currentPriceAsOf = $('#currentPriceAsOf');
     const effectiveDate = $('#effectiveDate');
     const outputArea = $('#outputArea');
+    const partnerCompany = $('#partnerCompany');
+    const partnerPerson = $('#partnerPerson');
+    const ownCompany = $('#ownCompany');
+    const ownPerson = $('#ownPerson');
     const copyBtn = $('#copyBtn');
     const printBtn = $('#printBtn');
     const copyStatus = $('#copyStatus');
@@ -608,6 +655,8 @@
 
     const cpiSinceView = $('#cpiSinceView');
     const cpiSinceBadge = $('#cpiSinceBadge');
+    const cpiSinceViewModal = $('#cpiSinceViewModal');
+    const cpiSinceBadgeModal = $('#cpiSinceBadgeModal');
 
     const helpCpi = $('#helpCpi');
     const helpWage = $('#helpWage');
@@ -1041,20 +1090,29 @@
       const x = calcCpiSince();
       const mwX = calcMwSince();
       const calcDetailBox = $('#calcDetailBox');
+      const calcDetailBoxModal = $('#calcDetailBoxModal');
 
       if(!x || !mwX){
-        cpiSinceView.innerHTML = '<b>物価：— ／ 最低賃金：—</b>';
-        cpiSinceBadge.textContent = '任意';
-        cpiSinceBadge.className = 'badge warn';
-        if(calcDetailBox) calcDetailBox.innerHTML = '（年月を入力すると計算過程が表示されます）';
+        [cpiSinceView, cpiSinceViewModal].forEach(el => { if(el) el.innerHTML = '<b>物価：— ／ 最低賃金：—</b>'; });
+        [cpiSinceBadge, cpiSinceBadgeModal].forEach(el => {
+          if(!el) return;
+          el.textContent = '任意';
+          el.className = 'badge warn';
+        });
+        [calcDetailBox, calcDetailBoxModal].forEach(el => { if(el) el.innerHTML = '（年月を入力すると計算過程が表示されます）'; });
         return;
       }
 
-      cpiSinceView.innerHTML = `<b>物価：約${pct1(x.cum)}% ／ 最低賃金：約${pct1(mwX.cum)}%（${x.months}ヶ月）</b>`;
-      cpiSinceBadge.textContent = '概算';
-      cpiSinceBadge.className = 'badge warn';
+      [cpiSinceView, cpiSinceViewModal].forEach(el => {
+        if(el) el.innerHTML = `<b>物価：約${pct1(x.cum)}% ／ 最低賃金：約${pct1(mwX.cum)}%（${x.months}ヶ月）</b>`;
+      });
+      [cpiSinceBadge, cpiSinceBadgeModal].forEach(el => {
+        if(!el) return;
+        el.textContent = '概算';
+        el.className = 'badge warn';
+      });
 
-      if(calcDetailBox) {
+      if(calcDetailBox || calcDetailBoxModal) {
         let detailHtml = `<b>【累積物価上昇率（CPI）の計算式】</b><br>`;
         detailHtml += `基準時（${x.by}年${x.bm+1}月）の推定CPI：${x.baseCpi.toFixed(2)}<br>`;
         detailHtml += `現在（${x.ny}年${x.nm+1}月）の推定CPI：${x.nowCpi.toFixed(2)}<br>`;
@@ -1066,7 +1124,8 @@
         detailHtml += `現在（${mwX.ny}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>`;
         detailHtml += `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`;
 
-        calcDetailBox.innerHTML = detailHtml;
+        if(calcDetailBox) calcDetailBox.innerHTML = detailHtml;
+        if(calcDetailBoxModal) calcDetailBoxModal.innerHTML = detailHtml;
       }
     }
 
@@ -1322,6 +1381,10 @@
       const np = toNum(newPrice.value);
       const dateStr = effectiveDate.value.trim() || '＿＿年＿＿月＿＿日';
       const decidedYM = fmtYM(currentPriceAsOf.value);
+      const partnerCompanyStr = (partnerCompany && partnerCompany.value.trim()) || '〇〇株式会社';
+      const partnerPersonStr = (partnerPerson && partnerPerson.value.trim()) || '〇〇様';
+      const ownCompanyStr = (ownCompany && ownCompany.value.trim()) || '弊社';
+      const ownPersonStr = (ownPerson && ownPerson.value.trim()) || '営業担当';
 
       const cpStr = isFinite(cp) ? yen(cp) : '＿＿＿円';
       const npStr = isFinite(np) ? yen(np) : '＿＿＿円';
@@ -1382,11 +1445,11 @@
         letter =
 `件名：【重要】価格改定のお願い（${prod}）
 
-〇〇株式会社
-〇〇様
+${partnerCompanyStr}
+${partnerPersonStr}
 
 いつも大変お世話になっております。
-弊社営業担当でございます。
+${ownCompanyStr}の${ownPersonStr}でございます。
 
 平素より格別のご高配を賜り、心より御礼申し上げます。
 
@@ -1415,11 +1478,11 @@ ${customerStrategy}
         letter =
 `件名：【重要】${prod} 価格改定のお願い
 
-〇〇株式会社
-〇〇様
+${partnerCompanyStr}
+${partnerPersonStr}
 
 いつも大変お世話になっております。
-弊社営業担当でございます。
+${ownCompanyStr}の${ownPersonStr}でございます。
 
 平素は弊社サービスをご利用いただき誠にありがとうございます。
 さて、昨今の${combinedFactors}により、各種コストが上昇しております。
@@ -1443,11 +1506,11 @@ ${customerStrategy}
         letter =
 `件名：【ご相談】${prod}の適正価格化（価格改定）について
 
-〇〇株式会社
-〇〇様
+${partnerCompanyStr}
+${partnerPersonStr}
 
 いつも大変お世話になっております。
-弊社営業担当でございます。
+${ownCompanyStr}の${ownPersonStr}でございます。
 
 本日は、今後の継続提供の前提となる「適正価格化」について、ご相談申し上げます。
 昨今の${combinedFactors}が常態化しており、当社のコスト構造にも継続的な影響が出ております。
@@ -1609,7 +1672,8 @@ ${objectionHandling}
 
     printBtn.addEventListener('click', () => { try{ window.print(); }catch(e){} });
 
-    [productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText,
+    [partnerCompany, partnerPerson, ownCompany, ownPerson,
+     productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText,
      embedNumbersInLetter, linkRates, cpiRate, wageRate, cpiAsOf, wageAsOf]
       .forEach(el => el.addEventListener('input', generate));
 
@@ -1619,6 +1683,12 @@ ${objectionHandling}
     if(closeExternalFactorsX) closeExternalFactorsX.addEventListener('click', closeExternalFactorsModal);
     if(externalFactorsModal) externalFactorsModal.addEventListener('click', (e)=>{
       if(e.target === externalFactorsModal) closeExternalFactorsModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape' && externalFactorsModal && externalFactorsModal.classList.contains('show')){
+        closeExternalFactorsModal();
+      }
     });
 
     currentPriceAsOf.addEventListener('change', () => {
@@ -1711,7 +1781,7 @@ ${objectionHandling}
     }
 
     resetBtn.addEventListener('click', () => {
-      [productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText].forEach(el=>{
+      [partnerCompany,partnerPerson,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText].forEach(el=>{
         el.value='';
         el.classList.remove('imported-value');
       });
