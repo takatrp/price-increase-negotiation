@@ -79,7 +79,16 @@
     .divider{height:1px;background:#e5e7eb;margin:12px 0}
 
     .btn.emphasis{background:#f59e0b;color:#111827;border:1px solid #d97706;}
-.btn.emphasis:hover{opacity:1;background:#fbbf24;}
+    .btn.emphasis:hover{opacity:1;background:#fbbf24;}
+
+    .modalOverlay{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;z-index:999}
+    .modalOverlay.show{display:flex}
+    .modalDialog{width:min(980px,92vw);max-height:88vh;overflow:auto;background:#fff;border-radius:14px;box-shadow:0 20px 40px rgba(0,0,0,.22);padding:14px}
+    .modalHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;background:#fff;padding-bottom:10px}
+    .iconBtn{border:1px solid #d1d5db;background:#fff;border-radius:8px;padding:4px 10px;font-weight:900;cursor:pointer}
+
+    .quietLaw summary{font-size:.82rem;color:#64748b;font-weight:700}
+    .quietLaw .mutedBox{background:#f9fafb;border-color:#e5e7eb;color:#6b7280;font-size:.78rem}
 
     /* インポートハイライト */
     input.imported-value, select.imported-value, textarea.imported-value{
@@ -133,7 +142,7 @@
       <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
         <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56" />
       </a>
-      <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r25</span></div>
+      <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r26</span></div>
       <div class="headRight">
         <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
       </div>
@@ -159,7 +168,7 @@
             ⚠️ 価格改定条項がない場合、一方的な値上げは原則不可（民法上は相手の同意が必要）。本ツールで生成する文面は「協議の申し入れ」として使用してください。
           </div>
 
-          <details>
+          <details class="quietLaw">
             <summary>独占禁止法の注意点（優越的地位）</summary>
             <div class="mutedBox">
               <div class="small">
@@ -223,121 +232,12 @@
 
         <div class="card" id="externalEnvSection">
           <div class="pill">STEP 2：背景（外部環境＋根拠データ）</div>
-          <div class="hint">STEP1の「外部環境を確認」ボタンで、このセクションへ移動できます。</div>
+          <div class="hint">「外部環境を確認」ボタンで、確認項目をフローティング表示します。</div>
           <button class="btn emphasis" id="openExternalFactorsBtn2" type="button">外部環境を確認</button>
 
-          <div class="dataPanel" style="margin-top:10px;">
-            <div class="dataRow">
-              <span class="dataKey">現行価格決定時からの累積上昇（概算）</span>
-              <span id="cpiSinceView"><b>物価：— ／ 最低賃金：—</b></span>
-              <span class="badge warn" id="cpiSinceBadge">任意</span>
-            </div>
-            <div class="small">※実際の消費者物価指数および最低賃金（対象都道府県）の過去推移データを用いた概算です。</div>
-
-            <details style="border:none; padding:0; background:transparent !important; margin-top:6px;">
-              <summary style="font-size:0.8rem; font-weight:normal; color:#578899; cursor:pointer; text-decoration:underline;">計算過程を確認する</summary>
-              <div id="calcDetailBox" class="mutedBox" style="font-size:0.75rem; margin-top:4px; line-height:1.5;">
-                （年月を入力すると計算過程が表示されます）
-              </div>
-            </details>
-
-            <div class="sourceLink">
-              <span class="badge">根拠</span>
-              <a href="https://www.stat.go.jp/data/cpi/sokuhou/tsuki/pdf/doukou.pdf" target="_blank" rel="noopener">総務省統計局</a> /
-              <a href="https://www.mhlw.go.jp/content/11200000/001571219.xlsx" target="_blank" rel="noopener">厚労省 最低賃金推移</a>
-            </div>
-          </div>
-
-          <div class="dataPanel" aria-label="参考データ（最低賃金など）">
-            <div class="dataRow">
-              <span class="dataKey">最低賃金（参考）</span>
-              <span id="minWageView">—</span>
-              <span class="badge" id="minWageBadge">未取得</span>
-            </div>
-            <div class="small" id="minWageNote">※最低賃金はJSON優先（未読込時は内蔵値）。</div>
-          </div>
-
           <div class="divider"></div>
 
-          <div class="inputGrid">
-            <div>
-              <label for="cpiRate">物価上昇率（%） <span class="badge" id="cpiScopeBadge">—</span></label>
-              <input type="text" id="cpiRate" inputmode="decimal" placeholder="例）2.0" />
-            </div>
-            <div>
-              <label for="wageRate">人件費上昇率（%） <span class="badge" id="wageScopeBadge">—</span></label>
-              <input type="text" id="wageRate" inputmode="decimal" placeholder="例）4.6" />
-            </div>
-          </div>
-
-          <div class="inputGrid" style="margin-top:12px;">
-            <div>
-              <label for="cpiAsOf" style="margin-top:0;">物価データの対象</label>
-              <input type="text" id="cpiAsOf" placeholder="例）2026年1月（前年同月比）" />
-            </div>
-            <div>
-              <label for="wageAsOf" style="margin-top:0;">人件費データの対象</label>
-              <input type="text" id="wageAsOf" placeholder="例）2025年春闘（中小）" />
-            </div>
-          </div>
-
-          <details>
-            <summary>詳細設定（連動/説明/JSON読込）</summary>
-
-            <div class="mutedBox">
-              <div class="dataRow">
-                <span class="dataKey">都道府県変更に連動</span>
-                <label style="display:flex;gap:10px;align-items:center;margin:0;font-weight:900;">
-                  <input type="checkbox" id="linkRates" checked style="width:auto;"> 連動する（推奨）
-                </label>
-                <span class="badge warn" id="linkNoteBadge">全国値が多い</span>
-              </div>
-              <div class="small" id="linkNoteText" style="margin-top:6px;">
-                ※都道府県別の物価/賃金がJSONに無い場合は「全国値」を表示します（バッジで明記）。
-                都道府県別で運用したい場合は pref_cost_data.json の prefs.[都道府県キー].cpi_yoy / wage_yoy を設定してください。
-              </div>
-
-              <div class="divider"></div>
-
-              <label style="display:flex;gap:10px;align-items:center;margin:0;font-weight:900;">
-                <input type="checkbox" id="embedNumbersInLetter" checked style="width:auto;"> 本文に根拠数値（%・最低賃金等）を自然に織り込み、末尾に参考データを付与する
-              </label>
-
-              <div class="divider"></div>
-
-              <div class="small" style="font-weight:900;color:#0f172a;">説明（社内向け）</div>
-              <div class="chipGroup" style="margin-top:6px;">
-                <button class="chip" type="button" id="helpCpi">物価上昇率とは？</button>
-                <button class="chip" type="button" id="helpWage">人件費上昇率とは？</button>
-                <button class="chip" type="button" id="helpScope">都道府県別でない理由</button>
-              </div>
-              <div class="small" id="helpBox" style="margin-top:8px;line-height:1.6;color:#334155;"></div>
-            </div>
-
-            <details id="dataLoader" class="adminOnly">
-              <summary>都道府県データを読み込み（JSON）</summary>
-              <div class="hint">同階層の <span class="kbd">pref_cost_data.json</span> またはURLから読み込みます（物価/賃金/最低賃金など）。</div>
-
-              <label for="dataUrl">JSONのURL（空欄なら ./pref_cost_data.json を試行）</label>
-              <input type="text" id="dataUrl" placeholder="例）https://.../pref_cost_data.json" />
-
-              <div class="miniActions">
-                <button class="btn" id="loadDataBtn" type="button">読み込み</button>
-                <button class="btn alt" id="clearDataBtn" type="button">読込解除</button>
-                <span id="dataLoadStatus" class="small" aria-live="polite"></span>
-              </div>
-
-              <div class="mutedBox">
-                <div class="small" style="margin-bottom:6px;"><b>JSONキー例（最小）</b></div>
-                <pre class="sample" id="jsonSample"></pre>
-              </div>
-              <div class="small">※キーは「兵庫 / 鳥取 / 和歌山」等、都道府県名（都・道・府・県を除いた形）で入れてください。</div>
-            </details>
-          </details>
-
-          <div class="divider"></div>
-
-          <div class="hint">外部環境：該当するものを選択（複数可）</div>
+          <div class="hint">入力項目：該当するものを選択（複数可）</div>
           <div class="chipGroup" id="factorGroup">
             <button class="chip active" type="button" data-val="原材料・仕入コストの上昇">原材料・仕入</button>
             <button class="chip" type="button" data-val="物流費・運賃の上昇">物流</button>
@@ -351,6 +251,126 @@
           <label for="extraFactors">補足（任意）</label>
           <textarea id="extraFactors" rows="2" placeholder="例）主要仕入先からの値上げ通知（+8%）、採用単価の上昇 等"></textarea>
           <div class="hint">※入力すると「〜に加え、〇〇」と自然に文章へ組み込まれます。</div>
+        </div>
+
+        <div id="externalFactorsModal" class="modalOverlay" aria-hidden="true">
+          <div class="modalDialog" role="dialog" aria-modal="true" aria-label="外部環境（確認項目）">
+            <div class="modalHeader">
+              <div class="pill" style="margin:0;">外部環境（確認項目）</div>
+              <div style="display:flex;gap:8px;">
+                <button class="iconBtn" id="closeExternalFactorsX" type="button">×</button>
+                <button class="btn alt sm" id="closeExternalFactorsBtn" type="button">閉じる</button>
+              </div>
+            </div>
+
+            <div class="dataPanel" style="margin-top:0;">
+              <div class="dataRow">
+                <span class="dataKey">現行価格決定時からの累積上昇（概算）</span>
+                <span id="cpiSinceView"><b>物価：— ／ 最低賃金：—</b></span>
+                <span class="badge warn" id="cpiSinceBadge">任意</span>
+              </div>
+              <div class="small">※実際の消費者物価指数および最低賃金（対象都道府県）の過去推移データを用いた概算です。</div>
+
+              <details style="border:none; padding:0; background:transparent !important; margin-top:6px;">
+                <summary style="font-size:0.8rem; font-weight:normal; color:#578899; cursor:pointer; text-decoration:underline;">計算過程を確認する</summary>
+                <div id="calcDetailBox" class="mutedBox" style="font-size:0.75rem; margin-top:4px; line-height:1.5;">
+                  （年月を入力すると計算過程が表示されます）
+                </div>
+              </details>
+
+              <div class="sourceLink">
+                <span class="badge">根拠</span>
+                <a href="https://www.stat.go.jp/data/cpi/sokuhou/tsuki/pdf/doukou.pdf" target="_blank" rel="noopener">総務省統計局</a> /
+                <a href="https://www.mhlw.go.jp/content/11200000/001571219.xlsx" target="_blank" rel="noopener">厚労省 最低賃金推移</a>
+              </div>
+            </div>
+
+            <div class="dataPanel" aria-label="参考データ（最低賃金など）">
+              <div class="dataRow">
+                <span class="dataKey">最低賃金（参考）</span>
+                <span id="minWageView">—</span>
+                <span class="badge" id="minWageBadge">未取得</span>
+              </div>
+              <div class="small" id="minWageNote">※最低賃金はJSON優先（未読込時は内蔵値）。</div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="inputGrid">
+              <div>
+                <label for="cpiRate">物価上昇率（%） <span class="badge" id="cpiScopeBadge">—</span></label>
+                <input type="text" id="cpiRate" inputmode="decimal" placeholder="例）2.0" />
+              </div>
+              <div>
+                <label for="wageRate">人件費上昇率（%） <span class="badge" id="wageScopeBadge">—</span></label>
+                <input type="text" id="wageRate" inputmode="decimal" placeholder="例）4.6" />
+              </div>
+            </div>
+
+            <div class="inputGrid" style="margin-top:12px;">
+              <div>
+                <label for="cpiAsOf" style="margin-top:0;">物価データの対象</label>
+                <input type="text" id="cpiAsOf" placeholder="例）2026年1月（前年同月比）" />
+              </div>
+              <div>
+                <label for="wageAsOf" style="margin-top:0;">人件費データの対象</label>
+                <input type="text" id="wageAsOf" placeholder="例）2025年春闘（中小）" />
+              </div>
+            </div>
+
+            <details>
+              <summary>詳細設定（連動/説明/JSON読込）</summary>
+
+              <div class="mutedBox">
+                <div class="dataRow">
+                  <span class="dataKey">都道府県変更に連動</span>
+                  <label style="display:flex;gap:10px;align-items:center;margin:0;font-weight:900;">
+                    <input type="checkbox" id="linkRates" checked style="width:auto;"> 連動する（推奨）
+                  </label>
+                  <span class="badge warn" id="linkNoteBadge">全国値が多い</span>
+                </div>
+                <div class="small" id="linkNoteText" style="margin-top:6px;">
+                  ※都道府県別の物価/賃金がJSONに無い場合は「全国値」を表示します（バッジで明記）。
+                  都道府県別で運用したい場合は pref_cost_data.json の prefs.[都道府県キー].cpi_yoy / wage_yoy を設定してください。
+                </div>
+
+                <div class="divider"></div>
+
+                <label style="display:flex;gap:10px;align-items:center;margin:0;font-weight:900;">
+                  <input type="checkbox" id="embedNumbersInLetter" checked style="width:auto;"> 本文に根拠数値（%・最低賃金等）を自然に織り込み、末尾に参考データを付与する
+                </label>
+
+                <div class="divider"></div>
+
+                <div class="small" style="font-weight:900;color:#0f172a;">説明（社内向け）</div>
+                <div class="chipGroup" style="margin-top:6px;">
+                  <button class="chip" type="button" id="helpCpi">物価上昇率とは？</button>
+                  <button class="chip" type="button" id="helpWage">人件費上昇率とは？</button>
+                  <button class="chip" type="button" id="helpScope">都道府県別でない理由</button>
+                </div>
+                <div class="small" id="helpBox" style="margin-top:8px;line-height:1.6;color:#334155;"></div>
+              </div>
+
+              <details id="dataLoader" class="adminOnly">
+                <summary>都道府県データを読み込み（JSON）</summary>
+                <div class="hint">同階層の <span class="kbd">pref_cost_data.json</span> またはURLから読み込みます（物価/賃金/最低賃金など）。</div>
+
+                <label for="dataUrl">JSONのURL（空欄なら ./pref_cost_data.json を試行）</label>
+                <input type="text" id="dataUrl" placeholder="例）https://.../pref_cost_data.json" />
+
+                <div class="miniActions">
+                  <button class="btn" id="loadDataBtn" type="button">読み込み</button>
+                  <button class="btn alt" id="clearDataBtn" type="button">読込解除</button>
+                  <span id="dataLoadStatus" class="small" aria-live="polite"></span>
+                </div>
+
+                <div class="mutedBox">
+                  <div class="small" style="margin-bottom:6px;"><b>JSONキー例（最小）</b></div>
+                  <pre class="sample" id="jsonSample"></pre>
+                </div>
+                <div class="small">※キーは「兵庫 / 鳥取 / 和歌山」等、都道府県名（都・道・府・県を除いた形）で入れてください。</div>
+              </details>
+            </details>
           </div>
         </div>
         <div class="card">
@@ -364,7 +384,7 @@
 
           <details style="margin-top:10px;">
             <summary>高度な戦略オプション（顧客タイプ）</summary>
-            <label>顧客タイプ（必須）</label>
+            <label>顧客タイプ</label>
             <div class="chipGroup" id="customerGroup">
               <button class="chip" type="button" data-val="strategic">戦略顧客（最重要）</button>
               <button class="chip" type="button" data-val="profitable">優良顧客</button>
@@ -378,7 +398,7 @@
           </details>
 
           <details style="margin-top:10px;">
-            <summary>自助努力（必須）</summary>
+            <summary>自助努力</summary>
             <div class="hint">これまでの努力（複数可）</div>
             <div class="chipGroup" id="effortGroup">
               <button class="chip active" type="button" data-val="徹底した経費削減">経費削減</button>
@@ -386,7 +406,7 @@
               <button class="chip" type="button" data-val="仕入先の見直し・統合">仕入先見直し</button>
               <button class="chip active" type="button" data-val="数年間にわたる価格据え置き">価格据え置き</button>
             </div>
-            <label for="effortFreeText">自助努力（自由入力・必須）</label>
+            <label for="effortFreeText">自助努力（自由入力）</label>
             <textarea id="effortFreeText" rows="2" placeholder="例）配送ルートの見直し、作業工程の標準化による残業削減 等"></textarea>
           </details>
         </div>
@@ -470,7 +490,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">r25</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">r26</span>（<span id="last-updated-date"></span>）
   </footer>
   <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -650,7 +670,9 @@
     const effortFreeText = $('#effortFreeText');
     const openExternalFactorsBtn = $('#openExternalFactorsBtn');
     const openExternalFactorsBtn2 = $('#openExternalFactorsBtn2');
-    const externalEnvSection = $('#externalEnvSection');
+    const externalFactorsModal = $('#externalFactorsModal');
+    const closeExternalFactorsBtn = $('#closeExternalFactorsBtn');
+    const closeExternalFactorsX = $('#closeExternalFactorsX');
 
     const printLetter = $('#printLetter');
     const printTalkMemo = $('#printTalkMemo');
@@ -1130,7 +1152,6 @@
       let msg = '';
       if(!prod) msg = '「対象商品・サービス名」が未入力です（送付前に必ず埋めてください）。';
       if(!customerType) msg = '「顧客タイプ」は必須です。1つ選択してください。';
-      if(efforts.length === 0 || !effortFree) msg = '「自助努力」は必須です。選択に加えて自由入力も記入してください。';
       if(isFinite(cp) && isFinite(np) && cp>0 && np<0) msg = '「改定後単価」に負の値が入っています。';
       if(isFinite(cp) && isFinite(np) && cp>0 && np===0) msg = '「改定後単価」が0円です。意図した入力か確認してください。';
 
@@ -1608,9 +1629,16 @@ ${objectionHandling}
       }
     }
 
-    function scrollToExternalEnv(){
-      if(!externalEnvSection) return;
-      externalEnvSection.scrollIntoView({ behavior:'smooth', block:'start' });
+    function openExternalFactorsModal(){
+      if(!externalFactorsModal) return;
+      externalFactorsModal.classList.add('show');
+      externalFactorsModal.setAttribute('aria-hidden','false');
+    }
+
+    function closeExternalFactorsModal(){
+      if(!externalFactorsModal) return;
+      externalFactorsModal.classList.remove('show');
+      externalFactorsModal.setAttribute('aria-hidden','true');
     }
 
     function syncHonorificInput(){
@@ -1656,8 +1684,16 @@ ${objectionHandling}
      embedNumbersInLetter, linkRates, cpiRate, wageRate, cpiAsOf, wageAsOf]
       .forEach(el => el.addEventListener('input', generate));
 
-    if(openExternalFactorsBtn) openExternalFactorsBtn.addEventListener('click', scrollToExternalEnv);
-    if(openExternalFactorsBtn2) openExternalFactorsBtn2.addEventListener('click', scrollToExternalEnv);
+    if(openExternalFactorsBtn) openExternalFactorsBtn.addEventListener('click', openExternalFactorsModal);
+    if(openExternalFactorsBtn2) openExternalFactorsBtn2.addEventListener('click', openExternalFactorsModal);
+    if(closeExternalFactorsBtn) closeExternalFactorsBtn.addEventListener('click', closeExternalFactorsModal);
+    if(closeExternalFactorsX) closeExternalFactorsX.addEventListener('click', closeExternalFactorsModal);
+    if(externalFactorsModal) externalFactorsModal.addEventListener('click', (e)=>{
+      if(e.target === externalFactorsModal) closeExternalFactorsModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape' && externalFactorsModal && externalFactorsModal.classList.contains('show')) closeExternalFactorsModal();
+    });
     if(partnerHonorific) partnerHonorific.addEventListener('change', () => { syncHonorificInput(); generate(); });
 
     linkRates.addEventListener('change', ()=>{
@@ -1751,6 +1787,8 @@ ${objectionHandling}
         el.classList.remove('imported-value');
       });
       closeExternalFactorsModal();
+
+      if(partnerHonorific) partnerHonorific.value = '様';
 
       if(partnerHonorific) partnerHonorific.value = '様';
 
