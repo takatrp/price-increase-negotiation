@@ -351,6 +351,7 @@
           <label for="extraFactors">補足（任意）</label>
           <textarea id="extraFactors" rows="2" placeholder="例）主要仕入先からの値上げ通知（+8%）、採用単価の上昇 等"></textarea>
           <div class="hint">※入力すると「〜に加え、〇〇」と自然に文章へ組み込まれます。</div>
+          </div>
         </div>
         <div class="card">
           <div class="pill">STEP 3：文面のトーン・顧客戦略</div>
@@ -631,6 +632,8 @@
 
     const cpiSinceView = $('#cpiSinceView');
     const cpiSinceBadge = $('#cpiSinceBadge');
+    const cpiSinceViewModal = $('#cpiSinceViewModal');
+    const cpiSinceBadgeModal = $('#cpiSinceBadgeModal');
 
     const helpCpi = $('#helpCpi');
     const helpWage = $('#helpWage');
@@ -1062,20 +1065,29 @@
       const x = calcCpiSince();
       const mwX = calcMwSince();
       const calcDetailBox = $('#calcDetailBox');
+      const calcDetailBoxModal = $('#calcDetailBoxModal');
 
       if(!x || !mwX){
-        cpiSinceView.innerHTML = '<b>物価：— ／ 最低賃金：—</b>';
-        cpiSinceBadge.textContent = '任意';
-        cpiSinceBadge.className = 'badge warn';
-        if(calcDetailBox) calcDetailBox.innerHTML = '（年月を入力すると計算過程が表示されます）';
+        [cpiSinceView, cpiSinceViewModal].forEach(el => { if(el) el.innerHTML = '<b>物価：— ／ 最低賃金：—</b>'; });
+        [cpiSinceBadge, cpiSinceBadgeModal].forEach(el => {
+          if(!el) return;
+          el.textContent = '任意';
+          el.className = 'badge warn';
+        });
+        [calcDetailBox, calcDetailBoxModal].forEach(el => { if(el) el.innerHTML = '（年月を入力すると計算過程が表示されます）'; });
         return;
       }
 
-      cpiSinceView.innerHTML = `<b>物価：約${pct1(x.cum)}% ／ 最低賃金：約${pct1(mwX.cum)}%（${x.months}ヶ月）</b>`;
-      cpiSinceBadge.textContent = '概算';
-      cpiSinceBadge.className = 'badge warn';
+      [cpiSinceView, cpiSinceViewModal].forEach(el => {
+        if(el) el.innerHTML = `<b>物価：約${pct1(x.cum)}% ／ 最低賃金：約${pct1(mwX.cum)}%（${x.months}ヶ月）</b>`;
+      });
+      [cpiSinceBadge, cpiSinceBadgeModal].forEach(el => {
+        if(!el) return;
+        el.textContent = '概算';
+        el.className = 'badge warn';
+      });
 
-      if(calcDetailBox) {
+      if(calcDetailBox || calcDetailBoxModal) {
         let detailHtml = `<b>【累積物価上昇率（CPI）の計算式】</b><br>`;
         detailHtml += `基準時（${x.by}年${x.bm+1}月）の推定CPI：${x.baseCpi.toFixed(2)}<br>`;
         detailHtml += `現在（${x.ny}年${x.nm+1}月）の推定CPI：${x.nowCpi.toFixed(2)}<br>`;
@@ -1087,7 +1099,8 @@
         detailHtml += `現在（${mwX.ny}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>`;
         detailHtml += `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`;
 
-        calcDetailBox.innerHTML = detailHtml;
+        if(calcDetailBox) calcDetailBox.innerHTML = detailHtml;
+        if(calcDetailBoxModal) calcDetailBoxModal.innerHTML = detailHtml;
       }
     }
 
@@ -1737,6 +1750,7 @@ ${objectionHandling}
         el.value='';
         el.classList.remove('imported-value');
       });
+      closeExternalFactorsModal();
 
       if(partnerHonorific) partnerHonorific.value = '様';
 
