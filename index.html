@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>値上げ交渉ナビゲーター（近畿・中国版）</title>
+  <title>値上げ交渉ナビゲーター（全国版）</title>
 
   <link rel="icon" type="image/png" sizes="192x192" href="favicon192192.png" />
   <link rel="apple-touch-icon" sizes="192x192" href="favicon192192.png" />
@@ -143,7 +143,7 @@
       <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
         <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56" />
       </a>
-      <div class="title">値上げ交渉ナビゲーター（近畿・中国版） <span class="badge ok">r27</span></div>
+      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok">r31</span></div>
       <div class="headRight">
         <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
       </div>
@@ -369,7 +369,7 @@
                   <div class="small" style="margin-bottom:6px;"><b>JSONキー例（最小）</b></div>
                   <pre class="sample" id="jsonSample"></pre>
                 </div>
-                <div class="small">※キーは「兵庫 / 鳥取 / 和歌山」等、都道府県名（都・道・府・県を除いた形）で入れてください。</div>
+                <div class="small">※キーは「兵庫 / 鳥取 / 和歌山」等、都道府県名（都・道・府・県を除いた形）で入れてください。最低賃金は <span class="kbd">prefs.[都道府県].min_wage</span> または <span class="kbd">national.min_wage_by_pref.[都道府県]</span> で全国管理できます。</div>
               </details>
             </details>
           </div>
@@ -383,12 +383,11 @@
             <button class="chip" type="button" data-val="C">価格に厳しい（データ・代替案）</button>
           </div>
 
-          <details style="margin-top:10px;" open>
-            <summary>高度な戦略オプション（顧客タイプ）</summary>
-            <label>顧客タイプ</label>
+          <div style="margin-top:10px;">
+            <label>高度な戦略オプション（顧客タイプ）</label>
             <div class="chipGroup" id="customerGroup">
               <button class="chip" type="button" data-val="strategic">戦略顧客（最重要）</button>
-              <button class="chip" type="button" data-val="profitable">優良顧客</button>
+              <button class="chip active" type="button" data-val="profitable">優良顧客</button>
               <button class="chip" type="button" data-val="marginal">採算ギリギリ</button>
               <button class="chip" type="button" data-val="loss">赤字顧客</button>
             </div>
@@ -396,10 +395,10 @@
               <b>戦略顧客:</b> 段階改定・条件調整を最優先提示<br>
               <b>赤字顧客:</b> 改定受入れなければ取引見直しを示唆する協議アプローチ
             </div>
-          </details>
+          </div>
 
-          <details style="margin-top:10px;" open>
-            <summary>自助努力</summary>
+          <div style="margin-top:10px;">
+            <label>自助努力</label>
             <div class="hint">これまでの努力（複数可）</div>
             <div class="chipGroup" id="effortGroup">
               <button class="chip active" type="button" data-val="徹底した経費削減">経費削減</button>
@@ -413,7 +412,7 @@
             </div>
             <label for="effortFreeText">自助努力（自由入力）</label>
             <textarea id="effortFreeText" rows="2" placeholder="例）配送ルートの見直し、作業工程の標準化による残業削減 等"></textarea>
-          </details>
+          </div>
         </div>
 
       </div>
@@ -495,7 +494,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">r27</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">r31</span>（<span id="last-updated-date"></span>）
   </footer>
   <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -520,7 +519,11 @@
         cpi_yoy: 2.0,
         cpi_asof: "2026年1月（前年同月比）",
         wage_yoy: 4.6,
-        wage_asof: "2025年春闘（中小）"
+        wage_asof: "2025年春闘（中小）",
+        min_wage_by_pref: {
+          "東京": { new: 1163, old: 1113, inc: 50, eff: "2025-10-01" },
+          "兵庫": { new: 1116, old: 1052, inc: 64, eff: "2025-10-04" }
+        }
       },
       prefs: {
         "兵庫": {
@@ -534,17 +537,23 @@
     };
 
     /* =========================
-       1) 対象都道府県（近畿・中国エリア）
+       1) 対象都道府県（全国）
        ========================= */
     const PREFS = [
-      {k:'滋賀', l:'滋賀県'}, {k:'京都', l:'京都府'}, {k:'大阪', l:'大阪府'},
-      {k:'兵庫', l:'兵庫県'}, {k:'奈良', l:'奈良県'}, {k:'和歌山', l:'和歌山県'},
-      {k:'鳥取', l:'鳥取県'}, {k:'島根', l:'島根県'}, {k:'岡山', l:'岡山県'},
-      {k:'広島', l:'広島県'}, {k:'山口', l:'山口県'}
+      {k:'北海道', l:'北海道'},
+      {k:'青森', l:'青森県'}, {k:'岩手', l:'岩手県'}, {k:'宮城', l:'宮城県'}, {k:'秋田', l:'秋田県'}, {k:'山形', l:'山形県'}, {k:'福島', l:'福島県'},
+      {k:'茨城', l:'茨城県'}, {k:'栃木', l:'栃木県'}, {k:'群馬', l:'群馬県'}, {k:'埼玉', l:'埼玉県'}, {k:'千葉', l:'千葉県'}, {k:'東京', l:'東京都'}, {k:'神奈川', l:'神奈川県'},
+      {k:'新潟', l:'新潟県'}, {k:'富山', l:'富山県'}, {k:'石川', l:'石川県'}, {k:'福井', l:'福井県'}, {k:'山梨', l:'山梨県'}, {k:'長野', l:'長野県'},
+      {k:'岐阜', l:'岐阜県'}, {k:'静岡', l:'静岡県'}, {k:'愛知', l:'愛知県'}, {k:'三重', l:'三重県'},
+      {k:'滋賀', l:'滋賀県'}, {k:'京都', l:'京都府'}, {k:'大阪', l:'大阪府'}, {k:'兵庫', l:'兵庫県'}, {k:'奈良', l:'奈良県'}, {k:'和歌山', l:'和歌山県'},
+      {k:'鳥取', l:'鳥取県'}, {k:'島根', l:'島根県'}, {k:'岡山', l:'岡山県'}, {k:'広島', l:'広島県'}, {k:'山口', l:'山口県'},
+      {k:'徳島', l:'徳島県'}, {k:'香川', l:'香川県'}, {k:'愛媛', l:'愛媛県'}, {k:'高知', l:'高知県'},
+      {k:'福岡', l:'福岡県'}, {k:'佐賀', l:'佐賀県'}, {k:'長崎', l:'長崎県'}, {k:'熊本', l:'熊本県'}, {k:'大分', l:'大分県'}, {k:'宮崎', l:'宮崎県'}, {k:'鹿児島', l:'鹿児島県'},
+      {k:'沖縄', l:'沖縄県'}
     ];
     const PREF_LABEL = Object.fromEntries(PREFS.map(x=>[x.k,x.l]));
 
-    // 既存内蔵データ (直近の改定情報)
+    // 既存内蔵データ（JSON未読込時のフォールバック）
     const MIN_WAGE = {
       "兵庫": {n:1116,o:1052,inc:64,eff:"2025-10-04"},
       "鳥取": {n:1030,o:957,inc:73,eff:"2025-10-04"},
@@ -791,8 +800,8 @@
         opt.textContent = p.l;
         prefSelect.appendChild(opt);
       }
-      // 初期値を鳥取県にセット
-      prefSelect.value = '鳥取';
+      // 初期値を東京都にセット
+      prefSelect.value = '東京';
     }
 
     let COST_DATA = null;
@@ -872,10 +881,8 @@
       generate();
     }
 
-    function getMinWageFromJson(prefKey){
-      const pd = getPrefData(prefKey);
-      if(!pd || !pd.min_wage) return null;
-      const w = pd.min_wage;
+    function parseMinWageRecord(w){
+      if(!w) return null;
       const n = toNum(w.new ?? w.n ?? w.N);
       const o = toNum(w.old ?? w.o ?? w.O);
       const inc = toNum(w.inc ?? w.diff ?? w.delta);
@@ -884,6 +891,26 @@
       if(!isFinite(n) || !isFinite(o) || n<=0 || o<=0) return null;
       const pct = (o > 0) ? (inc2 / o * 100) : NaN;
       return { n, o, inc: isFinite(inc2) ? inc2 : null, eff: eff ? String(eff) : null, pct, source: 'json' };
+    }
+
+    function getMinWageFromJson(prefKey){
+      const pd = getPrefData(prefKey);
+      const fromPref = parseMinWageRecord(pd && pd.min_wage ? pd.min_wage : null);
+      if(fromPref) return fromPref;
+
+      const natMap = COST_DATA && COST_DATA.national && COST_DATA.national.min_wage_by_pref
+        ? COST_DATA.national.min_wage_by_pref
+        : null;
+      if(!natMap) return null;
+      const direct = parseMinWageRecord(natMap[prefKey]);
+      if(direct) return direct;
+      for(const key in natMap){
+        if(normalizePrefKey(key) === prefKey){
+          const normalized = parseMinWageRecord(natMap[key]);
+          if(normalized) return normalized;
+        }
+      }
+      return null;
     }
 
     function getMinWageFromBuiltin(prefKey){
@@ -901,7 +928,7 @@
     }
 
     function renderMinWagePanel(){
-      const key = prefSelect.value || '鳥取';
+      const key = prefSelect.value || '東京';
       const w = minWageInfo(key);
 
       if(w){
@@ -956,7 +983,7 @@
     }
 
     function applyLinkedRates(){
-      const key = prefSelect.value || '鳥取';
+      const key = prefSelect.value || '東京';
       const cpi = resolveRate(key,'cpi');
       const wage = resolveRate(key,'wage');
 
@@ -1202,7 +1229,7 @@
        ========================= */
     function buildNaturalEvidencePhrase(){
       if(!embedNumbersInLetter.checked) return '';
-      const key = prefSelect.value || '鳥取';
+      const key = prefSelect.value || '東京';
 
       const w = minWageInfo(key);
       const mw = w ? `最低賃金（前年度比 +${pct1(w.pct)}%）` : '';
@@ -1219,7 +1246,7 @@
     }
 
     function buildReferenceBlock(decidedYM){
-      const key = prefSelect.value || '鳥取';
+      const key = prefSelect.value || '東京';
       const prefLabel = PREF_LABEL[key] || key;
 
       const lines = [];
@@ -1255,7 +1282,7 @@
        9) 根拠メモ（社内用）生成
        ========================= */
     function buildMemoText(){
-      const key = prefSelect.value || '鳥取';
+      const key = prefSelect.value || '東京';
       const prefLabel = PREF_LABEL[key] || key;
 
       const prod = productName.value.trim() || '＿＿＿＿（対象商品・サービス）';
@@ -1776,6 +1803,11 @@ ${objectionHandling}
         chips.filter(x=>['原材料・仕入コストの上昇','人件費（賃上げ・採用難）による負担増'].includes(x.getAttribute('data-val'))).forEach(x=>x.classList.add('active'));
         return;
       }
+      if(groupId==='#customerGroup'){
+        const p = chips.find(x=>x.getAttribute('data-val')==='profitable');
+        if(p) p.classList.add('active');
+        return;
+      }
     }
 
     resetBtn.addEventListener('click', () => {
@@ -1784,10 +1816,6 @@ ${objectionHandling}
         el.classList.remove('imported-value');
       });
       closeExternalFactorsModal();
-
-      if(partnerHonorific) partnerHonorific.value = '様';
-
-      if(partnerHonorific) partnerHonorific.value = '様';
 
       if(partnerHonorific) partnerHonorific.value = '様';
 
@@ -1802,8 +1830,8 @@ ${objectionHandling}
       resetChips('#relationGroup');
       resetChips('#customerGroup');
 
-      prefSelect.value = '鳥取';
-      setLocal('mk_pref_key','鳥取');
+      prefSelect.value = '東京';
+      setLocal('mk_pref_key','東京');
 
       renderAllByPref();
       generate();
@@ -1835,7 +1863,7 @@ ${objectionHandling}
 
     const savedPref = getLocal('mk_pref_key');
     if(savedPref && PREF_LABEL[savedPref]) prefSelect.value = savedPref;
-    else prefSelect.value = '鳥取';
+    else prefSelect.value = '東京';
 
     const savedUrl = getLocal('mk_cost_data_url');
     if(dataUrl && savedUrl) dataUrl.value = savedUrl;
