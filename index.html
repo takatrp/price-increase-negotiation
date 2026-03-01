@@ -149,7 +149,7 @@
       <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
         <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56" />
       </a>
-      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok">r41</span></div>
+      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok">r42</span></div>
       <div class="headRight">
         <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
       </div>
@@ -515,7 +515,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">r41</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">r42</span>（<span id="last-updated-date"></span>）
   </footer>
   <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -533,6 +533,8 @@
       min_wage: "令和7年度（2025年度）改定値（厚労省『最低賃金推移』H14～R7）",
       last_verified: "2026-03-01"
     };
+
+    const MW_MAX_YEAR = 2025;
 
     // JSONサンプル（管理モード表示用）
     const SAMPLE_JSON = {
@@ -1195,13 +1197,14 @@
       if(!m) return null;
 
       const by = parseInt(m[1],10);
-      const dataYear = Math.min(new Date().getFullYear(), MW_MAX_YEAR);
+      const ny = new Date().getFullYear();
+      const dataYear = Math.min(ny, MW_MAX_YEAR);
 
       const baseMw = getHistoricalMinWageForPref(prefKey, by);
       const nowMw = getHistoricalMinWageForPref(prefKey, dataYear);
 
       const currentMwInfo = minWageInfo(prefKey);
-      const nowMw = currentMwInfo ? currentMwInfo.n : getHistoricalMinWageForPref(prefKey, ny);
+      const nowMw = currentMwInfo ? currentMwInfo.n : getHistoricalMinWageForPref(prefKey, dataYear);
 
       if(!baseMw || !nowMw) return null;
 
