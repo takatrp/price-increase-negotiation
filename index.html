@@ -143,7 +143,7 @@
       <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
         <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56" />
       </a>
-      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok">r28</span></div>
+      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok">r29</span></div>
       <div class="headRight">
         <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
       </div>
@@ -369,7 +369,7 @@
                   <div class="small" style="margin-bottom:6px;"><b>JSONキー例（最小）</b></div>
                   <pre class="sample" id="jsonSample"></pre>
                 </div>
-                <div class="small">※キーは「兵庫 / 鳥取 / 和歌山」等、都道府県名（都・道・府・県を除いた形）で入れてください。</div>
+                <div class="small">※キーは「兵庫 / 鳥取 / 和歌山」等、都道府県名（都・道・府・県を除いた形）で入れてください。最低賃金は <span class="kbd">prefs.[都道府県].min_wage</span> または <span class="kbd">national.min_wage_by_pref.[都道府県]</span> で全国管理できます。</div>
               </details>
             </details>
           </div>
@@ -495,7 +495,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">r28</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">r29</span>（<span id="last-updated-date"></span>）
   </footer>
   <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -520,7 +520,11 @@
         cpi_yoy: 2.0,
         cpi_asof: "2026年1月（前年同月比）",
         wage_yoy: 4.6,
-        wage_asof: "2025年春闘（中小）"
+        wage_asof: "2025年春闘（中小）",
+        min_wage_by_pref: {
+          "東京": { new: 1163, old: 1113, inc: 50, eff: "2025-10-01" },
+          "兵庫": { new: 1116, old: 1052, inc: 64, eff: "2025-10-04" }
+        }
       },
       prefs: {
         "兵庫": {
@@ -550,7 +554,7 @@
     ];
     const PREF_LABEL = Object.fromEntries(PREFS.map(x=>[x.k,x.l]));
 
-    // 既存内蔵データ (直近の改定情報)
+    // 既存内蔵データ（JSON未読込時のフォールバック）
     const MIN_WAGE = {
       "兵庫": {n:1116,o:1052,inc:64,eff:"2025-10-04"},
       "鳥取": {n:1030,o:957,inc:73,eff:"2025-10-04"},
@@ -797,8 +801,8 @@
         opt.textContent = p.l;
         prefSelect.appendChild(opt);
       }
-      // 初期値を鳥取県にセット
-      prefSelect.value = '鳥取';
+      // 初期値を東京都にセット
+      prefSelect.value = '東京';
     }
 
     let COST_DATA = null;
@@ -878,10 +882,8 @@
       generate();
     }
 
-    function getMinWageFromJson(prefKey){
-      const pd = getPrefData(prefKey);
-      if(!pd || !pd.min_wage) return null;
-      const w = pd.min_wage;
+    function parseMinWageRecord(w){
+      if(!w) return null;
       const n = toNum(w.new ?? w.n ?? w.N);
       const o = toNum(w.old ?? w.o ?? w.O);
       const inc = toNum(w.inc ?? w.diff ?? w.delta);
@@ -890,6 +892,26 @@
       if(!isFinite(n) || !isFinite(o) || n<=0 || o<=0) return null;
       const pct = (o > 0) ? (inc2 / o * 100) : NaN;
       return { n, o, inc: isFinite(inc2) ? inc2 : null, eff: eff ? String(eff) : null, pct, source: 'json' };
+    }
+
+    function getMinWageFromJson(prefKey){
+      const pd = getPrefData(prefKey);
+      const fromPref = parseMinWageRecord(pd && pd.min_wage ? pd.min_wage : null);
+      if(fromPref) return fromPref;
+
+      const natMap = COST_DATA && COST_DATA.national && COST_DATA.national.min_wage_by_pref
+        ? COST_DATA.national.min_wage_by_pref
+        : null;
+      if(!natMap) return null;
+      const direct = parseMinWageRecord(natMap[prefKey]);
+      if(direct) return direct;
+      for(const key in natMap){
+        if(normalizePrefKey(key) === prefKey){
+          const normalized = parseMinWageRecord(natMap[key]);
+          if(normalized) return normalized;
+        }
+      }
+      return null;
     }
 
     function getMinWageFromBuiltin(prefKey){
@@ -907,7 +929,7 @@
     }
 
     function renderMinWagePanel(){
-      const key = prefSelect.value || '鳥取';
+      const key = prefSelect.value || '東京';
       const w = minWageInfo(key);
 
       if(w){
@@ -962,7 +984,7 @@
     }
 
     function applyLinkedRates(){
-      const key = prefSelect.value || '鳥取';
+      const key = prefSelect.value || '東京';
       const cpi = resolveRate(key,'cpi');
       const wage = resolveRate(key,'wage');
 
@@ -1208,7 +1230,7 @@
        ========================= */
     function buildNaturalEvidencePhrase(){
       if(!embedNumbersInLetter.checked) return '';
-      const key = prefSelect.value || '鳥取';
+      const key = prefSelect.value || '東京';
 
       const w = minWageInfo(key);
       const mw = w ? `最低賃金（前年度比 +${pct1(w.pct)}%）` : '';
@@ -1225,7 +1247,7 @@
     }
 
     function buildReferenceBlock(decidedYM){
-      const key = prefSelect.value || '鳥取';
+      const key = prefSelect.value || '東京';
       const prefLabel = PREF_LABEL[key] || key;
 
       const lines = [];
@@ -1261,7 +1283,7 @@
        9) 根拠メモ（社内用）生成
        ========================= */
     function buildMemoText(){
-      const key = prefSelect.value || '鳥取';
+      const key = prefSelect.value || '東京';
       const prefLabel = PREF_LABEL[key] || key;
 
       const prod = productName.value.trim() || '＿＿＿＿（対象商品・サービス）';
@@ -1808,8 +1830,8 @@ ${objectionHandling}
       resetChips('#relationGroup');
       resetChips('#customerGroup');
 
-      prefSelect.value = '鳥取';
-      setLocal('mk_pref_key','鳥取');
+      prefSelect.value = '東京';
+      setLocal('mk_pref_key','東京');
 
       renderAllByPref();
       generate();
@@ -1841,7 +1863,7 @@ ${objectionHandling}
 
     const savedPref = getLocal('mk_pref_key');
     if(savedPref && PREF_LABEL[savedPref]) prefSelect.value = savedPref;
-    else prefSelect.value = '鳥取';
+    else prefSelect.value = '東京';
 
     const savedUrl = getLocal('mk_cost_data_url');
     if(dataUrl && savedUrl) dataUrl.value = savedUrl;
