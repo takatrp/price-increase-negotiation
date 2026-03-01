@@ -202,6 +202,12 @@
         <div class="card">
           <div class="pill">STEP 1：改定内容</div>
 
+          <label>対象顧客</label>
+          <div class="audToggle" role="group" aria-label="対象顧客切替">
+            <button class="audBtn active" type="button" id="audBtob">企業向け（BtoB）</button>
+            <button class="audBtn" type="button" id="audBtoc">一般消費者向け（BtoC）</button>
+          </div>
+
           <label for="prefSelect">主な提供エリア（都道府県）</label>
           <select id="prefSelect" aria-label="都道府県選択"></select>
 
@@ -239,8 +245,6 @@
               <input type="text" id="effectiveDate" placeholder="例）2026年4月1日 ご注文分より" />
             </div>
           </div>
-
-          
 
           <div id="validateMsg" class="danger" style="display:none;"></div>
         </div>
@@ -306,7 +310,7 @@
                 <span id="minWageView">—</span>
                 <span class="badge" id="minWageBadge">未取得</span>
               </div>
-              <div class="small" id="minWageNote">※最低賃金はJSON優先（未読込時は内蔵値）。</div>
+              <div class="small" id="minWageNote">※最低賃金はJSON優先（未読込時は内蔵値：厚労省Excel（H14〜R7）より転記）。</div>
             </div>
 
             <div class="divider"></div>
@@ -1197,6 +1201,7 @@
       const dataYear = Math.min(ny, MW_MAX_YEAR);
 
       const baseMw = getHistoricalMinWageForPref(prefKey, by);
+      const nowMw = getHistoricalMinWageForPref(prefKey, dataYear);
 
       const currentMwInfo = minWageInfo(prefKey);
       const nowMw = currentMwInfo ? currentMwInfo.n : getHistoricalMinWageForPref(prefKey, dataYear);
@@ -1234,7 +1239,7 @@
         detailHtml += `<b>【累積最低賃金上昇率の計算式】</b><br>`;
         detailHtml += `対象エリア：${mwX.prefKey}<br>`;
         detailHtml += `基準年（${mwX.by}年）の最低賃金：${Math.round(mwX.baseMw)}円<br>`;
-        detailHtml += `現在（${mwX.ny}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>`;
+        detailHtml += `現在（${mwX.ny}年・最新データ上限${MW_MAX_YEAR}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>`;
         detailHtml += `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`;
 
         if(calcDetailBox) calcDetailBox.innerHTML = detailHtml;
