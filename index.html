@@ -381,7 +381,7 @@
                   <div class="small" style="margin-bottom:6px;"><b>JSONキー例（最小）</b></div>
                   <pre class="sample" id="jsonSample"></pre>
                 </div>
-                <div class="small">※キーは「兵庫 / 鳥取 / 和歌山」等、都道府県名（都・道・府・県を除いた形）で入れてください。最低賃金は <span class="kbd">national.min_wage_by_pref.[都道府県]</span> で全国管理できます。累積計算を精緻化する場合は <span class="kbd">national.min_wage_history_by_pref.[都道府県].[年]</span> を追加してください。</div>
+                <div class="small">※キーは「兵庫 / 鳥取 / 和歌山」等、都道府県名（都・道・府・県を除いた形）で入れてください。最低賃金は <span class="kbd">national.min_wage_by_pref.[都道府県]</span> で全国管理できます。都道府県履歴（実数）は <span class="kbd">national.min_wage_history_by_pref.[都道府県].[年]</span> に入力してください。履歴が無い場合のみ <span class="kbd">national.min_wage_history_avg.[年]</span> を参照して推計します。</div>
               </details>
             </details>
           </div>
@@ -1141,6 +1141,24 @@
     /* =========================
        6-2) エリア別 最低賃金の推移に基づく累積概算
        ========================= */
+    const DEFAULT_NATIONAL_MIN_WAGE_SERIES = {
+      2002: 663, 2003: 664, 2004: 665, 2005: 668, 2006: 673, 2007: 687,
+      2008: 703, 2009: 713, 2010: 730, 2011: 737, 2012: 749, 2013: 764,
+      2014: 780, 2015: 798, 2016: 823, 2017: 848, 2018: 874, 2019: 901,
+      2020: 902, 2021: 930, 2022: 961, 2023: 1004, 2024: 1055, 2025: 1067
+    };
+
+    function getNationalMinWageSeries(){
+      const fromJson = COST_DATA && COST_DATA.national && COST_DATA.national.min_wage_history_avg
+        ? COST_DATA.national.min_wage_history_avg
+        : null;
+      if(fromJson && typeof fromJson === 'object'){
+        return fromJson;
+      }
+      return DEFAULT_NATIONAL_MIN_WAGE_SERIES;
+    }
+
+
     function getHistoricalMinWageForPref(prefKey, year) {
       const y = Number(year);
       if(!isFinite(y)) return null;
@@ -1179,6 +1197,15 @@
       if(!isFinite(old) || !isFinite(newer)) return null;
       if(y === 2024) return old;
       if(y >= 2025) return newer;
+
+      // 3) 履歴データが無い場合は、全国加重平均の推移比で都道府県値を按分推計
+      const natSeries = getNationalMinWageSeries();
+      const natBase = natSeries[2024];
+      const natTarget = natSeries[y];
+      if(isFinite(natBase) && isFinite(natTarget) && natBase > 0){
+        return old * (natTarget / natBase);
+      }
+
       return null;
     }
 
@@ -1194,6 +1221,22 @@
       const ny = new Date().getFullYear();
       const dataYear = Math.min(ny, MW_MAX_YEAR);
 
+      const histMap = COST_DATA && COST_DATA.national && COST_DATA.national.min_wage_history_by_pref
+        ? COST_DATA.national.min_wage_history_by_pref
+        : null;
+      const hasExactHistory = (() => {
+        if(!histMap) return false;
+        const direct = histMap[prefKey];
+        if(direct && isFinite(toNum(direct[by]))) return true;
+        for(const key in histMap){
+          if(normalizePrefKey(key) === prefKey){
+            const rec = histMap[key];
+            if(rec && isFinite(toNum(rec[by]))) return true;
+          }
+        }
+        return false;
+      })();
+
       const baseMw = getHistoricalMinWageForPref(prefKey, by);
       const currentMwInfo = minWageInfo(prefKey);
       const nowMw = currentMwInfo ? currentMwInfo.n : getHistoricalMinWageForPref(prefKey, dataYear);
@@ -1201,7 +1244,7 @@
       if(!baseMw || !nowMw) return null;
 
       const cum = (nowMw / baseMw - 1) * 100;
-      return { cum: cum > 0 ? cum : 0, baseMw, nowMw, by, ny: dataYear, prefKey };
+      return { cum: cum > 0 ? cum : 0, baseMw, nowMw, by, ny: dataYear, prefKey, estimated: !hasExactHistory && by < 2024 };
     }
 
     function updateCpiSinceView(){
@@ -1248,7 +1291,7 @@
         detailParts.push(
           `<b>【累積最低賃金上昇率の計算式】</b><br>` +
           `対象エリア：${mwX.prefKey}<br>` +
-          `基準年（${mwX.by}年）の最低賃金：${Math.round(mwX.baseMw)}円<br>` +
+          `基準年（${mwX.by}年）の最低賃金：${Math.round(mwX.baseMw)}円${mwX.estimated ? '（推計）' : ''}<br>` +
           `現在（${mwX.ny}年・最新データ上限${MW_MAX_YEAR}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>` +
           `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`
         );
