@@ -202,12 +202,6 @@
         <div class="card">
           <div class="pill">STEP 1：改定内容</div>
 
-          <label>対象顧客</label>
-          <div class="audToggle" role="group" aria-label="対象顧客切替">
-            <button class="audBtn active" type="button" id="audBtob">企業向け（BtoB）</button>
-            <button class="audBtn" type="button" id="audBtoc">一般消費者向け（BtoC）</button>
-          </div>
-
           <label for="prefSelect">主な提供エリア（都道府県）</label>
           <select id="prefSelect" aria-label="都道府県選択"></select>
 
@@ -387,7 +381,7 @@
                   <div class="small" style="margin-bottom:6px;"><b>JSONキー例（最小）</b></div>
                   <pre class="sample" id="jsonSample"></pre>
                 </div>
-                <div class="small">※キーは「兵庫 / 鳥取 / 和歌山」等、都道府県名（都・道・府・県を除いた形）で入れてください。最低賃金は <span class="kbd">national.min_wage_by_pref.[都道府県]</span> で全国管理できます。累積計算を精緻化する場合は <span class="kbd">national.min_wage_history_by_pref.[都道府県].[年]</span> を追加してください。</div>
+                <div class="small">※キーは「兵庫 / 鳥取 / 和歌山」等、都道府県名（都・道・府・県を除いた形）で入れてください。最低賃金は <span class="kbd">national.min_wage_by_pref.[都道府県]</span> で全国管理できます。都道府県履歴（実数）は <span class="kbd">national.min_wage_history_by_pref.[都道府県].[年]</span> に入力してください。<span class="kbd">national.min_wage_history_by_pref_source</span> が <span class="kbd">provisional_*</span> の場合、2002-2023年は推計として扱います。</div>
               </details>
             </details>
           </div>
@@ -1147,6 +1141,24 @@
     /* =========================
        6-2) エリア別 最低賃金の推移に基づく累積概算
        ========================= */
+    const DEFAULT_NATIONAL_MIN_WAGE_SERIES = {
+      2002: 663, 2003: 664, 2004: 665, 2005: 668, 2006: 673, 2007: 687,
+      2008: 703, 2009: 713, 2010: 730, 2011: 737, 2012: 749, 2013: 764,
+      2014: 780, 2015: 798, 2016: 823, 2017: 848, 2018: 874, 2019: 901,
+      2020: 902, 2021: 930, 2022: 961, 2023: 1004, 2024: 1055, 2025: 1067
+    };
+
+    function getNationalMinWageSeries(){
+      const fromJson = COST_DATA && COST_DATA.national && COST_DATA.national.min_wage_history_avg
+        ? COST_DATA.national.min_wage_history_avg
+        : null;
+      if(fromJson && typeof fromJson === 'object'){
+        return fromJson;
+      }
+      return DEFAULT_NATIONAL_MIN_WAGE_SERIES;
+    }
+
+
     function getHistoricalMinWageForPref(prefKey, year) {
       const y = Number(year);
       if(!isFinite(y)) return null;
@@ -1185,6 +1197,15 @@
       if(!isFinite(old) || !isFinite(newer)) return null;
       if(y === 2024) return old;
       if(y >= 2025) return newer;
+
+      // 3) 履歴データが無い場合は、全国加重平均の推移比で都道府県値を按分推計
+      const natSeries = getNationalMinWageSeries();
+      const natBase = natSeries[2024];
+      const natTarget = natSeries[y];
+      if(isFinite(natBase) && isFinite(natTarget) && natBase > 0){
+        return old * (natTarget / natBase);
+      }
+
       return null;
     }
 
@@ -1200,16 +1221,32 @@
       const ny = new Date().getFullYear();
       const dataYear = Math.min(ny, MW_MAX_YEAR);
 
-      const baseMw = getHistoricalMinWageForPref(prefKey, by);
-      const nowMw = getHistoricalMinWageForPref(prefKey, dataYear);
+      const histMap = COST_DATA && COST_DATA.national && COST_DATA.national.min_wage_history_by_pref
+        ? COST_DATA.national.min_wage_history_by_pref
+        : null;
+      const historySource = COST_DATA && COST_DATA.national ? String(COST_DATA.national.min_wage_history_by_pref_source || '') : '';
+      const isProvisionalHistory = historySource.startsWith('provisional_');
+      const hasExactHistory = (() => {
+        if(!histMap) return false;
+        const direct = histMap[prefKey];
+        if(direct && isFinite(toNum(direct[by]))) return true;
+        for(const key in histMap){
+          if(normalizePrefKey(key) === prefKey){
+            const rec = histMap[key];
+            if(rec && isFinite(toNum(rec[by]))) return true;
+          }
+        }
+        return false;
+      })();
 
+      const baseMw = getHistoricalMinWageForPref(prefKey, by);
       const currentMwInfo = minWageInfo(prefKey);
       const nowMw = currentMwInfo ? currentMwInfo.n : getHistoricalMinWageForPref(prefKey, dataYear);
 
       if(!baseMw || !nowMw) return null;
 
       const cum = (nowMw / baseMw - 1) * 100;
-      return { cum: cum > 0 ? cum : 0, baseMw, nowMw, by, ny: dataYear, prefKey };
+      return { cum: cum > 0 ? cum : 0, baseMw, nowMw, by, ny: dataYear, prefKey, estimated: (isProvisionalHistory && by < 2024) || (!hasExactHistory && by < 2024) };
     }
 
     function updateCpiSinceView(){
@@ -1218,33 +1255,53 @@
       const calcDetailBox = $('#calcDetailBox');
       const calcDetailBoxModal = $('#calcDetailBoxModal');
 
-      if(!x || !mwX){
-        cpiSinceView.innerHTML = '<span class="cumValue">物価：— ／ 最低賃金：—</span>';
-        cpiSinceBadge.textContent = '任意';
-        cpiSinceBadge.className = 'badge warn';
+      const cpiText = x ? `物価：約${pct1(x.cum)}%` : '物価：—';
+      const mwText = mwX ? `最低賃金：約${pct1(mwX.cum)}%` : '最低賃金：—';
+      const monthText = x ? ` <b>（${x.months}ヶ月）</b>` : '';
+      const summaryHtml = `<span class="cumValue">${cpiText} ／ ${mwText}</span>${monthText}`;
+
+      cpiSinceView.innerHTML = summaryHtml;
+      if(cpiSinceViewModal) cpiSinceViewModal.innerHTML = summaryHtml;
+
+      const hasAny = Boolean(x || mwX);
+      const badgeText = hasAny ? '概算' : '任意';
+      const badgeClass = 'badge warn';
+      cpiSinceBadge.textContent = badgeText;
+      cpiSinceBadge.className = badgeClass;
+      if(cpiSinceBadgeModal){
+        cpiSinceBadgeModal.textContent = badgeText;
+        cpiSinceBadgeModal.className = badgeClass;
+      }
+
+      if(!x && !mwX){
         if(calcDetailBox) calcDetailBox.innerHTML = '（年月を入力すると計算過程が表示されます）';
+        if(calcDetailBoxModal) calcDetailBoxModal.innerHTML = '（年月を入力すると計算過程が表示されます）';
         return;
       }
 
-      cpiSinceView.innerHTML = `<span class="cumValue">物価：約${pct1(x.cum)}% ／ 最低賃金：約${pct1(mwX.cum)}%</span><b>（${x.months}ヶ月）</b>`;
-      cpiSinceBadge.textContent = '概算';
-      cpiSinceBadge.className = 'badge warn';
-
-      if(calcDetailBox || calcDetailBoxModal) {
-        let detailHtml = `<b>【累積物価上昇率の計算式】</b><br>`;
-        detailHtml += `基準時（${x.by}年${x.bm+1}月）の推定物価指数：${x.baseCpi.toFixed(2)}<br>`;
-        detailHtml += `現在（${x.ny}年${x.nm+1}月）の推定物価指数：${x.nowCpi.toFixed(2)}<br>`;
-        detailHtml += `⇒ (${x.nowCpi.toFixed(2)} ÷ ${x.baseCpi.toFixed(2)} - 1) × 100 = <b>${x.cum.toFixed(2)}%</b><br><br>`;
-
-        detailHtml += `<b>【累積最低賃金上昇率の計算式】</b><br>`;
-        detailHtml += `対象エリア：${mwX.prefKey}<br>`;
-        detailHtml += `基準年（${mwX.by}年）の最低賃金：${Math.round(mwX.baseMw)}円<br>`;
-        detailHtml += `現在（${mwX.ny}年・最新データ上限${MW_MAX_YEAR}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>`;
-        detailHtml += `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`;
-
-        if(calcDetailBox) calcDetailBox.innerHTML = detailHtml;
-        if(calcDetailBoxModal) calcDetailBoxModal.innerHTML = detailHtml;
+      let detailParts = [];
+      if(x){
+        detailParts.push(
+          `<b>【累積物価上昇率の計算式】</b><br>` +
+          `基準時（${x.by}年${x.bm+1}月）の推定物価指数：${x.baseCpi.toFixed(2)}<br>` +
+          `現在（${x.ny}年${x.nm+1}月）の推定物価指数：${x.nowCpi.toFixed(2)}<br>` +
+          `⇒ (${x.nowCpi.toFixed(2)} ÷ ${x.baseCpi.toFixed(2)} - 1) × 100 = <b>${x.cum.toFixed(2)}%</b>`
+        );
       }
+
+      if(mwX){
+        detailParts.push(
+          `<b>【累積最低賃金上昇率の計算式】</b><br>` +
+          `対象エリア：${mwX.prefKey}<br>` +
+          `基準年（${mwX.by}年）の最低賃金：${Math.round(mwX.baseMw)}円${mwX.estimated ? '（推計）' : ''}<br>` +
+          `現在（${mwX.ny}年・最新データ上限${MW_MAX_YEAR}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>` +
+          `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`
+        );
+      }
+
+      const detailHtml = detailParts.join('<br><br>');
+      if(calcDetailBox) calcDetailBox.innerHTML = detailHtml;
+      if(calcDetailBoxModal) calcDetailBoxModal.innerHTML = detailHtml;
     }
 
     /* =========================
