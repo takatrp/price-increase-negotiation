@@ -66,6 +66,10 @@
     .chip{border:1px solid #d1d5db;background:#fff;border-radius:999px;padding:8px 12px;font-size:.85rem;font-weight:900;color:#374151;cursor:pointer;transition:all .2s;line-height:1.1}
     .chip:hover{background:#f3f4f6}
     .chip.active{border-color:var(--brand);background:#eef6fa;color:#0f172a}
+    .audToggle{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px}
+    .audBtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:999px;padding:7px 12px;font-size:.85rem;font-weight:900;cursor:pointer}
+    .audBtn.active{background:#0f172a;color:#fff;border-color:#0f172a}
+    .hidden{display:none !important;}
 
     /* 参考データパネル */
     .dataPanel{border:1px solid #e5e7eb;border-radius:12px;background:#fafafa;padding:10px 12px;margin-top:10px}
@@ -145,7 +149,7 @@
       <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
         <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56" />
       </a>
-      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok">r33</span></div>
+      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok">r35</span></div>
       <div class="headRight">
         <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
       </div>
@@ -157,7 +161,7 @@
     <div class="dashboard">
       <div class="colL">
 
-        <div class="card">
+        <div class="card" id="step0Card">
           <div class="pill">STEP 0：契約確認（必須）</div>
 
           <label>既存契約における価格改定条項</label>
@@ -189,6 +193,12 @@
 
         <div class="card">
           <div class="pill">STEP 1：改定内容</div>
+
+          <label>対象顧客</label>
+          <div class="audToggle" role="group" aria-label="対象顧客切替">
+            <button class="audBtn active" type="button" id="audBtob">企業向け（BtoB）</button>
+            <button class="audBtn" type="button" id="audBtoc">一般消費者向け（BtoC）</button>
+          </div>
 
           <label for="prefSelect">主な提供エリア（都道府県）</label>
           <select id="prefSelect" aria-label="都道府県選択"></select>
@@ -457,8 +467,8 @@
           </div>
 
           <div class="tabs" id="outputTabs" role="tablist" aria-label="出力切替">
-            <div class="tab active" role="tab" aria-selected="true" tabindex="0" data-target="letter">案内文（顧客に渡す）</div>
-            <div class="tab" role="tab" aria-selected="false" tabindex="-1" data-target="talk">面談トーク</div>
+            <div class="tab active" role="tab" aria-selected="true" tabindex="0" data-target="letter">案内文（BtoB）</div>
+            <div class="tab" role="tab" aria-selected="false" tabindex="-1" data-target="talk">面談トーク（BtoB）</div>
             <div class="tab" role="tab" aria-selected="false" tabindex="-1" data-target="memo">根拠メモ（社内用）</div>
           </div>
 
@@ -496,7 +506,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">r33</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">r35</span>（<span id="last-updated-date"></span>）
   </footer>
   <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -643,6 +653,9 @@
     const validationWarning = $('#validationWarning');
 
     const prefSelect = $('#prefSelect');
+    const step0Card = $('#step0Card');
+    const audBtob = $('#audBtob');
+    const audBtoc = $('#audBtoc');
     const minWageView = $('#minWageView');
     const minWageBadge = $('#minWageBadge');
     const minWageNote = $('#minWageNote');
@@ -687,6 +700,34 @@
     const printDate = $('#printDate');
 
     let currentOutputMode = 'letter';
+
+    let currentAudience = 'btob';
+
+    function configureTabsByAudience(){
+      const tabLetter = document.querySelector('#outputTabs .tab[data-target="letter"]');
+      const tabTalk = document.querySelector('#outputTabs .tab[data-target="talk"]');
+      const tabMemo = document.querySelector('#outputTabs .tab[data-target="memo"]');
+      if(currentAudience === 'btoc'){
+        if(tabLetter) tabLetter.textContent = '店頭ポスター・WEBお知らせ（短文）';
+        if(tabTalk) tabTalk.textContent = '常連客へのDM・お手紙（長文）';
+        if(tabMemo) tabMemo.textContent = '店頭スタッフの接客トーク・Q&A';
+      }else{
+        if(tabLetter) tabLetter.textContent = '案内文（BtoB）';
+        if(tabTalk) tabTalk.textContent = '面談トーク（BtoB）';
+        if(tabMemo) tabMemo.textContent = '根拠メモ（社内用）';
+      }
+    }
+
+    function setAudience(mode, silent){
+      currentAudience = (mode === 'btoc') ? 'btoc' : 'btob';
+      if(audBtob) audBtob.classList.toggle('active', currentAudience === 'btob');
+      if(audBtoc) audBtoc.classList.toggle('active', currentAudience === 'btoc');
+      if(step0Card) step0Card.classList.toggle('hidden', currentAudience === 'btoc');
+      configureTabsByAudience();
+      setLocal('mk_audience_mode', currentAudience);
+      if(!silent) generate();
+    }
+
 
     document.addEventListener('input', (e) => {
       if(e.target && e.target.classList && e.target.classList.contains('imported-value')){
@@ -781,6 +822,9 @@
       }
     });
 
+    if(audBtob) audBtob.addEventListener('click', () => setAudience('btob'));
+    if(audBtoc) audBtoc.addEventListener('click', () => setAudience('btoc'));
+
     function getSelectedValues(groupId) {
       const g = $(groupId);
       if(!g) return [];
@@ -873,6 +917,7 @@
       COST_DATA = null;
       setStatus('読込解除しました', true);
       renderAllByPref();
+      setAudience(currentAudience, true);
       generate();
     }
 
@@ -1167,7 +1212,7 @@
       const effortFree = (effortFreeText.value || '').trim();
 
       let msg = '';
-      if(!customerType) msg = '「顧客タイプ」は必須です。1つ選択してください。';
+      if(currentAudience==='btob' && !customerType) msg = '「顧客タイプ」は必須です。1つ選択してください。';
       if(isFinite(cp) && isFinite(np) && cp>0 && np<0) msg = '「改定後単価」に負の値が入っています。';
       if(isFinite(cp) && isFinite(np) && cp>0 && np===0) msg = '「改定後単価」が0円です。意図した入力か確認してください。';
 
@@ -1613,6 +1658,78 @@ ${objectionHandling}
       return { letter, talk };
     }
 
+    function buildBtocOutputs(){
+      const prod = (productName.value || '').trim() || '対象商品・サービス';
+      const cp = toNum(currentPrice.value);
+      const np = toNum(newPrice.value);
+      const decidedYM = fmtYM(currentPriceAsOf.value);
+      const dateStr = (effectiveDate.value || '').trim() || '近日より';
+      const factors = getSelectedValues('#factorGroup');
+      const extra = (extraFactors.value||'').trim();
+      const baseFactors = factors.length > 0 ? joinJa(factors) : '原材料費・物流費・人件費などのコスト';
+      const factorsText = extra ? `${baseFactors}など` : baseFactors;
+      const rateStr = (isFinite(cp) && cp>0 && isFinite(np) && np>=0)
+        ? `${yen(cp)} → ${yen(np)}（約${pct1(((np/cp)-1)*100)}%）`
+        : `改定後価格：${(newPrice.value||'未入力')}`;
+
+      const poster =
+`【価格改定のお知らせ】
+
+平素よりご愛顧いただき、誠にありがとうございます。
+このたび、${factorsText}の高騰を受け、品質維持のため
+${dateStr}より「${prod}」の価格を改定させていただきます。
+
+改定内容：${rateStr}
+
+今後もご満足いただける商品・サービスの提供に努めてまいります。
+何卒ご理解賜りますようお願い申し上げます。`;
+
+      const dm =
+`【${prod} 価格改定のご案内】
+
+いつもご利用いただき、誠にありがとうございます。
+日頃よりご愛顧くださっている皆さまに、心より御礼申し上げます。
+
+当店ではこれまで価格維持に努めてまいりましたが、
+昨今、${factorsText}の上昇が続いており、現在の品質とサービス水準を保つため、
+やむを得ず${dateStr}より価格を改定させていただくこととなりました。
+
+【改定内容】
+・対象：${prod}
+・改定価格：${rateStr}
+${decidedYM ? `・現行価格の設定時期：${decidedYM}` : ''}
+
+お客様にはご負担をおかけし誠に恐縮ですが、
+今後も安心してご利用いただけるよう、品質向上とサービス改善に努めてまいります。
+何卒ご理解賜りますようお願い申し上げます。`;
+
+      const qa =
+`【店頭スタッフ向け 接客トーク・Q&A】
+
+■ 基本トーク（ひと言目）
+「いつもご利用ありがとうございます。品質維持のため、${dateStr}から${prod}の価格を見直しております。」
+
+■ よくあるご質問
+Q.「高くなったね」
+A.「ご負担をおかけして申し訳ありません。原材料費や物流費などの上昇が続いており、品質を保つために見直しを行いました。」
+
+Q.「なんで今なの？」
+A.「できる限り価格維持に努めてきましたが、継続的なコスト上昇の影響が大きく、今回のタイミングで改定となりました。」
+
+Q.「他はもっと安いよ」
+A.「ご意見ありがとうございます。当店としては品質とサービスを維持することを最優先に、適正価格でご提供しております。」
+
+■ NG例
+- 「仕方ないです」だけで終える
+- コスト内訳を細かく言い過ぎる
+- 反論口調になる
+
+■ 最後の一言
+「今後もご満足いただけるよう努めます。お気づきの点があればぜひお聞かせください。」`;
+
+      return { letter: poster, talk: dm, memo: qa };
+    }
+
     let CACHE = { letter:'', talk:'', memo:'' };
 
     function renderOutput(){
@@ -1628,12 +1745,18 @@ ${objectionHandling}
         validatePriceIncrease();
         updateCpiSinceView();
 
-        const lt = buildLetterAndTalk();
-        const memo = buildMemoText();
-
-        CACHE.letter = lt.letter;
-        CACHE.talk = lt.talk;
-        CACHE.memo = memo;
+        if(currentAudience === 'btoc'){
+          const b2c = buildBtocOutputs();
+          CACHE.letter = b2c.letter;
+          CACHE.talk = b2c.talk;
+          CACHE.memo = b2c.memo;
+        }else{
+          const lt = buildLetterAndTalk();
+          const memo = buildMemoText();
+          CACHE.letter = lt.letter;
+          CACHE.talk = lt.talk;
+          CACHE.memo = memo;
+        }
 
         renderOutput();
 
@@ -1870,6 +1993,9 @@ ${objectionHandling}
 
     const savedUrl = getLocal('mk_cost_data_url');
     if(dataUrl && savedUrl) dataUrl.value = savedUrl;
+
+    const savedAudience = getLocal('mk_audience_mode');
+    setAudience(savedAudience === 'btoc' ? 'btoc' : 'btob', true);
 
     loadCostData(savedUrl || './pref_cost_data.json', true);
 
