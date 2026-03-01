@@ -202,12 +202,6 @@
         <div class="card">
           <div class="pill">STEP 1：改定内容</div>
 
-          <label>対象顧客</label>
-          <div class="audToggle" role="group" aria-label="対象顧客切替">
-            <button class="audBtn active" type="button" id="audBtob">企業向け（BtoB）</button>
-            <button class="audBtn" type="button" id="audBtoc">一般消費者向け（BtoC）</button>
-          </div>
-
           <label for="prefSelect">主な提供エリア（都道府県）</label>
           <select id="prefSelect" aria-label="都道府県選択"></select>
 
@@ -1216,33 +1210,53 @@
       const calcDetailBox = $('#calcDetailBox');
       const calcDetailBoxModal = $('#calcDetailBoxModal');
 
-      if(!x || !mwX){
-        cpiSinceView.innerHTML = '<span class="cumValue">物価：— ／ 最低賃金：—</span>';
-        cpiSinceBadge.textContent = '任意';
-        cpiSinceBadge.className = 'badge warn';
+      const cpiText = x ? `物価：約${pct1(x.cum)}%` : '物価：—';
+      const mwText = mwX ? `最低賃金：約${pct1(mwX.cum)}%` : '最低賃金：—';
+      const monthText = x ? ` <b>（${x.months}ヶ月）</b>` : '';
+      const summaryHtml = `<span class="cumValue">${cpiText} ／ ${mwText}</span>${monthText}`;
+
+      cpiSinceView.innerHTML = summaryHtml;
+      if(cpiSinceViewModal) cpiSinceViewModal.innerHTML = summaryHtml;
+
+      const hasAny = Boolean(x || mwX);
+      const badgeText = hasAny ? '概算' : '任意';
+      const badgeClass = 'badge warn';
+      cpiSinceBadge.textContent = badgeText;
+      cpiSinceBadge.className = badgeClass;
+      if(cpiSinceBadgeModal){
+        cpiSinceBadgeModal.textContent = badgeText;
+        cpiSinceBadgeModal.className = badgeClass;
+      }
+
+      if(!x && !mwX){
         if(calcDetailBox) calcDetailBox.innerHTML = '（年月を入力すると計算過程が表示されます）';
+        if(calcDetailBoxModal) calcDetailBoxModal.innerHTML = '（年月を入力すると計算過程が表示されます）';
         return;
       }
 
-      cpiSinceView.innerHTML = `<span class="cumValue">物価：約${pct1(x.cum)}% ／ 最低賃金：約${pct1(mwX.cum)}%</span><b>（${x.months}ヶ月）</b>`;
-      cpiSinceBadge.textContent = '概算';
-      cpiSinceBadge.className = 'badge warn';
-
-      if(calcDetailBox || calcDetailBoxModal) {
-        let detailHtml = `<b>【累積物価上昇率の計算式】</b><br>`;
-        detailHtml += `基準時（${x.by}年${x.bm+1}月）の推定物価指数：${x.baseCpi.toFixed(2)}<br>`;
-        detailHtml += `現在（${x.ny}年${x.nm+1}月）の推定物価指数：${x.nowCpi.toFixed(2)}<br>`;
-        detailHtml += `⇒ (${x.nowCpi.toFixed(2)} ÷ ${x.baseCpi.toFixed(2)} - 1) × 100 = <b>${x.cum.toFixed(2)}%</b><br><br>`;
-
-        detailHtml += `<b>【累積最低賃金上昇率の計算式】</b><br>`;
-        detailHtml += `対象エリア：${mwX.prefKey}<br>`;
-        detailHtml += `基準年（${mwX.by}年）の最低賃金：${Math.round(mwX.baseMw)}円<br>`;
-        detailHtml += `現在（${mwX.ny}年・最新データ上限${MW_MAX_YEAR}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>`;
-        detailHtml += `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`;
-
-        if(calcDetailBox) calcDetailBox.innerHTML = detailHtml;
-        if(calcDetailBoxModal) calcDetailBoxModal.innerHTML = detailHtml;
+      let detailParts = [];
+      if(x){
+        detailParts.push(
+          `<b>【累積物価上昇率の計算式】</b><br>` +
+          `基準時（${x.by}年${x.bm+1}月）の推定物価指数：${x.baseCpi.toFixed(2)}<br>` +
+          `現在（${x.ny}年${x.nm+1}月）の推定物価指数：${x.nowCpi.toFixed(2)}<br>` +
+          `⇒ (${x.nowCpi.toFixed(2)} ÷ ${x.baseCpi.toFixed(2)} - 1) × 100 = <b>${x.cum.toFixed(2)}%</b>`
+        );
       }
+
+      if(mwX){
+        detailParts.push(
+          `<b>【累積最低賃金上昇率の計算式】</b><br>` +
+          `対象エリア：${mwX.prefKey}<br>` +
+          `基準年（${mwX.by}年）の最低賃金：${Math.round(mwX.baseMw)}円<br>` +
+          `現在（${mwX.ny}年・最新データ上限${MW_MAX_YEAR}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>` +
+          `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`
+        );
+      }
+
+      const detailHtml = detailParts.join('<br><br>');
+      if(calcDetailBox) calcDetailBox.innerHTML = detailHtml;
+      if(calcDetailBoxModal) calcDetailBoxModal.innerHTML = detailHtml;
     }
 
     /* =========================
