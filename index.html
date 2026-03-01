@@ -149,7 +149,7 @@
       <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
         <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56" />
       </a>
-      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok">r39</span></div>
+      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok">r40</span></div>
       <div class="headRight">
         <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
       </div>
@@ -515,7 +515,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">r39</span>（<span id="last-updated-date"></span>）
+    <span id="build-rev">r40</span>（<span id="last-updated-date"></span>）
   </footer>
   <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
 
@@ -830,15 +830,25 @@
     setupChips('#relationGroup', false);
     setupChips('#customerGroup', false);
 
-    $('#outputTabs').addEventListener('click', (e) => {
-      if(e.target.classList.contains('tab')) {
-        $$('#outputTabs .tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); t.tabIndex = -1; });
-        e.target.classList.add('active');
-        e.target.setAttribute('aria-selected','true');
-        e.target.tabIndex = 0;
-        currentOutputMode = e.target.getAttribute('data-target');
-        renderOutput();
-      }
+    const outputTabsEl = $('#outputTabs');
+    if(outputTabsEl){
+      outputTabsEl.addEventListener('click', (e) => {
+        const tab = e.target && e.target.closest ? e.target.closest('.tab') : null;
+        if(tab) {
+          $$('#outputTabs .tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); t.tabIndex = -1; });
+          tab.classList.add('active');
+          tab.setAttribute('aria-selected','true');
+          tab.tabIndex = 0;
+          currentOutputMode = tab.getAttribute('data-target');
+          renderOutput();
+        }
+      });
+    }
+
+    // フェイルセーフ：ボタン再配置や取得失敗時も委譲で拾う
+    document.addEventListener('click', (e) => {
+      const aud = e.target && e.target.closest ? e.target.closest('.audBtn[data-mode]') : null;
+      if(aud){ setAudience(aud.getAttribute('data-mode')); return; }
     });
 
     if(audBtob) audBtob.addEventListener('click', () => setAudience('btob'));
@@ -936,7 +946,7 @@
       COST_DATA = null;
       setStatus('読込解除しました', true);
       renderAllByPref();
-      setAudience(currentAudience, true);
+      setAudience('btob', true);
       generate();
     }
 
