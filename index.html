@@ -382,12 +382,11 @@
             <button class="chip" type="button" data-val="C">価格に厳しい（データ・代替案）</button>
           </div>
 
-          <details style="margin-top:10px;" open>
-            <summary>高度な戦略オプション（顧客タイプ）</summary>
-            <label>顧客タイプ</label>
+          <div style="margin-top:10px;">
+            <label>高度な戦略オプション（顧客タイプ）</label>
             <div class="chipGroup" id="customerGroup">
               <button class="chip" type="button" data-val="strategic">戦略顧客（最重要）</button>
-              <button class="chip" type="button" data-val="profitable">優良顧客</button>
+              <button class="chip active" type="button" data-val="profitable">優良顧客</button>
               <button class="chip" type="button" data-val="marginal">採算ギリギリ</button>
               <button class="chip" type="button" data-val="loss">赤字顧客</button>
             </div>
@@ -395,10 +394,10 @@
               <b>戦略顧客:</b> 段階改定・条件調整を最優先提示<br>
               <b>赤字顧客:</b> 改定受入れなければ取引見直しを示唆する協議アプローチ
             </div>
-          </details>
+          </div>
 
-          <details style="margin-top:10px;" open>
-            <summary>自助努力</summary>
+          <div style="margin-top:10px;">
+            <label>自助努力</label>
             <div class="hint">これまでの努力（複数可）</div>
             <div class="chipGroup" id="effortGroup">
               <button class="chip active" type="button" data-val="徹底した経費削減">経費削減</button>
@@ -412,7 +411,7 @@
             </div>
             <label for="effortFreeText">自助努力（自由入力）</label>
             <textarea id="effortFreeText" rows="2" placeholder="例）配送ルートの見直し、作業工程の標準化による残業削減 等"></textarea>
-          </details>
+          </div>
         </div>
 
       </div>
@@ -1780,6 +1779,11 @@ ${objectionHandling}
       }
       if(groupId==='#factorGroup'){
         chips.filter(x=>['原材料・仕入コストの上昇','人件費（賃上げ・採用難）による負担増'].includes(x.getAttribute('data-val'))).forEach(x=>x.classList.add('active'));
+        return;
+      }
+      if(groupId==='#customerGroup'){
+        const p = chips.find(x=>x.getAttribute('data-val')==='profitable');
+        if(p) p.classList.add('active');
         return;
       }
     }
