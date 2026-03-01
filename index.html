@@ -1201,8 +1201,6 @@
       const dataYear = Math.min(ny, MW_MAX_YEAR);
 
       const baseMw = getHistoricalMinWageForPref(prefKey, by);
-      const nowMw = getHistoricalMinWageForPref(prefKey, dataYear);
-
       const currentMwInfo = minWageInfo(prefKey);
       const nowMw = currentMwInfo ? currentMwInfo.n : getHistoricalMinWageForPref(prefKey, dataYear);
 
