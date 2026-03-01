@@ -317,565 +317,283 @@
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1075,
-        "old": 1010,
-        "inc": 65,
-        "eff": "2025-10-04"
-      }
+      "wage_asof": null
     },
     "青森": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1029,
-        "old": 953,
-        "inc": 76,
-        "eff": "2025-11-21"
-      }
+      "wage_asof": null
     },
     "岩手": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1031,
-        "old": 952,
-        "inc": 79,
-        "eff": "2025-12-01"
-      }
+      "wage_asof": null
     },
     "宮城": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1038,
-        "old": 973,
-        "inc": 65,
-        "eff": "2025-10-04"
-      }
+      "wage_asof": null
     },
     "秋田": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1031,
-        "old": 951,
-        "inc": 80,
-        "eff": "2026-03-31"
-      }
+      "wage_asof": null
     },
     "山形": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1032,
-        "old": 955,
-        "inc": 77,
-        "eff": "2025-12-23"
-      }
+      "wage_asof": null
     },
     "福島": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1033,
-        "old": 955,
-        "inc": 78,
-        "eff": "2026-01-01"
-      }
+      "wage_asof": null
     },
     "茨城": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1074,
-        "old": 1005,
-        "inc": 69,
-        "eff": "2025-10-12"
-      }
+      "wage_asof": null
     },
     "栃木": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1068,
-        "old": 1004,
-        "inc": 64,
-        "eff": "2025-10-01"
-      }
+      "wage_asof": null
     },
     "群馬": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1063,
-        "old": 985,
-        "inc": 78,
-        "eff": "2026-03-01"
-      }
+      "wage_asof": null
     },
     "埼玉": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1141,
-        "old": 1078,
-        "inc": 63,
-        "eff": "2025-11-01"
-      }
+      "wage_asof": null
     },
     "千葉": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1140,
-        "old": 1076,
-        "inc": 64,
-        "eff": "2025-10-03"
-      }
+      "wage_asof": null
     },
     "東京": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1226,
-        "old": 1163,
-        "inc": 63,
-        "eff": "2025-10-03"
-      }
+      "wage_asof": null
     },
     "神奈川": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1225,
-        "old": 1162,
-        "inc": 63,
-        "eff": "2025-10-04"
-      }
+      "wage_asof": null
     },
     "新潟": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1050,
-        "old": 985,
-        "inc": 65,
-        "eff": "2025-10-02"
-      }
+      "wage_asof": null
     },
     "富山": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1062,
-        "old": 998,
-        "inc": 64,
-        "eff": "2025-10-12"
-      }
+      "wage_asof": null
     },
     "石川": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1054,
-        "old": 984,
-        "inc": 70,
-        "eff": "2025-10-08"
-      }
+      "wage_asof": null
     },
     "福井": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1053,
-        "old": 984,
-        "inc": 69,
-        "eff": "2025-10-08"
-      }
+      "wage_asof": null
     },
     "山梨": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1052,
-        "old": 988,
-        "inc": 64,
-        "eff": "2025-12-01"
-      }
+      "wage_asof": null
     },
     "長野": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1061,
-        "old": 998,
-        "inc": 63,
-        "eff": "2025-10-03"
-      }
+      "wage_asof": null
     },
     "岐阜": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1065,
-        "old": 1001,
-        "inc": 64,
-        "eff": "2025-10-18"
-      }
+      "wage_asof": null
     },
     "静岡": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1097,
-        "old": 1034,
-        "inc": 63,
-        "eff": "2025-11-01"
-      }
+      "wage_asof": null
     },
     "愛知": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1140,
-        "old": 1077,
-        "inc": 63,
-        "eff": "2025-10-18"
-      }
+      "wage_asof": null
     },
     "三重": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1087,
-        "old": 1023,
-        "inc": 64,
-        "eff": "2025-11-21"
-      }
+      "wage_asof": null
     },
     "滋賀": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1080,
-        "old": 1017,
-        "inc": 63,
-        "eff": "2025-10-05"
-      }
+      "wage_asof": null
     },
     "京都": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1122,
-        "old": 1058,
-        "inc": 64,
-        "eff": "2025-11-21"
-      }
+      "wage_asof": null
     },
     "大阪": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1177,
-        "old": 1114,
-        "inc": 63,
-        "eff": "2025-10-16"
-      }
+      "wage_asof": null
     },
     "兵庫": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1116,
-        "old": 1052,
-        "inc": 64,
-        "eff": "2025-10-04"
-      }
+      "wage_asof": null
     },
     "奈良": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1051,
-        "old": 986,
-        "inc": 65,
-        "eff": "2025-11-16"
-      }
+      "wage_asof": null
     },
     "和歌山": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1045,
-        "old": 980,
-        "inc": 65,
-        "eff": "2025-11-01"
-      }
+      "wage_asof": null
     },
     "鳥取": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1030,
-        "old": 957,
-        "inc": 73,
-        "eff": "2025-10-04"
-      }
+      "wage_asof": null
     },
     "島根": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1033,
-        "old": 962,
-        "inc": 71,
-        "eff": "2025-11-17"
-      }
+      "wage_asof": null
     },
     "岡山": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1047,
-        "old": 982,
-        "inc": 65,
-        "eff": "2025-12-01"
-      }
+      "wage_asof": null
     },
     "広島": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1085,
-        "old": 1020,
-        "inc": 65,
-        "eff": "2025-11-01"
-      }
+      "wage_asof": null
     },
     "山口": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1043,
-        "old": 979,
-        "inc": 64,
-        "eff": "2025-10-16"
-      }
+      "wage_asof": null
     },
     "徳島": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1046,
-        "old": 980,
-        "inc": 66,
-        "eff": "2026-01-01"
-      }
+      "wage_asof": null
     },
     "香川": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1036,
-        "old": 970,
-        "inc": 66,
-        "eff": "2025-10-18"
-      }
+      "wage_asof": null
     },
     "愛媛": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1033,
-        "old": 956,
-        "inc": 77,
-        "eff": "2025-12-01"
-      }
+      "wage_asof": null
     },
     "高知": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1023,
-        "old": 952,
-        "inc": 71,
-        "eff": "2025-12-01"
-      }
+      "wage_asof": null
     },
     "福岡": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1057,
-        "old": 992,
-        "inc": 65,
-        "eff": "2025-11-16"
-      }
+      "wage_asof": null
     },
     "佐賀": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1030,
-        "old": 956,
-        "inc": 74,
-        "eff": "2025-11-21"
-      }
+      "wage_asof": null
     },
     "長崎": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1031,
-        "old": 953,
-        "inc": 78,
-        "eff": "2025-12-01"
-      }
+      "wage_asof": null
     },
     "熊本": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1034,
-        "old": 952,
-        "inc": 82,
-        "eff": "2026-01-01"
-      }
+      "wage_asof": null
     },
     "大分": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1035,
-        "old": 954,
-        "inc": 81,
-        "eff": "2026-01-01"
-      }
+      "wage_asof": null
     },
     "宮崎": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1023,
-        "old": 952,
-        "inc": 71,
-        "eff": "2025-11-16"
-      }
+      "wage_asof": null
     },
     "鹿児島": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1026,
-        "old": 953,
-        "inc": 73,
-        "eff": "2025-11-01"
-      }
+      "wage_asof": null
     },
     "沖縄": {
       "cpi_yoy": null,
       "cpi_asof": null,
       "wage_yoy": null,
-      "wage_asof": null,
-      "min_wage": {
-        "new": 1023,
-        "old": 952,
-        "inc": 71,
-        "eff": "2025-12-01"
-      }
+      "wage_asof": null
     }
   }
 }
