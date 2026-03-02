@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon192192.png" />
   <link rel="apple-touch-icon" sizes="192x192" href="favicon192192.png" />
   <link rel="shortcut icon" href="favicon192192.png" />
+  <script defer src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
 
   <style>
     :root{
@@ -60,6 +61,24 @@
     .mk-mini{margin:16px auto 10px;max-width:1100px;color:#374151;font-size:.84rem;text-align:center}
     .mk-mini a{color:inherit;text-decoration:underline}
     .note{font-size:.8rem;color:#6b7280;text-align:center;margin-bottom:24px}
+
+    .authShell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(1200px 600px at -10% -10%, rgba(87,136,153,.16), transparent 65%),radial-gradient(900px 500px at 110% 110%, rgba(87,136,153,.14), transparent 60%),linear-gradient(145deg,#f8fbfd 0%,#eef6fa 100%);transition:opacity .35s ease, transform .35s ease}
+    .authShell.fadeOut{opacity:0;transform:translateY(-8px);pointer-events:none}
+    .authCard{width:min(520px,94vw);background:#fff;border-radius:20px;border:1px solid #dbe7ee;box-shadow:0 16px 36px rgba(15,23,42,.12);padding:26px}
+    .authLogoFrame{width:min(240px,62vw);margin:0 auto 14px;padding:10px;border-radius:16px;background:#fff;border:1px solid #e5e7eb}
+    .authLogo{display:block;width:100%;height:auto;margin:0 auto;object-fit:contain}
+    .authTitle{font-weight:900;font-size:1.15rem;color:#0f172a;margin:0 0 8px;display:flex;align-items:center;justify-content:center;gap:8px}
+    .authBadge{display:inline-block;background:rgba(87,136,153,.12);color:#2f5f70;border:1px solid rgba(87,136,153,.25);border-radius:999px;padding:2px 8px;font-size:.72rem;font-weight:900}
+    .authMsg{font-size:.9rem;color:#475569;margin:0 0 14px;line-height:1.7;text-align:center}
+    .authField{width:min(320px,86vw);margin:0 auto}
+    .authField label{display:block;text-align:center}
+    .authInput{font-size:1.12rem !important;padding:14px 12px !important;border-radius:12px !important;width:100%;max-width:320px;margin:0 auto;text-align:center;display:block}
+    .authCheck{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;font-size:.9rem;color:#334155}
+    .authCheck input{width:16px;height:16px;accent-color:var(--brand)}
+    .authErr{display:none;font-size:.8rem;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 10px;margin-top:10px}
+    .authErr.show{display:block}
+    #appShell{opacity:0;transition:opacity .45s ease}
+    #appShell.show{opacity:1}
 
     /* チップ */
     .chipGroup{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;margin-bottom:4px}
@@ -144,6 +163,24 @@
 </head>
 
 <body>
+  <div id="authShell" class="authShell" aria-live="polite">
+    <div class="authCard">
+      <div class="authLogoFrame"><img src="ロゴ.jpg" alt="松本会計ロゴ" class="authLogo" /></div>
+      <div class="authTitle">🔐 値上げ交渉ナビゲーター <span class="authBadge">松本会計</span></div>
+      <p class="authMsg">このツールを利用するには、パスワードを入力してください。<br>同じタブを開いている間は再入力不要です。</p>
+      <div class="authField">
+        <label for="authPassword" style="margin-top:0;">パスワード</label>
+        <input type="password" id="authPassword" class="authInput" placeholder="パスワードを入力" autocomplete="current-password" />
+      </div>
+      <label class="authCheck" for="authShowPassword"><input type="checkbox" id="authShowPassword" />パスワードを表示</label>
+      <div class="miniActions" style="margin-top:10px;justify-content:center;">
+        <button class="btn" id="authUnlockBtn" type="button">利用を開始</button>
+      </div>
+      <div id="authError" class="authErr">パスワードが正しくありません。</div>
+    </div>
+  </div>
+
+  <div id="appShell" style="display:none;">
   <div class="wrap">
     <div class="header">
       <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
@@ -424,6 +461,23 @@
             </div>
             <label for="effortFreeText">自助努力（任意）</label>
             <textarea id="effortFreeText" rows="2" placeholder="例）配送ルートの見直し、作業工程の標準化による残業削減 等"></textarea>
+
+            <div style="margin-top:20px; padding-top:16px; border-top:1px dashed #e5e7eb;">
+              <label>値上げに伴う提供価値・メリット（任意）</label>
+              <div class="hint">値上げをご了承いただいた買い手企業へ約束できる「見返り」を選択</div>
+              <div class="chipGroup" id="valueGroup">
+                <button class="chip" type="button" data-val="stable_supply">安定供給・優先対応</button>
+                <button class="chip" type="button" data-val="support_speed">サポート強化・迅速化</button>
+                <button class="chip" type="button" data-val="quality_upgrade">品質向上・新仕様対応</button>
+                <button class="chip" type="button" data-val="flexible_terms">発注ロット・納品条件の柔軟化</button>
+                <button class="chip" type="button" data-val="lead_time_short">リードタイム短縮の取り組み</button>
+                <button class="chip" type="button" data-val="reporting">定期レポート・情報共有強化</button>
+                <button class="chip" type="button" data-val="dedicated_contact">専任担当・窓口の明確化</button>
+                <button class="chip" type="button" data-val="proposal_support">活用提案・運用改善支援</button>
+              </div>
+              <label for="valueFreeText">具体的なメリット（自由入力）</label>
+              <textarea id="valueFreeText" rows="2" placeholder="例）専任担当の配置、月1回の定期レポート提出 など"></textarea>
+            </div>
           </div>
         </div>
 
@@ -480,6 +534,7 @@
           <div class="miniActions">
             <button class="btn" id="copyBtn" type="button">現在の表示をコピー</button>
             <button class="btn alt" id="printBtn" type="button">印刷/PDF（案内文＆面談トーク・根拠メモ）</button>
+            <button class="btn ghost" id="wordBtn" type="button">Word（.docx）出力</button>
           </div>
           <div class="hint" style="margin-top:8px;">※印刷/PDFは「案内文」と「面談トーク・根拠メモ（社内用）」を出力します。</div>
         </div>
@@ -512,6 +567,7 @@
     <span id="build-rev">r42</span>（<span id="last-updated-date"></span>）
   </footer>
   <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
+  </div>
 
   <script>
   (function(){
@@ -521,6 +577,8 @@
     const qs = new URLSearchParams(window.location.search);
     const IS_ADMIN = (qs.get('admin') === '1');
     try{ document.documentElement.classList.toggle('isAdmin', !!IS_ADMIN); }catch(e){}
+    const TARGET_PASSWORD = 'matsu2026';
+    const AUTH_SESSION_KEY = 'mk_session_unlocked';
 
     const DATA_FRESHNESS = {
       cpi_base: "2024年12月確定値（2025年以降は推計）",
@@ -644,12 +702,19 @@
     const ownPerson = $('#ownPerson');
     const copyBtn = $('#copyBtn');
     const printBtn = $('#printBtn');
+    const wordBtn = $('#wordBtn');
     const copyStatus = $('#copyStatus');
     const resetBtn = $('#resetBtn');
     const rateHint = $('#rateHint');
     const validateMsg = $('#validateMsg');
     const importStatusEl = $('#importStatus');
     const validationWarning = $('#validationWarning');
+    const authShell = $('#authShell');
+    const appShell = $('#appShell');
+    const authPassword = $('#authPassword');
+    const authUnlockBtn = $('#authUnlockBtn');
+    const authError = $('#authError');
+    const authShowPassword = $('#authShowPassword');
 
     const prefSelect = $('#prefSelect');
     const step0Card = $('#step0Card');
@@ -690,6 +755,7 @@
 
     const extraFactors = $('#extraFactors');
     const effortFreeText = $('#effortFreeText');
+    const valueFreeText = $('#valueFreeText');
     const openExternalFactorsBtn = $('#openExternalFactorsBtn');
     const openExternalFactorsBtn2 = $('#openExternalFactorsBtn2');
     const externalFactorsModal = $('#externalFactorsModal');
@@ -701,6 +767,60 @@
     const printDate = $('#printDate');
 
     let currentOutputMode = 'letter';
+    const AUTOSAVE_KEY = 'mk_autosave_v1';
+
+    function unlockApp(saveSession){
+      if(appShell){
+        appShell.style.display = '';
+        requestAnimationFrame(() => appShell.classList.add('show'));
+      }
+      if(authShell){
+        authShell.classList.add('fadeOut');
+        setTimeout(() => { authShell.style.display = 'none'; }, 320);
+      }
+      if(saveSession){
+        try{ sessionStorage.setItem(AUTH_SESSION_KEY, '1'); }catch(e){}
+      }
+    }
+
+    function initAuthGate(){
+      let unlocked = false;
+      try{ unlocked = sessionStorage.getItem(AUTH_SESSION_KEY) === '1'; }catch(e){}
+      if(unlocked){
+        unlockApp(false);
+        generate();
+        return;
+      }
+
+      if(appShell) appShell.style.display = 'none';
+      if(appShell) appShell.classList.remove('show');
+      if(authShell){
+        authShell.style.display = 'flex';
+        authShell.classList.remove('fadeOut');
+      }
+
+      const attemptUnlock = () => {
+        const input = (authPassword && authPassword.value || '').trim();
+        if(input === TARGET_PASSWORD){
+          if(authError) authError.classList.remove('show');
+          unlockApp(true);
+          generate();
+          return;
+        }
+        if(authError) authError.classList.add('show');
+      };
+
+      if(authUnlockBtn) authUnlockBtn.addEventListener('click', attemptUnlock);
+      if(authPassword) authPassword.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') attemptUnlock();
+      });
+      if(authShowPassword && authPassword){
+        authShowPassword.addEventListener('change', () => {
+          authPassword.type = authShowPassword.checked ? 'text' : 'password';
+        });
+      }
+      if(authPassword) setTimeout(() => authPassword.focus(), 10);
+    }
 
     let currentAudience = 'btob';
 
@@ -756,6 +876,123 @@
       importStatusEl.classList.add('show');
       clearTimeout(showImportStatus._t);
       showImportStatus._t = setTimeout(()=>importStatusEl.classList.remove('show'), 4200);
+    }
+
+    function getChipState(groupId){
+      const g = $(groupId);
+      if(!g) return [];
+      return Array.from(g.querySelectorAll('.chip.active')).map(c => c.getAttribute('data-val'));
+    }
+
+    function applyChipState(groupId, values){
+      const g = $(groupId);
+      if(!g || !Array.isArray(values)) return;
+      const set = new Set(values.map(v => String(v)));
+      g.querySelectorAll('.chip').forEach(ch => {
+        ch.classList.toggle('active', set.has(ch.getAttribute('data-val')));
+      });
+    }
+
+    function saveDraft(){
+      try{
+        const payload = {
+          partnerCompany: partnerCompany.value,
+          partnerPerson: partnerPerson.value,
+          partnerHonorific: partnerHonorific.value,
+          partnerHonorificCustom: partnerHonorificCustom.value,
+          ownCompany: ownCompany.value,
+          ownPerson: ownPerson.value,
+          productName: productName.value,
+          currentPrice: currentPrice.value,
+          newPrice: newPrice.value,
+          currentPriceAsOf: currentPriceAsOf.value,
+          effectiveDate: effectiveDate.value,
+          extraFactors: extraFactors.value,
+          effortFreeText: effortFreeText.value,
+          valueFreeText: valueFreeText.value,
+          cpiRate: cpiRate.value,
+          wageRate: wageRate.value,
+          cpiAsOf: cpiAsOf.value,
+          wageAsOf: wageAsOf.value,
+          embedNumbersInLetter: !!embedNumbersInLetter.checked,
+          linkRates: !!linkRates.checked,
+          pref: prefSelect.value,
+          audience: currentAudience,
+          chips: {
+            clause: getChipState('#clauseGroup'),
+            factor: getChipState('#factorGroup'),
+            effort: getChipState('#effortGroup'),
+            value: getChipState('#valueGroup'),
+            relation: getChipState('#relationGroup'),
+            customer: getChipState('#customerGroup')
+          }
+        };
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(payload));
+      }catch(e){}
+    }
+
+    function restoreDraft(){
+      try{
+        const raw = localStorage.getItem(AUTOSAVE_KEY);
+        if(!raw) return false;
+        const d = JSON.parse(raw);
+        if(!d || typeof d !== 'object') return false;
+
+        if(typeof d.partnerCompany === 'string') partnerCompany.value = d.partnerCompany;
+        if(typeof d.partnerPerson === 'string') partnerPerson.value = d.partnerPerson;
+        if(typeof d.partnerHonorific === 'string') partnerHonorific.value = d.partnerHonorific;
+        if(typeof d.partnerHonorificCustom === 'string') partnerHonorificCustom.value = d.partnerHonorificCustom;
+        if(typeof d.ownCompany === 'string') ownCompany.value = d.ownCompany;
+        if(typeof d.ownPerson === 'string') ownPerson.value = d.ownPerson;
+        if(typeof d.productName === 'string') productName.value = d.productName;
+        if(typeof d.currentPrice === 'string') currentPrice.value = d.currentPrice;
+        if(typeof d.newPrice === 'string') newPrice.value = d.newPrice;
+        if(typeof d.currentPriceAsOf === 'string') currentPriceAsOf.value = d.currentPriceAsOf;
+        if(typeof d.effectiveDate === 'string') effectiveDate.value = d.effectiveDate;
+        if(typeof d.extraFactors === 'string') extraFactors.value = d.extraFactors;
+        if(typeof d.effortFreeText === 'string') effortFreeText.value = d.effortFreeText;
+        if(typeof d.valueFreeText === 'string') valueFreeText.value = d.valueFreeText;
+        if(typeof d.cpiRate === 'string') cpiRate.value = d.cpiRate;
+        if(typeof d.wageRate === 'string') wageRate.value = d.wageRate;
+        if(typeof d.cpiAsOf === 'string') cpiAsOf.value = d.cpiAsOf;
+        if(typeof d.wageAsOf === 'string') wageAsOf.value = d.wageAsOf;
+        if(typeof d.embedNumbersInLetter === 'boolean') embedNumbersInLetter.checked = d.embedNumbersInLetter;
+        if(typeof d.linkRates === 'boolean') linkRates.checked = d.linkRates;
+        if(typeof d.pref === 'string' && PREF_LABEL[d.pref]) prefSelect.value = d.pref;
+        if(typeof d.audience === 'string') setAudience(d.audience === 'btoc' ? 'btoc' : 'btob', true);
+
+        const chips = d.chips || {};
+        applyChipState('#clauseGroup', chips.clause);
+        applyChipState('#factorGroup', chips.factor);
+        applyChipState('#effortGroup', chips.effort);
+        applyChipState('#valueGroup', chips.value);
+        applyChipState('#relationGroup', chips.relation);
+        applyChipState('#customerGroup', chips.customer);
+
+        showImportStatus('📝 下書きを復元しました（自動保存データ）');
+        return true;
+      }catch(e){
+        return false;
+      }
+    }
+
+    async function downloadWordDocx(text, filename){
+      if(!window.docx){
+        alert('Word出力ライブラリの読み込みに失敗しました。ネットワーク接続をご確認ください。');
+        return;
+      }
+      const { Document, Packer, Paragraph } = window.docx;
+      const lines = String(text || '').split('\n');
+      const children = lines.length ? lines.map(line => new Paragraph({ text: line || ' ' })) : [new Paragraph({ text: '' })];
+      const doc = new Document({ sections: [{ children }] });
+      const blob = await Packer.toBlob(doc);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1200);
     }
     function markImported(el){ if(el) el.classList.add('imported-value'); }
 
@@ -823,6 +1060,7 @@
     setupChips('#clauseGroup', false);
     setupChips('#factorGroup', true);
     setupChips('#effortGroup', true);
+    setupChips('#valueGroup', true);
     setupChips('#relationGroup', false);
     setupChips('#customerGroup', false);
 
@@ -1588,6 +1826,57 @@
       const effortJoined = efforts.length > 0 ? joinJa(efforts) : '';
       const effortText = [effortJoined, effortFree].filter(Boolean).join('／') || '徹底したコスト削減';
 
+      const valueChips = getSelectedValues('#valueGroup');
+      const valFree = (valueFreeText && valueFreeText.value) ? valueFreeText.value.trim() : '';
+      const valueDetailMap = {
+        stable_supply: {
+          list: '安定的な供給体制を維持し、緊急時の優先対応を強化',
+          talk: '安定供給と優先対応'
+        },
+        support_speed: {
+          list: '問い合わせへの初動・回答スピードを高めるなど、サポート体制を強化',
+          talk: 'サポートの迅速化'
+        },
+        quality_upgrade: {
+          list: '品質改善活動を継続し、新仕様・改善要望への対応力を向上',
+          talk: '品質向上と新仕様対応'
+        },
+        flexible_terms: {
+          list: '発注ロットや納品条件について、運用実態に合わせた柔軟な見直しに対応',
+          talk: '発注・納品条件の柔軟化'
+        },
+        lead_time_short: {
+          list: '生産・手配プロセスを見直し、リードタイム短縮に向けた取り組みを推進',
+          talk: 'リードタイム短縮の取り組み'
+        },
+        reporting: {
+          list: '定期レポートや市況共有を通じて、状況の見える化と先回りの情報連携を実施',
+          talk: '定期レポートによる情報共有'
+        },
+        dedicated_contact: {
+          list: '専任担当（または責任窓口）を明確化し、相談・調整のスムーズ化を推進',
+          talk: '専任担当による対応強化'
+        },
+        proposal_support: {
+          list: '運用改善やコスト最適化につながる活用提案を継続的に実施',
+          talk: '運用改善に向けた提案支援'
+        }
+      };
+      const valueDetailLines = valueChips.map(k => valueDetailMap[k] && valueDetailMap[k].list).filter(Boolean);
+      const valueTalkTerms = valueChips.map(k => valueDetailMap[k] && valueDetailMap[k].talk).filter(Boolean);
+      if(valFree) valueDetailLines.push(valFree);
+      if(valFree) valueTalkTerms.push(valFree);
+
+      const valueListText = valueDetailLines.map(v => `・${v}`).join('\n');
+      const valueTalkText = valueTalkTerms.length > 0 ? joinJa(valueTalkTerms) : '';
+
+      const valueBlockLetter = valueDetailLines.length > 0
+        ? `\n\nまた、本改定に伴い、貴社に対して以下の取り組みを強化いたします。\nより一層の貢献をお約束いたします。\n\n【今後の提供価値・取り組み】\n${valueListText}\n`
+        : '';
+      const valueBlockTalk = valueTalkText
+        ? `\n「単にご負担をお願いするだけでなく、今後は${valueTalkText}の面で、御社への還元を具体化してまいります。」`
+        : '';
+
       const relation = getSelectedValues('#relationGroup')[0] || 'B';
       const customerType = getSelectedValues('#customerGroup')[0] || '';
       const customerStrategyMap = {
@@ -1649,7 +1938,7 @@ ${customerStrategy}
 ご負担をおかけし大変申し訳ございません。
 頂戴するご負担に見合う品質・サービスを維持し、今後も継続的に貢献できるよう尽力いたします。
 
-ご不明点やご相談がございましたら、遠慮なくお申し付けください。
+ご不明点やご相談がございましたら、遠慮なくお申し付けください。${valueBlockLetter}
 何卒、諸事情をご賢察いただき、ご理解を賜りますようお願い申し上げます。${referenceBlock}`;
       } else if(relation === 'B') {
         letter =
@@ -1677,7 +1966,7 @@ ${customerStrategy}
 ・改定価格：${rateStr}
 ・適用時期：${dateStr}
 
-お客様にはご負担をおかけいたします分、より一層のサービス向上に努めてまいります。
+お客様にはご負担をおかけいたします分、より一層のサービス向上に努めてまいります。${valueBlockLetter}
 何卒ご理解賜りますようお願い申し上げます。${referenceBlock}`;
       } else {
         letter =
@@ -1709,7 +1998,7 @@ ${customerStrategy}
 もし上記での全面的なご承認が難しい場合でも、
 段階的改定／条件調整（ロット・契約期間・一部仕様等）を含め、双方が納得できる着地点を模索したく存じます。
 
-近日中にお打ち合わせの機会を頂戴できますと幸いです。
+近日中にお打ち合わせの機会を頂戴できますと幸いです。${valueBlockLetter}
 何卒よろしくお願い申し上げます。${referenceBlock}`;
       }
 
@@ -1765,7 +2054,7 @@ ${decidedTalk}
 
 ■ 5. 結論（改定の打診）
 「このままですと『${prod}』の品質維持や提供体制に支障が出る恐れがあります。
-つきましては、${dateStr}より、【 ${rateStr} 】への見直しをご相談できないでしょうか。」
+つきましては、${dateStr}より、【 ${rateStr} 】への見直しをご相談できないでしょうか。」${valueBlockTalk}
 ${objectionHandling}
 
 ■ 7. クロージング（次アクション）
@@ -1878,6 +2167,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
 
         if(printLetter) printLetter.textContent = CACHE.letter || '';
         if(printTalkMemo) printTalkMemo.textContent = `${CACHE.talk || ''}\n\n----------------------------------------\n\n${CACHE.memo || ''}`;
+        saveDraft();
       } catch (err) {
         console.error(err);
         if(outputArea) outputArea.value = '※文面生成中にエラーが発生しました。\n' + err.message;
@@ -1945,8 +2235,14 @@ A.「ご意見ありがとうございます。当店としては品質とサー
       }catch(e){}
     });
 
+    if(wordBtn) wordBtn.addEventListener('click', async () => {
+      const modeTitle = currentOutputMode === 'letter' ? '案内文' : (currentOutputMode === 'talk' ? '面談トーク' : '根拠メモ');
+      const ymd = new Date().toISOString().slice(0,10);
+      await downloadWordDocx(outputArea.value || '', `値上げ交渉_${modeTitle}_${ymd}.docx`);
+    });
+
     [partnerCompany, partnerPerson, partnerHonorific, partnerHonorificCustom, ownCompany, ownPerson,
-     productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText,
+     productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText, valueFreeText,
      embedNumbersInLetter, linkRates, cpiRate, wageRate, cpiAsOf, wageAsOf]
       .forEach(el => el.addEventListener('input', generate));
 
@@ -2054,10 +2350,11 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     }
 
     resetBtn.addEventListener('click', () => {
-      [partnerCompany,partnerPerson,partnerHonorificCustom,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText].forEach(el=>{
+      [partnerCompany,partnerPerson,partnerHonorificCustom,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText,valueFreeText].forEach(el=>{
         el.value='';
         el.classList.remove('imported-value');
       });
+      try{ localStorage.removeItem(AUTOSAVE_KEY); }catch(e){}
       closeExternalFactorsModal();
 
       if(partnerHonorific) partnerHonorific.value = '様';
@@ -2070,6 +2367,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
       resetChips('#clauseGroup');
       resetChips('#factorGroup');
       resetChips('#effortGroup');
+      resetChips('#valueGroup');
       resetChips('#relationGroup');
       resetChips('#customerGroup');
 
@@ -2117,10 +2415,11 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     loadCostData(savedUrl || './pref_cost_data.json', true);
 
     renderAllByPref();
+    restoreDraft();
     getUrlParams();
     syncHonorificInput();
 
-    generate();
+    initAuthGate();
 
   })();
   </script>
