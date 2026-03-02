@@ -424,6 +424,19 @@
             </div>
             <label for="effortFreeText">自助努力（任意）</label>
             <textarea id="effortFreeText" rows="2" placeholder="例）配送ルートの見直し、作業工程の標準化による残業削減 等"></textarea>
+
+            <div style="margin-top:20px; padding-top:16px; border-top:1px dashed #e5e7eb;">
+              <label>値上げに伴う提供価値・メリット（任意）</label>
+              <div class="hint">値上げをご了承いただいた買い手企業へ約束できる「見返り」を選択</div>
+              <div class="chipGroup" id="valueGroup">
+                <button class="chip" type="button" data-val="安定的な供給体制と優先対応の確約">安定供給・優先対応</button>
+                <button class="chip" type="button" data-val="サポート体制の強化・迅速化">サポート強化</button>
+                <button class="chip" type="button" data-val="品質のさらなる向上・改善">品質向上</button>
+                <button class="chip" type="button" data-val="発注ロットや納品条件の柔軟な見直し">柔軟な条件見直し</button>
+              </div>
+              <label for="valueFreeText">具体的なメリット（自由入力）</label>
+              <textarea id="valueFreeText" rows="2" placeholder="例）専任担当の配置、月1回の定期レポート提出 など"></textarea>
+            </div>
           </div>
         </div>
 
@@ -690,6 +703,7 @@
 
     const extraFactors = $('#extraFactors');
     const effortFreeText = $('#effortFreeText');
+    const valueFreeText = $('#valueFreeText');
     const openExternalFactorsBtn = $('#openExternalFactorsBtn');
     const openExternalFactorsBtn2 = $('#openExternalFactorsBtn2');
     const externalFactorsModal = $('#externalFactorsModal');
@@ -823,6 +837,7 @@
     setupChips('#clauseGroup', false);
     setupChips('#factorGroup', true);
     setupChips('#effortGroup', true);
+    setupChips('#valueGroup', true);
     setupChips('#relationGroup', false);
     setupChips('#customerGroup', false);
 
@@ -1588,6 +1603,18 @@
       const effortJoined = efforts.length > 0 ? joinJa(efforts) : '';
       const effortText = [effortJoined, effortFree].filter(Boolean).join('／') || '徹底したコスト削減';
 
+      const valueChips = getSelectedValues('#valueGroup');
+      const valFree = (valueFreeText && valueFreeText.value) ? valueFreeText.value.trim() : '';
+      const valJoined = valueChips.length > 0 ? joinJa(valueChips) : '';
+      const valueText = [valJoined, valFree].filter(Boolean).join('／');
+
+      const valueBlockLetter = valueText
+        ? `\n\nまた、本改定に伴い、貴社に対して以下の取り組みを強化し、より一層の貢献をお約束いたします。\n【今後の提供価値・取り組み】\n・${valueText}`
+        : '';
+      const valueBlockTalk = valueText
+        ? `\n「ただ単にご負担をお願いするだけでなく、今後は【 ${valueText} 】の面で御社にしっかりと還元させていただきます。」`
+        : '';
+
       const relation = getSelectedValues('#relationGroup')[0] || 'B';
       const customerType = getSelectedValues('#customerGroup')[0] || '';
       const customerStrategyMap = {
@@ -1649,7 +1676,7 @@ ${customerStrategy}
 ご負担をおかけし大変申し訳ございません。
 頂戴するご負担に見合う品質・サービスを維持し、今後も継続的に貢献できるよう尽力いたします。
 
-ご不明点やご相談がございましたら、遠慮なくお申し付けください。
+ご不明点やご相談がございましたら、遠慮なくお申し付けください。${valueBlockLetter}
 何卒、諸事情をご賢察いただき、ご理解を賜りますようお願い申し上げます。${referenceBlock}`;
       } else if(relation === 'B') {
         letter =
@@ -1677,7 +1704,7 @@ ${customerStrategy}
 ・改定価格：${rateStr}
 ・適用時期：${dateStr}
 
-お客様にはご負担をおかけいたします分、より一層のサービス向上に努めてまいります。
+お客様にはご負担をおかけいたします分、より一層のサービス向上に努めてまいります。${valueBlockLetter}
 何卒ご理解賜りますようお願い申し上げます。${referenceBlock}`;
       } else {
         letter =
@@ -1709,7 +1736,7 @@ ${customerStrategy}
 もし上記での全面的なご承認が難しい場合でも、
 段階的改定／条件調整（ロット・契約期間・一部仕様等）を含め、双方が納得できる着地点を模索したく存じます。
 
-近日中にお打ち合わせの機会を頂戴できますと幸いです。
+近日中にお打ち合わせの機会を頂戴できますと幸いです。${valueBlockLetter}
 何卒よろしくお願い申し上げます。${referenceBlock}`;
       }
 
@@ -1765,7 +1792,7 @@ ${decidedTalk}
 
 ■ 5. 結論（改定の打診）
 「このままですと『${prod}』の品質維持や提供体制に支障が出る恐れがあります。
-つきましては、${dateStr}より、【 ${rateStr} 】への見直しをご相談できないでしょうか。」
+つきましては、${dateStr}より、【 ${rateStr} 】への見直しをご相談できないでしょうか。」${valueBlockTalk}
 ${objectionHandling}
 
 ■ 7. クロージング（次アクション）
@@ -1946,7 +1973,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     });
 
     [partnerCompany, partnerPerson, partnerHonorific, partnerHonorificCustom, ownCompany, ownPerson,
-     productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText,
+     productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText, valueFreeText,
      embedNumbersInLetter, linkRates, cpiRate, wageRate, cpiAsOf, wageAsOf]
       .forEach(el => el.addEventListener('input', generate));
 
@@ -2054,7 +2081,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     }
 
     resetBtn.addEventListener('click', () => {
-      [partnerCompany,partnerPerson,partnerHonorificCustom,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText].forEach(el=>{
+      [partnerCompany,partnerPerson,partnerHonorificCustom,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText,valueFreeText].forEach(el=>{
         el.value='';
         el.classList.remove('imported-value');
       });
@@ -2070,6 +2097,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
       resetChips('#clauseGroup');
       resetChips('#factorGroup');
       resetChips('#effortGroup');
+      resetChips('#valueGroup');
       resetChips('#relationGroup');
       resetChips('#customerGroup');
 
