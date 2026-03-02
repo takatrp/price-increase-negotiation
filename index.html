@@ -62,7 +62,7 @@
     .mk-mini a{color:inherit;text-decoration:underline}
     .note{font-size:.8rem;color:#6b7280;text-align:center;margin-bottom:24px}
 
-    .authShell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(1200px 600px at -10% -10%, rgba(87,136,153,.16), transparent 65%),radial-gradient(900px 500px at 110% 110%, rgba(87,136,153,.14), transparent 60%),linear-gradient(145deg,#f8fbfd 0%,#eef6fa 100%);transition:opacity .35s ease, transform .35s ease}
+    .authShell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:12px 20px;background:radial-gradient(1200px 600px at -10% -10%, rgba(87,136,153,.16), transparent 65%),radial-gradient(900px 500px at 110% 110%, rgba(87,136,153,.14), transparent 60%),linear-gradient(145deg,#f8fbfd 0%,#eef6fa 100%);transition:opacity .35s ease, transform .35s ease}
     .authShell.fadeOut{opacity:0;transform:translateY(-8px);pointer-events:none}
     .authCard{width:min(520px,94vw);background:#fff;border-radius:20px;border:1px solid #dbe7ee;box-shadow:0 16px 36px rgba(15,23,42,.12);padding:26px}
     .authLogoFrame{width:min(240px,62vw);margin:0 auto 14px;padding:10px;border-radius:16px;background:#fff;border:none}
@@ -71,12 +71,14 @@
     .authBadge{display:inline-block;background:rgba(87,136,153,.12);color:#2f5f70;border:1px solid rgba(87,136,153,.25);border-radius:999px;padding:2px 8px;font-size:.72rem;font-weight:900}
     .authMsg{font-size:.9rem;color:#475569;margin:0 0 14px;line-height:1.7;text-align:center}
     .authField{width:min(320px,86vw);margin:0 auto}
-    .authField label{display:block;text-align:center}
     .authInput{font-size:1.12rem !important;padding:14px 12px !important;border-radius:12px !important;width:100%;max-width:320px;margin:0 auto;text-align:center;display:block}
     .authCheck{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;font-size:.9rem;color:#334155}
     .authCheck input{width:16px;height:16px;accent-color:var(--brand)}
     .authErr{display:none;font-size:.8rem;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 10px;margin-top:10px}
     .authErr.show{display:block}
+    @media (max-width:640px){
+      .authShell{align-items:flex-start;padding-top:max(8px, env(safe-area-inset-top));}
+    }
     #appShell{opacity:0;transition:opacity .45s ease}
     #appShell.show{opacity:1}
 
@@ -169,7 +171,6 @@
       <div class="authTitle">🔐 値上げ交渉ナビゲーター <span class="authBadge">松本会計</span></div>
       <p class="authMsg">このツールを利用するには、パスワードを入力してください。<br>同じタブを開いている間は再入力不要です。</p>
       <div class="authField">
-        <label for="authPassword" style="margin-top:0;">パスワード</label>
         <input type="password" id="authPassword" class="authInput" placeholder="パスワードを入力" autocomplete="current-password" />
       </div>
       <label class="authCheck" for="authShowPassword"><input type="checkbox" id="authShowPassword" />パスワードを表示</label>
