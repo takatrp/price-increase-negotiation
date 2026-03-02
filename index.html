@@ -429,10 +429,14 @@
               <label>値上げに伴う提供価値・メリット（任意）</label>
               <div class="hint">値上げをご了承いただいた買い手企業へ約束できる「見返り」を選択</div>
               <div class="chipGroup" id="valueGroup">
-                <button class="chip" type="button" data-val="安定的な供給体制と優先対応の確約">安定供給・優先対応</button>
-                <button class="chip" type="button" data-val="サポート体制の強化・迅速化">サポート強化</button>
-                <button class="chip" type="button" data-val="品質のさらなる向上・改善">品質向上</button>
-                <button class="chip" type="button" data-val="発注ロットや納品条件の柔軟な見直し">柔軟な条件見直し</button>
+                <button class="chip" type="button" data-val="stable_supply">安定供給・優先対応</button>
+                <button class="chip" type="button" data-val="support_speed">サポート強化・迅速化</button>
+                <button class="chip" type="button" data-val="quality_upgrade">品質向上・新仕様対応</button>
+                <button class="chip" type="button" data-val="flexible_terms">発注ロット・納品条件の柔軟化</button>
+                <button class="chip" type="button" data-val="lead_time_short">リードタイム短縮の取り組み</button>
+                <button class="chip" type="button" data-val="reporting">定期レポート・情報共有強化</button>
+                <button class="chip" type="button" data-val="dedicated_contact">専任担当・窓口の明確化</button>
+                <button class="chip" type="button" data-val="proposal_support">活用提案・運用改善支援</button>
               </div>
               <label for="valueFreeText">具体的なメリット（自由入力）</label>
               <textarea id="valueFreeText" rows="2" placeholder="例）専任担当の配置、月1回の定期レポート提出 など"></textarea>
@@ -1605,14 +1609,53 @@
 
       const valueChips = getSelectedValues('#valueGroup');
       const valFree = (valueFreeText && valueFreeText.value) ? valueFreeText.value.trim() : '';
-      const valJoined = valueChips.length > 0 ? joinJa(valueChips) : '';
-      const valueText = [valJoined, valFree].filter(Boolean).join('／');
+      const valueDetailMap = {
+        stable_supply: {
+          list: '安定的な供給体制を維持し、緊急時の優先対応を強化',
+          talk: '安定供給と優先対応'
+        },
+        support_speed: {
+          list: '問い合わせへの初動・回答スピードを高めるなど、サポート体制を強化',
+          talk: 'サポートの迅速化'
+        },
+        quality_upgrade: {
+          list: '品質改善活動を継続し、新仕様・改善要望への対応力を向上',
+          talk: '品質向上と新仕様対応'
+        },
+        flexible_terms: {
+          list: '発注ロットや納品条件について、運用実態に合わせた柔軟な見直しに対応',
+          talk: '発注・納品条件の柔軟化'
+        },
+        lead_time_short: {
+          list: '生産・手配プロセスを見直し、リードタイム短縮に向けた取り組みを推進',
+          talk: 'リードタイム短縮の取り組み'
+        },
+        reporting: {
+          list: '定期レポートや市況共有を通じて、状況の見える化と先回りの情報連携を実施',
+          talk: '定期レポートによる情報共有'
+        },
+        dedicated_contact: {
+          list: '専任担当（または責任窓口）を明確化し、相談・調整のスムーズ化を推進',
+          talk: '専任担当による対応強化'
+        },
+        proposal_support: {
+          list: '運用改善やコスト最適化につながる活用提案を継続的に実施',
+          talk: '運用改善に向けた提案支援'
+        }
+      };
+      const valueDetailLines = valueChips.map(k => valueDetailMap[k] && valueDetailMap[k].list).filter(Boolean);
+      const valueTalkTerms = valueChips.map(k => valueDetailMap[k] && valueDetailMap[k].talk).filter(Boolean);
+      if(valFree) valueDetailLines.push(valFree);
+      if(valFree) valueTalkTerms.push(valFree);
 
-      const valueBlockLetter = valueText
-        ? `\n\nまた、本改定に伴い、貴社に対して以下の取り組みを強化し、より一層の貢献をお約束いたします。\n【今後の提供価値・取り組み】\n・${valueText}`
+      const valueListText = valueDetailLines.map(v => `・${v}`).join('\n');
+      const valueTalkText = valueTalkTerms.length > 0 ? joinJa(valueTalkTerms) : '';
+
+      const valueBlockLetter = valueDetailLines.length > 0
+        ? `\n\nまた、本改定に伴い、貴社に対して以下の取り組みを強化し、より一層の貢献をお約束いたします。\n【今後の提供価値・取り組み】\n${valueListText}`
         : '';
-      const valueBlockTalk = valueText
-        ? `\n「ただ単にご負担をお願いするだけでなく、今後は【 ${valueText} 】の面で御社にしっかりと還元させていただきます。」`
+      const valueBlockTalk = valueTalkText
+        ? `\n「単にご負担をお願いするだけでなく、今後は${valueTalkText}の面で、御社への還元を具体化してまいります。」`
         : '';
 
       const relation = getSelectedValues('#relationGroup')[0] || 'B';
