@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="favicon192192.png" />
   <link rel="apple-touch-icon" sizes="192x192" href="favicon192192.png" />
   <link rel="shortcut icon" href="favicon192192.png" />
+  <script defer src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
 
   <style>
     :root{
@@ -497,6 +498,7 @@
           <div class="miniActions">
             <button class="btn" id="copyBtn" type="button">現在の表示をコピー</button>
             <button class="btn alt" id="printBtn" type="button">印刷/PDF（案内文＆面談トーク・根拠メモ）</button>
+            <button class="btn ghost" id="wordBtn" type="button">Word（.docx）出力</button>
           </div>
           <div class="hint" style="margin-top:8px;">※印刷/PDFは「案内文」と「面談トーク・根拠メモ（社内用）」を出力します。</div>
         </div>
@@ -661,6 +663,7 @@
     const ownPerson = $('#ownPerson');
     const copyBtn = $('#copyBtn');
     const printBtn = $('#printBtn');
+    const wordBtn = $('#wordBtn');
     const copyStatus = $('#copyStatus');
     const resetBtn = $('#resetBtn');
     const rateHint = $('#rateHint');
@@ -719,6 +722,7 @@
     const printDate = $('#printDate');
 
     let currentOutputMode = 'letter';
+    const AUTOSAVE_KEY = 'mk_autosave_v1';
 
     let currentAudience = 'btob';
 
@@ -774,6 +778,123 @@
       importStatusEl.classList.add('show');
       clearTimeout(showImportStatus._t);
       showImportStatus._t = setTimeout(()=>importStatusEl.classList.remove('show'), 4200);
+    }
+
+    function getChipState(groupId){
+      const g = $(groupId);
+      if(!g) return [];
+      return Array.from(g.querySelectorAll('.chip.active')).map(c => c.getAttribute('data-val'));
+    }
+
+    function applyChipState(groupId, values){
+      const g = $(groupId);
+      if(!g || !Array.isArray(values)) return;
+      const set = new Set(values.map(v => String(v)));
+      g.querySelectorAll('.chip').forEach(ch => {
+        ch.classList.toggle('active', set.has(ch.getAttribute('data-val')));
+      });
+    }
+
+    function saveDraft(){
+      try{
+        const payload = {
+          partnerCompany: partnerCompany.value,
+          partnerPerson: partnerPerson.value,
+          partnerHonorific: partnerHonorific.value,
+          partnerHonorificCustom: partnerHonorificCustom.value,
+          ownCompany: ownCompany.value,
+          ownPerson: ownPerson.value,
+          productName: productName.value,
+          currentPrice: currentPrice.value,
+          newPrice: newPrice.value,
+          currentPriceAsOf: currentPriceAsOf.value,
+          effectiveDate: effectiveDate.value,
+          extraFactors: extraFactors.value,
+          effortFreeText: effortFreeText.value,
+          valueFreeText: valueFreeText.value,
+          cpiRate: cpiRate.value,
+          wageRate: wageRate.value,
+          cpiAsOf: cpiAsOf.value,
+          wageAsOf: wageAsOf.value,
+          embedNumbersInLetter: !!embedNumbersInLetter.checked,
+          linkRates: !!linkRates.checked,
+          pref: prefSelect.value,
+          audience: currentAudience,
+          chips: {
+            clause: getChipState('#clauseGroup'),
+            factor: getChipState('#factorGroup'),
+            effort: getChipState('#effortGroup'),
+            value: getChipState('#valueGroup'),
+            relation: getChipState('#relationGroup'),
+            customer: getChipState('#customerGroup')
+          }
+        };
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(payload));
+      }catch(e){}
+    }
+
+    function restoreDraft(){
+      try{
+        const raw = localStorage.getItem(AUTOSAVE_KEY);
+        if(!raw) return false;
+        const d = JSON.parse(raw);
+        if(!d || typeof d !== 'object') return false;
+
+        if(typeof d.partnerCompany === 'string') partnerCompany.value = d.partnerCompany;
+        if(typeof d.partnerPerson === 'string') partnerPerson.value = d.partnerPerson;
+        if(typeof d.partnerHonorific === 'string') partnerHonorific.value = d.partnerHonorific;
+        if(typeof d.partnerHonorificCustom === 'string') partnerHonorificCustom.value = d.partnerHonorificCustom;
+        if(typeof d.ownCompany === 'string') ownCompany.value = d.ownCompany;
+        if(typeof d.ownPerson === 'string') ownPerson.value = d.ownPerson;
+        if(typeof d.productName === 'string') productName.value = d.productName;
+        if(typeof d.currentPrice === 'string') currentPrice.value = d.currentPrice;
+        if(typeof d.newPrice === 'string') newPrice.value = d.newPrice;
+        if(typeof d.currentPriceAsOf === 'string') currentPriceAsOf.value = d.currentPriceAsOf;
+        if(typeof d.effectiveDate === 'string') effectiveDate.value = d.effectiveDate;
+        if(typeof d.extraFactors === 'string') extraFactors.value = d.extraFactors;
+        if(typeof d.effortFreeText === 'string') effortFreeText.value = d.effortFreeText;
+        if(typeof d.valueFreeText === 'string') valueFreeText.value = d.valueFreeText;
+        if(typeof d.cpiRate === 'string') cpiRate.value = d.cpiRate;
+        if(typeof d.wageRate === 'string') wageRate.value = d.wageRate;
+        if(typeof d.cpiAsOf === 'string') cpiAsOf.value = d.cpiAsOf;
+        if(typeof d.wageAsOf === 'string') wageAsOf.value = d.wageAsOf;
+        if(typeof d.embedNumbersInLetter === 'boolean') embedNumbersInLetter.checked = d.embedNumbersInLetter;
+        if(typeof d.linkRates === 'boolean') linkRates.checked = d.linkRates;
+        if(typeof d.pref === 'string' && PREF_LABEL[d.pref]) prefSelect.value = d.pref;
+        if(typeof d.audience === 'string') setAudience(d.audience === 'btoc' ? 'btoc' : 'btob', true);
+
+        const chips = d.chips || {};
+        applyChipState('#clauseGroup', chips.clause);
+        applyChipState('#factorGroup', chips.factor);
+        applyChipState('#effortGroup', chips.effort);
+        applyChipState('#valueGroup', chips.value);
+        applyChipState('#relationGroup', chips.relation);
+        applyChipState('#customerGroup', chips.customer);
+
+        showImportStatus('📝 下書きを復元しました（自動保存データ）');
+        return true;
+      }catch(e){
+        return false;
+      }
+    }
+
+    async function downloadWordDocx(text, filename){
+      if(!window.docx){
+        alert('Word出力ライブラリの読み込みに失敗しました。ネットワーク接続をご確認ください。');
+        return;
+      }
+      const { Document, Packer, Paragraph } = window.docx;
+      const lines = String(text || '').split('\n');
+      const children = lines.length ? lines.map(line => new Paragraph({ text: line || ' ' })) : [new Paragraph({ text: '' })];
+      const doc = new Document({ sections: [{ children }] });
+      const blob = await Packer.toBlob(doc);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1200);
     }
     function markImported(el){ if(el) el.classList.add('imported-value'); }
 
@@ -1948,6 +2069,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
 
         if(printLetter) printLetter.textContent = CACHE.letter || '';
         if(printTalkMemo) printTalkMemo.textContent = `${CACHE.talk || ''}\n\n----------------------------------------\n\n${CACHE.memo || ''}`;
+        saveDraft();
       } catch (err) {
         console.error(err);
         if(outputArea) outputArea.value = '※文面生成中にエラーが発生しました。\n' + err.message;
@@ -2013,6 +2135,12 @@ A.「ご意見ありがとうございます。当店としては品質とサー
         }
         window.print();
       }catch(e){}
+    });
+
+    if(wordBtn) wordBtn.addEventListener('click', async () => {
+      const modeTitle = currentOutputMode === 'letter' ? '案内文' : (currentOutputMode === 'talk' ? '面談トーク' : '根拠メモ');
+      const ymd = new Date().toISOString().slice(0,10);
+      await downloadWordDocx(outputArea.value || '', `値上げ交渉_${modeTitle}_${ymd}.docx`);
     });
 
     [partnerCompany, partnerPerson, partnerHonorific, partnerHonorificCustom, ownCompany, ownPerson,
@@ -2128,6 +2256,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
         el.value='';
         el.classList.remove('imported-value');
       });
+      try{ localStorage.removeItem(AUTOSAVE_KEY); }catch(e){}
       closeExternalFactorsModal();
 
       if(partnerHonorific) partnerHonorific.value = '様';
@@ -2188,6 +2317,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     loadCostData(savedUrl || './pref_cost_data.json', true);
 
     renderAllByPref();
+    restoreDraft();
     getUrlParams();
     syncHonorificInput();
 
