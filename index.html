@@ -62,13 +62,20 @@
     .mk-mini a{color:inherit;text-decoration:underline}
     .note{font-size:.8rem;color:#6b7280;text-align:center;margin-bottom:24px}
 
-    .authShell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#f8fbfd 0%,#eef6fa 100%)}
-    .authCard{width:min(460px,94vw);background:#fff;border-radius:14px;border:1px solid #dbe7ee;box-shadow:0 12px 28px rgba(15,23,42,.10);padding:20px}
-    .authTitle{font-weight:900;font-size:1.05rem;color:#0f172a;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+    .authShell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(1200px 600px at -10% -10%, rgba(87,136,153,.16), transparent 65%),radial-gradient(900px 500px at 110% 110%, rgba(87,136,153,.14), transparent 60%),linear-gradient(145deg,#f8fbfd 0%,#eef6fa 100%);transition:opacity .35s ease, transform .35s ease}
+    .authShell.fadeOut{opacity:0;transform:translateY(-8px);pointer-events:none}
+    .authCard{width:min(520px,94vw);background:#fff;border-radius:20px;border:1px solid #dbe7ee;box-shadow:0 16px 36px rgba(15,23,42,.12);padding:26px}
+    .authLogo{display:block;width:min(220px,58vw);height:auto;margin:0 auto 14px;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(15,23,42,.12))}
+    .authTitle{font-weight:900;font-size:1.15rem;color:#0f172a;margin:0 0 8px;display:flex;align-items:center;justify-content:center;gap:8px}
     .authBadge{display:inline-block;background:rgba(87,136,153,.12);color:#2f5f70;border:1px solid rgba(87,136,153,.25);border-radius:999px;padding:2px 8px;font-size:.72rem;font-weight:900}
-    .authMsg{font-size:.84rem;color:#475569;margin:0 0 12px;line-height:1.6}
+    .authMsg{font-size:.9rem;color:#475569;margin:0 0 14px;line-height:1.7;text-align:center}
+    .authInput{font-size:1.12rem !important;padding:14px 12px !important;border-radius:12px !important}
+    .authCheck{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;font-size:.9rem;color:#334155}
+    .authCheck input{width:16px;height:16px;accent-color:var(--brand)}
     .authErr{display:none;font-size:.8rem;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 10px;margin-top:10px}
     .authErr.show{display:block}
+    #appShell{opacity:0;transition:opacity .45s ease}
+    #appShell.show{opacity:1}
 
     /* チップ */
     .chipGroup{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;margin-bottom:4px}
@@ -155,11 +162,13 @@
 <body>
   <div id="authShell" class="authShell" aria-live="polite">
     <div class="authCard">
+      <img src="ロゴ.jpg" alt="松本会計ロゴ" class="authLogo" />
       <div class="authTitle">🔐 値上げ交渉ナビゲーター <span class="authBadge">松本会計</span></div>
       <p class="authMsg">このツールを利用するには、パスワードを入力してください。<br>同じタブを開いている間は再入力不要です。</p>
       <label for="authPassword" style="margin-top:0;">パスワード</label>
-      <input type="password" id="authPassword" placeholder="パスワードを入力" autocomplete="current-password" />
-      <div class="miniActions" style="margin-top:10px;">
+      <input type="password" id="authPassword" class="authInput" placeholder="パスワードを入力" autocomplete="current-password" />
+      <label class="authCheck" for="authShowPassword"><input type="checkbox" id="authShowPassword" />パスワードを表示</label>
+      <div class="miniActions" style="margin-top:10px;justify-content:center;">
         <button class="btn" id="authUnlockBtn" type="button">利用を開始</button>
       </div>
       <div id="authError" class="authErr">パスワードが正しくありません。</div>
@@ -700,6 +709,7 @@
     const authPassword = $('#authPassword');
     const authUnlockBtn = $('#authUnlockBtn');
     const authError = $('#authError');
+    const authShowPassword = $('#authShowPassword');
 
     const prefSelect = $('#prefSelect');
     const step0Card = $('#step0Card');
@@ -755,8 +765,14 @@
     const AUTOSAVE_KEY = 'mk_autosave_v1';
 
     function unlockApp(saveSession){
-      if(appShell) appShell.style.display = '';
-      if(authShell) authShell.style.display = 'none';
+      if(appShell){
+        appShell.style.display = '';
+        requestAnimationFrame(() => appShell.classList.add('show'));
+      }
+      if(authShell){
+        authShell.classList.add('fadeOut');
+        setTimeout(() => { authShell.style.display = 'none'; }, 320);
+      }
       if(saveSession){
         try{ sessionStorage.setItem(AUTH_SESSION_KEY, '1'); }catch(e){}
       }
@@ -772,7 +788,11 @@
       }
 
       if(appShell) appShell.style.display = 'none';
-      if(authShell) authShell.style.display = 'flex';
+      if(appShell) appShell.classList.remove('show');
+      if(authShell){
+        authShell.style.display = 'flex';
+        authShell.classList.remove('fadeOut');
+      }
 
       const attemptUnlock = () => {
         const input = (authPassword && authPassword.value || '').trim();
@@ -789,6 +809,11 @@
       if(authPassword) authPassword.addEventListener('keydown', (e) => {
         if(e.key === 'Enter') attemptUnlock();
       });
+      if(authShowPassword && authPassword){
+        authShowPassword.addEventListener('change', () => {
+          authPassword.type = authShowPassword.checked ? 'text' : 'password';
+        });
+      }
       if(authPassword) setTimeout(() => authPassword.focus(), 10);
     }
 
