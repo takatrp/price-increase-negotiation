@@ -62,6 +62,14 @@
     .mk-mini a{color:inherit;text-decoration:underline}
     .note{font-size:.8rem;color:#6b7280;text-align:center;margin-bottom:24px}
 
+    .authShell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#f8fbfd 0%,#eef6fa 100%)}
+    .authCard{width:min(460px,94vw);background:#fff;border-radius:14px;border:1px solid #dbe7ee;box-shadow:0 12px 28px rgba(15,23,42,.10);padding:20px}
+    .authTitle{font-weight:900;font-size:1.05rem;color:#0f172a;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+    .authBadge{display:inline-block;background:rgba(87,136,153,.12);color:#2f5f70;border:1px solid rgba(87,136,153,.25);border-radius:999px;padding:2px 8px;font-size:.72rem;font-weight:900}
+    .authMsg{font-size:.84rem;color:#475569;margin:0 0 12px;line-height:1.6}
+    .authErr{display:none;font-size:.8rem;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 10px;margin-top:10px}
+    .authErr.show{display:block}
+
     /* チップ */
     .chipGroup{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;margin-bottom:4px}
     .chip{border:1px solid #d1d5db;background:#fff;border-radius:999px;padding:8px 12px;font-size:.85rem;font-weight:900;color:#374151;cursor:pointer;transition:all .2s;line-height:1.1}
@@ -145,6 +153,20 @@
 </head>
 
 <body>
+  <div id="authShell" class="authShell" aria-live="polite">
+    <div class="authCard">
+      <div class="authTitle">🔐 値上げ交渉ナビゲーター <span class="authBadge">松本会計</span></div>
+      <p class="authMsg">このツールを利用するには、パスワードを入力してください。<br>同じタブを開いている間は再入力不要です。</p>
+      <label for="authPassword" style="margin-top:0;">パスワード</label>
+      <input type="password" id="authPassword" placeholder="パスワードを入力" autocomplete="current-password" />
+      <div class="miniActions" style="margin-top:10px;">
+        <button class="btn" id="authUnlockBtn" type="button">利用を開始</button>
+      </div>
+      <div id="authError" class="authErr">パスワードが正しくありません。</div>
+    </div>
+  </div>
+
+  <div id="appShell" style="display:none;">
   <div class="wrap">
     <div class="header">
       <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
@@ -531,6 +553,7 @@
     <span id="build-rev">r42</span>（<span id="last-updated-date"></span>）
   </footer>
   <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
+  </div>
 
   <script>
   (function(){
@@ -540,6 +563,8 @@
     const qs = new URLSearchParams(window.location.search);
     const IS_ADMIN = (qs.get('admin') === '1');
     try{ document.documentElement.classList.toggle('isAdmin', !!IS_ADMIN); }catch(e){}
+    const TARGET_PASSWORD = 'matsu2026';
+    const AUTH_SESSION_KEY = 'mk_session_unlocked';
 
     const DATA_FRESHNESS = {
       cpi_base: "2024年12月確定値（2025年以降は推計）",
@@ -670,6 +695,11 @@
     const validateMsg = $('#validateMsg');
     const importStatusEl = $('#importStatus');
     const validationWarning = $('#validationWarning');
+    const authShell = $('#authShell');
+    const appShell = $('#appShell');
+    const authPassword = $('#authPassword');
+    const authUnlockBtn = $('#authUnlockBtn');
+    const authError = $('#authError');
 
     const prefSelect = $('#prefSelect');
     const step0Card = $('#step0Card');
@@ -723,6 +753,44 @@
 
     let currentOutputMode = 'letter';
     const AUTOSAVE_KEY = 'mk_autosave_v1';
+
+    function unlockApp(saveSession){
+      if(appShell) appShell.style.display = '';
+      if(authShell) authShell.style.display = 'none';
+      if(saveSession){
+        try{ sessionStorage.setItem(AUTH_SESSION_KEY, '1'); }catch(e){}
+      }
+    }
+
+    function initAuthGate(){
+      let unlocked = false;
+      try{ unlocked = sessionStorage.getItem(AUTH_SESSION_KEY) === '1'; }catch(e){}
+      if(unlocked){
+        unlockApp(false);
+        generate();
+        return;
+      }
+
+      if(appShell) appShell.style.display = 'none';
+      if(authShell) authShell.style.display = 'flex';
+
+      const attemptUnlock = () => {
+        const input = (authPassword && authPassword.value || '').trim();
+        if(input === TARGET_PASSWORD){
+          if(authError) authError.classList.remove('show');
+          unlockApp(true);
+          generate();
+          return;
+        }
+        if(authError) authError.classList.add('show');
+      };
+
+      if(authUnlockBtn) authUnlockBtn.addEventListener('click', attemptUnlock);
+      if(authPassword) authPassword.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') attemptUnlock();
+      });
+      if(authPassword) setTimeout(() => authPassword.focus(), 10);
+    }
 
     let currentAudience = 'btob';
 
@@ -2321,7 +2389,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     getUrlParams();
     syncHonorificInput();
 
-    generate();
+    initAuthGate();
 
   })();
   </script>
