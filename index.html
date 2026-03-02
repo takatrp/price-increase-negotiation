@@ -2412,14 +2412,13 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     const savedAudience = getLocal('mk_audience_mode');
     setAudience(savedAudience === 'btoc' ? 'btoc' : 'btob', true);
 
-    loadCostData(savedUrl || './pref_cost_data.json', true);
-
-    renderAllByPref();
-    restoreDraft();
-    getUrlParams();
-    syncHonorificInput();
-
-    initAuthGate();
+    loadCostData(savedUrl || './pref_cost_data.json', true).then(() => {
+      renderAllByPref();
+      restoreDraft();
+      getUrlParams();
+      syncHonorificInput();
+      initAuthGate();
+    });
 
   })();
   </script>
