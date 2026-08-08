@@ -1,30 +1,89 @@
 {
   "schema_version": 1,
   "meta": {
-    "updated": "2026-03-01",
-    "note": "CPI/賃上げ率は必要に応じて追記。最低賃金は厚労省の答申状況（発効日予定）に基づく。",
+    "updated": "2026-08-08",
+    "note": "CPIは2025年基準の最新公表値、賃上げ率は連合の2026年第7回（最終）回答集計を使用。最低賃金は令和7年度の47都道府県確定値を使用し、令和8年度は中央最低賃金審議会の目安段階のため計算には使用しない。",
     "sources": {
       "min_wage": {
         "publisher": "厚生労働省",
-        "title": "令和7年度 地域別最低賃金 答申状況（別紙）",
-        "url": "https://www.mhlw.go.jp/content/11302000/001557056.pdf",
-        "caution": "発効日（予定）は異議申出等により変更となる可能性あり。"
+        "title": "令和7年度地域別最低賃金の全国一覧",
+        "publication_date": "2025-10-01",
+        "publication_date_basis": "公式Excelの最終更新日（HTTP Last-Modified）",
+        "target_period": "令和7年度（2025年度）",
+        "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/index.html",
+        "status": "final",
+        "accessed_date": "2026-08-08"
       },
       "min_wage_history_excel": {
-        "publisher": "（不明：添付Excel）",
-        "title": "001571219 (1).xlsx / シート「H14～R７」",
-        "caution": "本チャットにアップロードされたExcelから、各年度の『改定額(円)』を転記。都道府県名はExcel表記の空白を除去して正規化。"
+        "publisher": "厚生労働省",
+        "title": "平成14年度から令和7年度までの地域別最低賃金改定状況",
+        "publication_date": "2025-10-01",
+        "publication_date_basis": "公式Excelの最終更新日（HTTP Last-Modified）",
+        "target_period": "平成14年度～令和7年度",
+        "url": "https://www.mhlw.go.jp/content/11200000/001571219.xlsx",
+        "status": "final",
+        "accessed_date": "2026-08-08"
       }
     }
   },
   "national": {
-    "cpi_yoy": 2,
-    "cpi_asof": "2026年1月（前年同月比・生鮮食品を除く総合）",
-    "wage_yoy": 4.65,
-    "wage_asof": "2025年春季生活闘争（連合 第7回〔最終〕回答集計：300人未満の中小組合・加重平均）",
+    "cpi_yoy": 1.6,
+    "cpi_asof": "2026年6月（前年同月比・生鮮食品を除く総合、2025年基準）",
+    "wage_yoy": 4.69,
+    "wage_amount": 12866,
+    "wage_asof": "2026年春季生活闘争（連合 第7回〔最終〕回答集計：300人未満の中小組合・加重平均、定昇相当込み）",
     "sources": {
-      "cpi": "e-Stat（総務省統計局）『2026年1月分 消費者物価指数（CPI）結果の概要（全国）』",
-      "wage": "連合『2025春季生活闘争 第7回（最終）回答集計結果について』（2025-07-03）"
+      "cpi": {
+        "publisher": "総務省統計局",
+        "title": "消費者物価指数 2025年基準改定による遡及結果について",
+        "publication_date": "2026-08-07",
+        "target_period": "2026年6月",
+        "url": "https://www.stat.go.jp/data/cpi/2025/pdf/def2025-2020.pdf",
+        "status": "final",
+        "accessed_date": "2026-08-08"
+      },
+      "cpi_monthly": {
+        "publisher": "総務省統計局・政府統計の総合窓口 e-Stat",
+        "title": "2025年基準消費者物価指数 長期時系列データ 中分類指数（全国・月次）",
+        "publication_date": "2026-08-07",
+        "target_period": "1970年1月～2026年6月",
+        "url": "https://www.e-stat.go.jp/stat-search/files?layout=datalist&lid=000001488144&page=1",
+        "status": "final",
+        "accessed_date": "2026-08-08"
+      },
+      "wage": {
+        "publisher": "日本労働組合総連合会（連合）",
+        "title": "2026春季生活闘争 第7回（最終）回答集計結果について",
+        "publication_date": "2026-07-03",
+        "target_period": "2026年春季生活闘争（2026年7月1日集計）",
+        "url": "https://www.jtuc-rengo.or.jp/activity/roudou/shuntou/2026/yokyu_kaito/kaito/press_no7.pdf",
+        "status": "final",
+        "accessed_date": "2026-08-08"
+      },
+      "min_wage": {
+        "publisher": "厚生労働省",
+        "title": "令和7年度地域別最低賃金の全国一覧",
+        "publication_date": "2025-10-01",
+        "publication_date_basis": "公式Excelの最終更新日（HTTP Last-Modified）",
+        "target_period": "令和7年度（2025年度）",
+        "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/index.html",
+        "status": "final",
+        "accessed_date": "2026-08-08"
+      }
+    },
+    "min_wage_guideline_2026": {
+      "status": "guideline_not_final",
+      "asof": "2026-07-28",
+      "rank_a_inc": 54,
+      "rank_b_inc": 56,
+      "rank_c_inc": 56,
+      "projected_weighted_avg": 1176,
+      "projected_inc": 55,
+      "projected_rate": 4.9,
+      "used_in_calculation": false,
+      "publisher": "厚生労働省",
+      "title": "令和8年度地域別最低賃金額改定の目安について",
+      "url": "https://www.mhlw.go.jp/stf/newpage_74920.html"
     },
     "min_wage_avg": {
       "new": 1121,
@@ -1566,7 +1625,7 @@
         "2025": 1026
       }
     },
-    "min_wage_history_by_pref_source": "transcribed_from_uploaded_excel_001571219 (1).xlsx_sheet_H14～R７_amount_columns"
+    "min_wage_history_by_pref_source": "厚生労働省『平成14年度から令和7年度までの地域別最低賃金改定状況』"
   },
   "prefs": {
     "北海道": {
