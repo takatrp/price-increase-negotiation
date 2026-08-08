@@ -23,6 +23,16 @@
         "url": "https://www.mhlw.go.jp/content/11200000/001571219.xlsx",
         "status": "final",
         "accessed_date": "2026-08-08"
+      },
+      "min_wage_effective_history": {
+        "publisher": "厚生労働省",
+        "title": "平成14年度から令和7年度までの地域別最低賃金改定状況",
+        "publication_date": null,
+        "target_period": "2002年度～2025年度",
+        "url": "https://www.mhlw.go.jp/content/11200000/001571219.xlsx",
+        "status": "final",
+        "accessed_date": "2026-08-08",
+        "note": "公式Excelの都道府県別改定額と発効年月日を使用。全国加重平均額は公式表示値（整数）を使用。"
       }
     }
   },
@@ -107,7 +117,7 @@
       "2014": 780,
       "2015": 798,
       "2016": 823,
-      "2017": 847,
+      "2017": 848,
       "2018": 874,
       "2019": 901,
       "2020": 902,
@@ -1625,7 +1635,5498 @@
         "2025": 1026
       }
     },
-    "min_wage_history_by_pref_source": "厚生労働省『平成14年度から令和7年度までの地域別最低賃金改定状況』"
+    "min_wage_history_by_pref_source": "厚生労働省『平成14年度から令和7年度までの地域別最低賃金改定状況』",
+    "min_wage_history_by_pref_effective": {
+      "北海道": [
+        {
+          "fiscal_year": 2002,
+          "amount": 637,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 638,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 641,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 644,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 654,
+          "effective_date": "2007-10-19"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 667,
+          "effective_date": "2008-10-19"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 678,
+          "effective_date": "2009-10-10"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 691,
+          "effective_date": "2010-10-15"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 705,
+          "effective_date": "2011-10-06"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 719,
+          "effective_date": "2012-10-18"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 734,
+          "effective_date": "2013-10-18"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 748,
+          "effective_date": "2014-10-08"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 764,
+          "effective_date": "2015-10-08"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 786,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 810,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 835,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 861,
+          "effective_date": "2019-10-03"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 889,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 920,
+          "effective_date": "2022-10-02"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 960,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1010,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1075,
+          "effective_date": "2025-10-04"
+        }
+      ],
+      "青森": [
+        {
+          "fiscal_year": 2002,
+          "amount": 605,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 606,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 608,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 610,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 619,
+          "effective_date": "2007-10-31"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 630,
+          "effective_date": "2008-10-29"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 633,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 645,
+          "effective_date": "2010-10-29"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 647,
+          "effective_date": "2011-10-16"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 654,
+          "effective_date": "2012-10-12"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 665,
+          "effective_date": "2013-10-24"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 679,
+          "effective_date": "2014-10-24"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 695,
+          "effective_date": "2015-10-18"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 716,
+          "effective_date": "2016-10-20"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 738,
+          "effective_date": "2017-10-06"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 762,
+          "effective_date": "2018-10-04"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-04"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 793,
+          "effective_date": "2020-10-03"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 822,
+          "effective_date": "2021-10-06"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 853,
+          "effective_date": "2022-10-05"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 898,
+          "effective_date": "2023-10-07"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 953,
+          "effective_date": "2024-10-05"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1029,
+          "effective_date": "2025-11-21"
+        }
+      ],
+      "岩手": [
+        {
+          "fiscal_year": 2002,
+          "amount": 605,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 606,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 608,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 610,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 619,
+          "effective_date": "2007-10-28"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 628,
+          "effective_date": "2008-10-30"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 631,
+          "effective_date": "2009-10-04"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 644,
+          "effective_date": "2010-10-30"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 645,
+          "effective_date": "2011-11-11"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 653,
+          "effective_date": "2012-10-20"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 665,
+          "effective_date": "2013-10-27"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 678,
+          "effective_date": "2014-10-04"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 695,
+          "effective_date": "2015-10-16"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 716,
+          "effective_date": "2016-10-05"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 738,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 762,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-04"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 793,
+          "effective_date": "2020-10-03"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 821,
+          "effective_date": "2021-10-02"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 854,
+          "effective_date": "2022-10-20"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 893,
+          "effective_date": "2023-10-04"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 952,
+          "effective_date": "2024-10-27"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1031,
+          "effective_date": "2025-12-01"
+        }
+      ],
+      "宮城": [
+        {
+          "fiscal_year": 2002,
+          "amount": 617,
+          "effective_date": "2002-10-02"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 619,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 623,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 628,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 639,
+          "effective_date": "2007-10-20"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 653,
+          "effective_date": "2008-10-24"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 662,
+          "effective_date": "2009-10-24"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 674,
+          "effective_date": "2010-10-24"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 675,
+          "effective_date": "2011-10-29"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 685,
+          "effective_date": "2012-10-19"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 696,
+          "effective_date": "2013-10-31"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 710,
+          "effective_date": "2014-10-16"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 726,
+          "effective_date": "2015-10-03"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 748,
+          "effective_date": "2016-10-05"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 772,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 798,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 824,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 825,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 853,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 883,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 923,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 973,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1038,
+          "effective_date": "2025-10-04"
+        }
+      ],
+      "秋田": [
+        {
+          "fiscal_year": 2002,
+          "amount": 605,
+          "effective_date": "2002-09-30"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 606,
+          "effective_date": "2004-09-30"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 608,
+          "effective_date": "2005-09-30"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 610,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 618,
+          "effective_date": "2007-10-28"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 629,
+          "effective_date": "2008-11-02"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 632,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 645,
+          "effective_date": "2010-11-03"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 647,
+          "effective_date": "2011-10-30"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 654,
+          "effective_date": "2012-10-13"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 665,
+          "effective_date": "2013-10-26"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 679,
+          "effective_date": "2014-10-05"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 695,
+          "effective_date": "2015-10-07"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 716,
+          "effective_date": "2016-10-06"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 738,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 762,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-03"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 792,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 822,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 853,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 897,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 951,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1031,
+          "effective_date": "2026-03-31"
+        }
+      ],
+      "山形": [
+        {
+          "fiscal_year": 2002,
+          "amount": 605,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2003,
+          "amount": 606,
+          "effective_date": "2003-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 607,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 610,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 613,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 620,
+          "effective_date": "2007-10-25"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 629,
+          "effective_date": "2008-10-30"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 631,
+          "effective_date": "2009-10-18"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 645,
+          "effective_date": "2010-10-29"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 647,
+          "effective_date": "2011-10-29"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 654,
+          "effective_date": "2012-10-24"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 665,
+          "effective_date": "2013-10-24"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 680,
+          "effective_date": "2014-10-17"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 696,
+          "effective_date": "2015-10-16"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 717,
+          "effective_date": "2016-10-07"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 739,
+          "effective_date": "2017-10-06"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 763,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 793,
+          "effective_date": "2020-10-03"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 822,
+          "effective_date": "2021-10-02"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 854,
+          "effective_date": "2022-10-06"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 900,
+          "effective_date": "2023-10-14"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 955,
+          "effective_date": "2024-10-19"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1032,
+          "effective_date": "2025-12-23"
+        }
+      ],
+      "福島": [
+        {
+          "fiscal_year": 2002,
+          "amount": 610,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 611,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 614,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 618,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 629,
+          "effective_date": "2007-10-19"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 641,
+          "effective_date": "2008-10-22"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 644,
+          "effective_date": "2009-10-18"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 657,
+          "effective_date": "2010-10-24"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 658,
+          "effective_date": "2011-11-02"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 664,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 675,
+          "effective_date": "2013-10-06"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 689,
+          "effective_date": "2014-10-04"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 705,
+          "effective_date": "2015-10-03"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 726,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 748,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 772,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 798,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 800,
+          "effective_date": "2020-10-02"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 828,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 858,
+          "effective_date": "2022-10-06"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 900,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 955,
+          "effective_date": "2024-10-05"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1033,
+          "effective_date": "2026-01-01"
+        }
+      ],
+      "茨城": [
+        {
+          "fiscal_year": 2002,
+          "amount": 647,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 648,
+          "effective_date": "2004-10-17"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 651,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 655,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 665,
+          "effective_date": "2007-10-20"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 676,
+          "effective_date": "2008-10-19"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 678,
+          "effective_date": "2009-10-08"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 690,
+          "effective_date": "2010-10-16"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 692,
+          "effective_date": "2011-10-08"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 699,
+          "effective_date": "2012-10-06"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 713,
+          "effective_date": "2013-10-20"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 729,
+          "effective_date": "2014-10-04"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 747,
+          "effective_date": "2015-10-04"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 771,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 796,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 822,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 849,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 851,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 879,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 911,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 953,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1005,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1074,
+          "effective_date": "2025-10-12"
+        }
+      ],
+      "栃木": [
+        {
+          "fiscal_year": 2002,
+          "amount": 648,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 649,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 652,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 657,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 671,
+          "effective_date": "2007-10-20"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 683,
+          "effective_date": "2008-10-20"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 685,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 697,
+          "effective_date": "2010-10-07"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 700,
+          "effective_date": "2011-10-01"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 705,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 718,
+          "effective_date": "2013-10-19"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 733,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 751,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 775,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 800,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 826,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 853,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 854,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 882,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 913,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 954,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1004,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1068,
+          "effective_date": "2025-10-01"
+        }
+      ],
+      "群馬": [
+        {
+          "fiscal_year": 2002,
+          "amount": 644,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 645,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 649,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 654,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 664,
+          "effective_date": "2007-10-19"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 675,
+          "effective_date": "2008-10-16"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 676,
+          "effective_date": "2009-10-04"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 688,
+          "effective_date": "2010-10-09"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 690,
+          "effective_date": "2011-10-07"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 696,
+          "effective_date": "2012-10-10"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 707,
+          "effective_date": "2013-10-13"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 721,
+          "effective_date": "2014-10-05"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 737,
+          "effective_date": "2015-10-08"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 759,
+          "effective_date": "2016-10-06"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 783,
+          "effective_date": "2017-10-07"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 809,
+          "effective_date": "2018-10-06"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 835,
+          "effective_date": "2019-10-06"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 837,
+          "effective_date": "2020-10-03"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 865,
+          "effective_date": "2021-10-02"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 895,
+          "effective_date": "2022-10-08"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 935,
+          "effective_date": "2023-10-05"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 985,
+          "effective_date": "2024-10-04"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1063,
+          "effective_date": "2026-03-01"
+        }
+      ],
+      "埼玉": [
+        {
+          "fiscal_year": 2002,
+          "amount": 678,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 679,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 682,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 687,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 702,
+          "effective_date": "2007-10-20"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 722,
+          "effective_date": "2008-10-17"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 735,
+          "effective_date": "2009-10-17"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 750,
+          "effective_date": "2010-10-16"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 759,
+          "effective_date": "2011-10-01"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 771,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 785,
+          "effective_date": "2013-10-20"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 802,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 820,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 845,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 871,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 898,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 926,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 928,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 956,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 987,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 1028,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1078,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1141,
+          "effective_date": "2025-11-01"
+        }
+      ],
+      "千葉": [
+        {
+          "fiscal_year": 2002,
+          "amount": 677,
+          "effective_date": "2002-10-04"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 678,
+          "effective_date": "2004-10-04"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 682,
+          "effective_date": "2005-10-04"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 687,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 706,
+          "effective_date": "2007-10-19"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 723,
+          "effective_date": "2008-10-31"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 728,
+          "effective_date": "2009-10-03"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 744,
+          "effective_date": "2010-10-24"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 748,
+          "effective_date": "2011-10-01"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 756,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 777,
+          "effective_date": "2013-10-18"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 798,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 817,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 842,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 868,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 895,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 923,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 925,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 953,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 984,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 1026,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1076,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1140,
+          "effective_date": "2025-10-03"
+        }
+      ],
+      "東京": [
+        {
+          "fiscal_year": 2002,
+          "amount": 708,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 710,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 714,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 719,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 739,
+          "effective_date": "2007-10-19"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 766,
+          "effective_date": "2008-10-19"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 791,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 821,
+          "effective_date": "2010-10-24"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 837,
+          "effective_date": "2011-10-01"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 850,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 869,
+          "effective_date": "2013-10-19"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 888,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 907,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 932,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 958,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 985,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 1013,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 1041,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 1072,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 1113,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1163,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1226,
+          "effective_date": "2025-10-03"
+        }
+      ],
+      "神奈川": [
+        {
+          "fiscal_year": 2002,
+          "amount": 706,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2003,
+          "amount": 707,
+          "effective_date": "2003-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 708,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 712,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 717,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 736,
+          "effective_date": "2007-10-19"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 766,
+          "effective_date": "2008-10-25"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 789,
+          "effective_date": "2009-10-25"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 818,
+          "effective_date": "2010-10-21"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 836,
+          "effective_date": "2011-10-01"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 849,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 868,
+          "effective_date": "2013-10-20"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 887,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 905,
+          "effective_date": "2015-10-18"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 930,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 956,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 983,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 1011,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 1012,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 1040,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 1071,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 1112,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1162,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1225,
+          "effective_date": "2025-10-04"
+        }
+      ],
+      "新潟": [
+        {
+          "fiscal_year": 2002,
+          "amount": 641,
+          "effective_date": "2002-09-30"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 642,
+          "effective_date": "2004-09-30"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 645,
+          "effective_date": "2005-09-30"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 648,
+          "effective_date": "2006-09-30"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 657,
+          "effective_date": "2007-10-19"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 669,
+          "effective_date": "2008-10-26"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 669,
+          "effective_date": "2009-10-26"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 681,
+          "effective_date": "2010-10-21"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 683,
+          "effective_date": "2011-10-07"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 689,
+          "effective_date": "2012-10-05"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 701,
+          "effective_date": "2013-10-26"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 715,
+          "effective_date": "2014-10-04"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 731,
+          "effective_date": "2015-10-03"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 753,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 778,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 803,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 830,
+          "effective_date": "2019-10-06"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 831,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 859,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 890,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 931,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 985,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1050,
+          "effective_date": "2025-10-02"
+        }
+      ],
+      "富山": [
+        {
+          "fiscal_year": 2002,
+          "amount": 644,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 644,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 648,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 652,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 666,
+          "effective_date": "2007-10-20"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 677,
+          "effective_date": "2008-10-25"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 679,
+          "effective_date": "2009-10-18"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 691,
+          "effective_date": "2010-10-27"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 692,
+          "effective_date": "2011-10-01"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 700,
+          "effective_date": "2012-11-04"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 712,
+          "effective_date": "2013-10-06"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 728,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 746,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 770,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 795,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 821,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 848,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 849,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 877,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 908,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 948,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 998,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1062,
+          "effective_date": "2025-10-12"
+        }
+      ],
+      "石川": [
+        {
+          "fiscal_year": 2002,
+          "amount": 645,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 646,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 649,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 652,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 662,
+          "effective_date": "2007-10-21"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 673,
+          "effective_date": "2008-10-19"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 674,
+          "effective_date": "2009-10-10"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 686,
+          "effective_date": "2010-10-30"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 687,
+          "effective_date": "2011-10-20"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 693,
+          "effective_date": "2012-10-06"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 704,
+          "effective_date": "2013-10-19"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 718,
+          "effective_date": "2014-10-05"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 735,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 757,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 781,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 806,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 832,
+          "effective_date": "2019-10-02"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 833,
+          "effective_date": "2020-10-07"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 861,
+          "effective_date": "2021-10-07"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 891,
+          "effective_date": "2022-10-08"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 933,
+          "effective_date": "2023-10-08"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 984,
+          "effective_date": "2024-10-05"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1054,
+          "effective_date": "2025-10-08"
+        }
+      ],
+      "福井": [
+        {
+          "fiscal_year": 2002,
+          "amount": 642,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 643,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 645,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 649,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 659,
+          "effective_date": "2007-10-19"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 670,
+          "effective_date": "2008-10-22"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 671,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 683,
+          "effective_date": "2010-10-21"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 684,
+          "effective_date": "2011-10-01"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 690,
+          "effective_date": "2012-10-06"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 701,
+          "effective_date": "2013-10-13"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 716,
+          "effective_date": "2014-10-04"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 732,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 754,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 778,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 803,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 829,
+          "effective_date": "2019-10-04"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 830,
+          "effective_date": "2020-10-02"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 858,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 888,
+          "effective_date": "2022-10-02"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 931,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 984,
+          "effective_date": "2024-10-05"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1053,
+          "effective_date": "2025-10-08"
+        }
+      ],
+      "山梨": [
+        {
+          "fiscal_year": 2002,
+          "amount": 647,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 648,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 651,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 655,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 665,
+          "effective_date": "2007-10-28"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 676,
+          "effective_date": "2008-10-25"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 677,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 689,
+          "effective_date": "2010-10-17"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 690,
+          "effective_date": "2011-10-20"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 695,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 706,
+          "effective_date": "2013-10-18"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 721,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 737,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 759,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 784,
+          "effective_date": "2017-10-14"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 810,
+          "effective_date": "2018-10-03"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 837,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 838,
+          "effective_date": "2020-10-09"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 866,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 898,
+          "effective_date": "2022-10-20"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 938,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 988,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1052,
+          "effective_date": "2025-12-01"
+        }
+      ],
+      "長野": [
+        {
+          "fiscal_year": 2002,
+          "amount": 646,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 647,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 650,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 655,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 669,
+          "effective_date": "2007-10-21"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 680,
+          "effective_date": "2008-10-16"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 681,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 693,
+          "effective_date": "2010-10-29"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 694,
+          "effective_date": "2011-10-01"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 700,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 713,
+          "effective_date": "2013-10-19"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 728,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 746,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 770,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 795,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 821,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 848,
+          "effective_date": "2019-10-04"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 849,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 877,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 908,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 948,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 998,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1061,
+          "effective_date": "2025-10-03"
+        }
+      ],
+      "岐阜": [
+        {
+          "fiscal_year": 2002,
+          "amount": 668,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 669,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 671,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 675,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 685,
+          "effective_date": "2007-10-19"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 696,
+          "effective_date": "2008-10-19"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 696,
+          "effective_date": "2009-10-19"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 706,
+          "effective_date": "2010-10-17"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 707,
+          "effective_date": "2011-10-01"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 713,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 724,
+          "effective_date": "2013-10-19"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 738,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 754,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 776,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 800,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 825,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 851,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 852,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 880,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 910,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 950,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1001,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1065,
+          "effective_date": "2025-10-18"
+        }
+      ],
+      "静岡": [
+        {
+          "fiscal_year": 2002,
+          "amount": 671,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 673,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 677,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 682,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 697,
+          "effective_date": "2007-10-26"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 711,
+          "effective_date": "2008-10-26"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 713,
+          "effective_date": "2009-10-26"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 725,
+          "effective_date": "2010-10-14"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 728,
+          "effective_date": "2011-10-14"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 735,
+          "effective_date": "2012-10-12"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 749,
+          "effective_date": "2013-10-12"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 765,
+          "effective_date": "2014-10-05"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 783,
+          "effective_date": "2015-10-03"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 807,
+          "effective_date": "2016-10-05"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 832,
+          "effective_date": "2017-10-04"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 858,
+          "effective_date": "2018-10-03"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 885,
+          "effective_date": "2019-10-04"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 913,
+          "effective_date": "2021-10-02"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 944,
+          "effective_date": "2022-10-05"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 984,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1034,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1097,
+          "effective_date": "2025-11-01"
+        }
+      ],
+      "愛知": [
+        {
+          "fiscal_year": 2002,
+          "amount": 681,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 683,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 688,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 694,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 714,
+          "effective_date": "2007-10-25"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 731,
+          "effective_date": "2008-10-24"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 732,
+          "effective_date": "2009-10-11"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 745,
+          "effective_date": "2010-10-24"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 750,
+          "effective_date": "2011-10-07"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 758,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 780,
+          "effective_date": "2013-10-26"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 800,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 820,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 845,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 871,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 898,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 926,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 927,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 955,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 986,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 1027,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1077,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1140,
+          "effective_date": "2025-10-18"
+        }
+      ],
+      "三重": [
+        {
+          "fiscal_year": 2002,
+          "amount": 667,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 668,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 671,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 675,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 689,
+          "effective_date": "2007-10-27"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 701,
+          "effective_date": "2008-10-26"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 702,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 714,
+          "effective_date": "2010-10-22"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 717,
+          "effective_date": "2011-10-01"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 724,
+          "effective_date": "2012-09-30"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 737,
+          "effective_date": "2013-10-19"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 753,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 771,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 795,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 820,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 846,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 873,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 874,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 902,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 933,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 973,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1023,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1087,
+          "effective_date": "2025-11-21"
+        }
+      ],
+      "滋賀": [
+        {
+          "fiscal_year": 2002,
+          "amount": 651,
+          "effective_date": "2002-09-29"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 652,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 657,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 662,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 677,
+          "effective_date": "2007-10-25"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 691,
+          "effective_date": "2008-10-18"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 693,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 706,
+          "effective_date": "2010-10-21"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 709,
+          "effective_date": "2011-10-20"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 716,
+          "effective_date": "2012-10-06"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 730,
+          "effective_date": "2013-10-25"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 746,
+          "effective_date": "2014-10-09"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 764,
+          "effective_date": "2015-10-08"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 788,
+          "effective_date": "2016-10-06"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 813,
+          "effective_date": "2017-10-05"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 839,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 866,
+          "effective_date": "2019-10-03"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 868,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 896,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 927,
+          "effective_date": "2022-10-06"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 967,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1017,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1080,
+          "effective_date": "2025-10-05"
+        }
+      ],
+      "京都": [
+        {
+          "fiscal_year": 2002,
+          "amount": 677,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 678,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 682,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 686,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 700,
+          "effective_date": "2007-10-25"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 717,
+          "effective_date": "2008-10-25"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 729,
+          "effective_date": "2009-10-17"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 749,
+          "effective_date": "2010-10-17"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 751,
+          "effective_date": "2011-10-16"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 759,
+          "effective_date": "2012-10-14"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 773,
+          "effective_date": "2013-10-24"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 789,
+          "effective_date": "2014-10-22"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 807,
+          "effective_date": "2015-10-07"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 831,
+          "effective_date": "2016-10-02"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 856,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 882,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 909,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 937,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 968,
+          "effective_date": "2022-10-09"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 1008,
+          "effective_date": "2023-10-06"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1058,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1122,
+          "effective_date": "2025-11-21"
+        }
+      ],
+      "大阪": [
+        {
+          "fiscal_year": 2002,
+          "amount": 703,
+          "effective_date": "2002-09-30"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 704,
+          "effective_date": "2004-09-30"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 708,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 712,
+          "effective_date": "2006-09-30"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 731,
+          "effective_date": "2007-10-20"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 748,
+          "effective_date": "2008-10-18"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 762,
+          "effective_date": "2009-09-30"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 779,
+          "effective_date": "2010-10-15"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 786,
+          "effective_date": "2011-09-30"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 800,
+          "effective_date": "2012-09-30"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 819,
+          "effective_date": "2013-10-18"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 838,
+          "effective_date": "2014-10-05"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 858,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 883,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 909,
+          "effective_date": "2017-09-30"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 936,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 964,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 992,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 1023,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 1064,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1114,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1177,
+          "effective_date": "2025-10-16"
+        }
+      ],
+      "兵庫": [
+        {
+          "fiscal_year": 2002,
+          "amount": 675,
+          "effective_date": "2002-09-30"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 676,
+          "effective_date": "2004-09-30"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 679,
+          "effective_date": "2005-09-30"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 683,
+          "effective_date": "2006-09-30"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 697,
+          "effective_date": "2007-10-31"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 712,
+          "effective_date": "2008-10-22"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 721,
+          "effective_date": "2009-10-08"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 734,
+          "effective_date": "2010-10-17"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 739,
+          "effective_date": "2011-10-01"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 749,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 761,
+          "effective_date": "2013-10-19"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 776,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 794,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 819,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 844,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 871,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 899,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 900,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 928,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 960,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 1001,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1052,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1116,
+          "effective_date": "2025-10-04"
+        }
+      ],
+      "奈良": [
+        {
+          "fiscal_year": 2002,
+          "amount": 647,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 648,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 652,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 656,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 667,
+          "effective_date": "2007-10-25"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 678,
+          "effective_date": "2008-10-25"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 679,
+          "effective_date": "2009-10-17"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 691,
+          "effective_date": "2010-10-24"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 693,
+          "effective_date": "2011-10-07"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 699,
+          "effective_date": "2012-10-06"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 710,
+          "effective_date": "2013-10-20"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 724,
+          "effective_date": "2014-10-03"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 740,
+          "effective_date": "2015-10-07"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 762,
+          "effective_date": "2016-10-06"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 786,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 811,
+          "effective_date": "2018-10-04"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 837,
+          "effective_date": "2019-10-05"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 838,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 866,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 896,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 936,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 986,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1051,
+          "effective_date": "2025-11-16"
+        }
+      ],
+      "和歌山": [
+        {
+          "fiscal_year": 2002,
+          "amount": 645,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 645,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 649,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 652,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 662,
+          "effective_date": "2007-10-20"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 673,
+          "effective_date": "2008-10-31"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 674,
+          "effective_date": "2009-10-31"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 684,
+          "effective_date": "2010-10-29"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 685,
+          "effective_date": "2011-10-13"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 690,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 701,
+          "effective_date": "2013-10-19"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 715,
+          "effective_date": "2014-10-17"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 731,
+          "effective_date": "2015-10-02"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 753,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 777,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 803,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 830,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 831,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 859,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 889,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 929,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 980,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1045,
+          "effective_date": "2025-11-01"
+        }
+      ],
+      "鳥取": [
+        {
+          "fiscal_year": 2002,
+          "amount": 610,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 611,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 612,
+          "effective_date": "2005-10-07"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 614,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 621,
+          "effective_date": "2007-10-21"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 629,
+          "effective_date": "2008-10-26"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 630,
+          "effective_date": "2009-10-08"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 642,
+          "effective_date": "2010-10-31"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 646,
+          "effective_date": "2011-10-29"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 653,
+          "effective_date": "2012-10-20"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 664,
+          "effective_date": "2013-10-25"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 677,
+          "effective_date": "2014-10-08"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 693,
+          "effective_date": "2015-10-04"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 715,
+          "effective_date": "2016-10-12"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 738,
+          "effective_date": "2017-10-06"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 762,
+          "effective_date": "2018-10-05"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-05"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 792,
+          "effective_date": "2020-10-02"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 821,
+          "effective_date": "2021-10-06"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 854,
+          "effective_date": "2022-10-06"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 900,
+          "effective_date": "2023-10-05"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 957,
+          "effective_date": "2024-10-05"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1030,
+          "effective_date": "2025-10-04"
+        }
+      ],
+      "島根": [
+        {
+          "fiscal_year": 2002,
+          "amount": 609,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 610,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 612,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 614,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 621,
+          "effective_date": "2007-10-19"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 629,
+          "effective_date": "2008-10-19"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 630,
+          "effective_date": "2009-10-04"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 642,
+          "effective_date": "2010-10-24"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 646,
+          "effective_date": "2011-11-06"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 652,
+          "effective_date": "2012-10-14"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 664,
+          "effective_date": "2013-11-06"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 679,
+          "effective_date": "2014-10-05"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 696,
+          "effective_date": "2015-10-04"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 718,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 740,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 764,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 792,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 824,
+          "effective_date": "2021-10-02"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 857,
+          "effective_date": "2022-10-05"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 904,
+          "effective_date": "2023-10-06"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 962,
+          "effective_date": "2024-10-12"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1033,
+          "effective_date": "2025-11-17"
+        }
+      ],
+      "岡山": [
+        {
+          "fiscal_year": 2002,
+          "amount": 640,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 641,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 644,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 648,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 658,
+          "effective_date": "2007-10-26"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 669,
+          "effective_date": "2008-10-18"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 670,
+          "effective_date": "2009-10-08"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 683,
+          "effective_date": "2010-11-05"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 685,
+          "effective_date": "2011-10-27"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 691,
+          "effective_date": "2012-10-24"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 703,
+          "effective_date": "2013-10-30"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 719,
+          "effective_date": "2014-10-05"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 735,
+          "effective_date": "2015-10-02"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 757,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 781,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 807,
+          "effective_date": "2018-10-03"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 833,
+          "effective_date": "2019-10-02"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 834,
+          "effective_date": "2020-10-03"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 862,
+          "effective_date": "2021-10-02"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 892,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 932,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 982,
+          "effective_date": "2024-10-02"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1047,
+          "effective_date": "2025-12-01"
+        }
+      ],
+      "広島": [
+        {
+          "fiscal_year": 2002,
+          "amount": 644,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 645,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 649,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 654,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 669,
+          "effective_date": "2007-10-28"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 683,
+          "effective_date": "2008-10-26"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 692,
+          "effective_date": "2009-10-08"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 704,
+          "effective_date": "2010-10-30"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 710,
+          "effective_date": "2011-10-01"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 719,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 733,
+          "effective_date": "2013-10-24"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 750,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 769,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 793,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 818,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 844,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 871,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 899,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 930,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 970,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 1020,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1085,
+          "effective_date": "2025-11-01"
+        }
+      ],
+      "山口": [
+        {
+          "fiscal_year": 2002,
+          "amount": 637,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 638,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 642,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 646,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 657,
+          "effective_date": "2007-10-28"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 668,
+          "effective_date": "2008-10-29"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 669,
+          "effective_date": "2009-10-04"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 681,
+          "effective_date": "2010-10-29"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 684,
+          "effective_date": "2011-10-06"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 690,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 701,
+          "effective_date": "2013-10-10"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 715,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 731,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 753,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 777,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 802,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 829,
+          "effective_date": "2019-10-05"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 857,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 888,
+          "effective_date": "2022-10-13"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 928,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 979,
+          "effective_date": "2024-10-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1043,
+          "effective_date": "2025-10-16"
+        }
+      ],
+      "徳島": [
+        {
+          "fiscal_year": 2002,
+          "amount": 611,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 612,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 615,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 617,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 625,
+          "effective_date": "2007-10-21"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 632,
+          "effective_date": "2008-11-07"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 633,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 645,
+          "effective_date": "2010-10-16"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 647,
+          "effective_date": "2011-10-15"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 654,
+          "effective_date": "2012-10-19"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 666,
+          "effective_date": "2013-10-30"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 679,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 695,
+          "effective_date": "2015-10-04"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 716,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 740,
+          "effective_date": "2017-10-05"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 766,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 793,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 796,
+          "effective_date": "2020-10-04"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 824,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 855,
+          "effective_date": "2022-10-06"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 896,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 980,
+          "effective_date": "2024-11-01"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1046,
+          "effective_date": "2026-01-01"
+        }
+      ],
+      "香川": [
+        {
+          "fiscal_year": 2002,
+          "amount": 618,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2003,
+          "amount": 619,
+          "effective_date": "2003-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 620,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 625,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 629,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 640,
+          "effective_date": "2007-10-21"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 651,
+          "effective_date": "2008-10-19"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 652,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 664,
+          "effective_date": "2010-10-16"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 667,
+          "effective_date": "2011-10-05"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 674,
+          "effective_date": "2012-10-05"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 686,
+          "effective_date": "2013-10-24"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 702,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 719,
+          "effective_date": "2015-10-01"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 742,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 766,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 792,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 818,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 820,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 848,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 878,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 918,
+          "effective_date": "2023-10-01"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 970,
+          "effective_date": "2024-10-02"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1036,
+          "effective_date": "2025-10-18"
+        }
+      ],
+      "愛媛": [
+        {
+          "fiscal_year": 2002,
+          "amount": 611,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 612,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 614,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 616,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 623,
+          "effective_date": "2007-10-25"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 631,
+          "effective_date": "2008-10-24"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 632,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 644,
+          "effective_date": "2010-10-27"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 647,
+          "effective_date": "2011-10-20"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 654,
+          "effective_date": "2012-10-24"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 666,
+          "effective_date": "2013-10-31"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 680,
+          "effective_date": "2014-10-12"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 696,
+          "effective_date": "2015-10-03"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 717,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 739,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 764,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 793,
+          "effective_date": "2020-10-03"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 821,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 853,
+          "effective_date": "2022-10-05"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 897,
+          "effective_date": "2023-10-06"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 956,
+          "effective_date": "2024-10-13"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1033,
+          "effective_date": "2025-12-01"
+        }
+      ],
+      "高知": [
+        {
+          "fiscal_year": 2002,
+          "amount": 611,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 611,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 613,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 615,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 622,
+          "effective_date": "2007-10-26"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 630,
+          "effective_date": "2008-10-26"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 631,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 642,
+          "effective_date": "2010-10-27"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 645,
+          "effective_date": "2011-10-26"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 652,
+          "effective_date": "2012-10-26"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 664,
+          "effective_date": "2013-10-26"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 677,
+          "effective_date": "2014-10-26"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 693,
+          "effective_date": "2015-10-18"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 715,
+          "effective_date": "2016-10-16"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 737,
+          "effective_date": "2017-10-13"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 762,
+          "effective_date": "2018-10-05"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-05"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 792,
+          "effective_date": "2020-10-03"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 820,
+          "effective_date": "2021-10-02"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 853,
+          "effective_date": "2022-10-09"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 897,
+          "effective_date": "2023-10-08"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 952,
+          "effective_date": "2024-10-09"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1023,
+          "effective_date": "2025-12-01"
+        }
+      ],
+      "福岡": [
+        {
+          "fiscal_year": 2002,
+          "amount": 643,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2003,
+          "amount": 644,
+          "effective_date": "2003-10-19"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 645,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 648,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 652,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 663,
+          "effective_date": "2007-10-28"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 675,
+          "effective_date": "2008-10-05"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 680,
+          "effective_date": "2009-10-16"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 692,
+          "effective_date": "2010-10-22"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 695,
+          "effective_date": "2011-10-15"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 701,
+          "effective_date": "2012-10-13"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 712,
+          "effective_date": "2013-10-18"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 727,
+          "effective_date": "2014-10-05"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 743,
+          "effective_date": "2015-10-04"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 765,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 789,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 814,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 841,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 842,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 870,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 900,
+          "effective_date": "2022-10-08"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 941,
+          "effective_date": "2023-10-06"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 992,
+          "effective_date": "2024-10-05"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1057,
+          "effective_date": "2025-11-16"
+        }
+      ],
+      "佐賀": [
+        {
+          "fiscal_year": 2002,
+          "amount": 605,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 606,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 608,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 611,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 619,
+          "effective_date": "2007-10-28"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 628,
+          "effective_date": "2008-10-25"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 629,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 642,
+          "effective_date": "2010-10-29"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 646,
+          "effective_date": "2011-10-06"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 653,
+          "effective_date": "2012-10-21"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 664,
+          "effective_date": "2013-10-26"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 678,
+          "effective_date": "2014-10-04"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 694,
+          "effective_date": "2015-10-04"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 715,
+          "effective_date": "2016-10-02"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 737,
+          "effective_date": "2017-10-06"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 762,
+          "effective_date": "2018-10-04"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-04"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 792,
+          "effective_date": "2020-10-02"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 821,
+          "effective_date": "2021-10-06"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 853,
+          "effective_date": "2022-10-02"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 900,
+          "effective_date": "2023-10-14"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 956,
+          "effective_date": "2024-10-17"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1030,
+          "effective_date": "2025-11-21"
+        }
+      ],
+      "長崎": [
+        {
+          "fiscal_year": 2002,
+          "amount": 605,
+          "effective_date": "2002-10-06"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 606,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 608,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 611,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 619,
+          "effective_date": "2007-10-21"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 628,
+          "effective_date": "2008-10-30"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 629,
+          "effective_date": "2009-10-10"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 642,
+          "effective_date": "2010-11-04"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 646,
+          "effective_date": "2011-10-12"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 653,
+          "effective_date": "2012-10-24"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 664,
+          "effective_date": "2013-10-20"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 677,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 694,
+          "effective_date": "2015-10-07"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 715,
+          "effective_date": "2016-10-06"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 737,
+          "effective_date": "2017-10-06"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 762,
+          "effective_date": "2018-10-06"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-03"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 793,
+          "effective_date": "2020-10-03"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 821,
+          "effective_date": "2021-10-02"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 853,
+          "effective_date": "2022-10-08"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 898,
+          "effective_date": "2023-10-13"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 953,
+          "effective_date": "2024-10-12"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1031,
+          "effective_date": "2025-12-01"
+        }
+      ],
+      "熊本": [
+        {
+          "fiscal_year": 2002,
+          "amount": 606,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 607,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 609,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 612,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 620,
+          "effective_date": "2007-10-25"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 628,
+          "effective_date": "2008-10-17"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 630,
+          "effective_date": "2009-10-18"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 643,
+          "effective_date": "2010-11-05"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 647,
+          "effective_date": "2011-10-20"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 653,
+          "effective_date": "2012-10-01"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 664,
+          "effective_date": "2013-10-30"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 677,
+          "effective_date": "2014-10-01"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 694,
+          "effective_date": "2015-10-17"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 715,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 737,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 762,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 793,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 821,
+          "effective_date": "2021-10-01"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 853,
+          "effective_date": "2022-10-01"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 898,
+          "effective_date": "2023-10-08"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 952,
+          "effective_date": "2024-10-05"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1034,
+          "effective_date": "2026-01-01"
+        }
+      ],
+      "大分": [
+        {
+          "fiscal_year": 2002,
+          "amount": 606,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 607,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 610,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 613,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 620,
+          "effective_date": "2007-10-20"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 630,
+          "effective_date": "2008-10-29"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 631,
+          "effective_date": "2009-10-01"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 643,
+          "effective_date": "2010-10-24"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 647,
+          "effective_date": "2011-10-20"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 653,
+          "effective_date": "2012-10-04"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 664,
+          "effective_date": "2013-10-20"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 677,
+          "effective_date": "2014-10-04"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 694,
+          "effective_date": "2015-10-17"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 715,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 737,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 762,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-01"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 792,
+          "effective_date": "2020-10-01"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 822,
+          "effective_date": "2021-10-06"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 854,
+          "effective_date": "2022-10-05"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 899,
+          "effective_date": "2023-10-06"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 954,
+          "effective_date": "2024-10-05"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1035,
+          "effective_date": "2026-01-01"
+        }
+      ],
+      "宮崎": [
+        {
+          "fiscal_year": 2002,
+          "amount": 605,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 606,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 608,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 611,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 619,
+          "effective_date": "2007-10-27"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 627,
+          "effective_date": "2008-10-26"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 629,
+          "effective_date": "2009-10-14"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 642,
+          "effective_date": "2010-11-04"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 646,
+          "effective_date": "2011-11-02"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 653,
+          "effective_date": "2012-10-26"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 664,
+          "effective_date": "2013-11-02"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 677,
+          "effective_date": "2014-10-16"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 693,
+          "effective_date": "2015-10-16"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 714,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 737,
+          "effective_date": "2017-10-06"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 762,
+          "effective_date": "2018-10-05"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-04"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 793,
+          "effective_date": "2020-10-03"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 821,
+          "effective_date": "2021-10-06"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 853,
+          "effective_date": "2022-10-06"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 897,
+          "effective_date": "2023-10-06"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 952,
+          "effective_date": "2024-10-05"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1023,
+          "effective_date": "2025-11-16"
+        }
+      ],
+      "鹿児島": [
+        {
+          "fiscal_year": 2002,
+          "amount": 605,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 606,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 608,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 611,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 619,
+          "effective_date": "2007-10-26"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 627,
+          "effective_date": "2008-10-18"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 630,
+          "effective_date": "2009-10-14"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 642,
+          "effective_date": "2010-10-28"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 647,
+          "effective_date": "2011-10-29"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 654,
+          "effective_date": "2012-10-13"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 665,
+          "effective_date": "2013-10-27"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 678,
+          "effective_date": "2014-10-19"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 694,
+          "effective_date": "2015-10-08"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 715,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 737,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 761,
+          "effective_date": "2018-10-01"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-03"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 793,
+          "effective_date": "2020-10-03"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 821,
+          "effective_date": "2021-10-02"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 853,
+          "effective_date": "2022-10-06"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 897,
+          "effective_date": "2023-10-06"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 953,
+          "effective_date": "2024-10-05"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1026,
+          "effective_date": "2025-11-01"
+        }
+      ],
+      "沖縄": [
+        {
+          "fiscal_year": 2002,
+          "amount": 604,
+          "effective_date": "2002-10-01"
+        },
+        {
+          "fiscal_year": 2003,
+          "amount": 605,
+          "effective_date": "2003-10-01"
+        },
+        {
+          "fiscal_year": 2004,
+          "amount": 606,
+          "effective_date": "2004-10-01"
+        },
+        {
+          "fiscal_year": 2005,
+          "amount": 608,
+          "effective_date": "2005-10-01"
+        },
+        {
+          "fiscal_year": 2006,
+          "amount": 610,
+          "effective_date": "2006-10-01"
+        },
+        {
+          "fiscal_year": 2007,
+          "amount": 618,
+          "effective_date": "2007-10-28"
+        },
+        {
+          "fiscal_year": 2008,
+          "amount": 627,
+          "effective_date": "2008-10-31"
+        },
+        {
+          "fiscal_year": 2009,
+          "amount": 629,
+          "effective_date": "2009-10-18"
+        },
+        {
+          "fiscal_year": 2010,
+          "amount": 642,
+          "effective_date": "2010-11-05"
+        },
+        {
+          "fiscal_year": 2011,
+          "amount": 645,
+          "effective_date": "2011-11-06"
+        },
+        {
+          "fiscal_year": 2012,
+          "amount": 653,
+          "effective_date": "2012-10-25"
+        },
+        {
+          "fiscal_year": 2013,
+          "amount": 664,
+          "effective_date": "2013-10-26"
+        },
+        {
+          "fiscal_year": 2014,
+          "amount": 677,
+          "effective_date": "2014-10-24"
+        },
+        {
+          "fiscal_year": 2015,
+          "amount": 693,
+          "effective_date": "2015-10-09"
+        },
+        {
+          "fiscal_year": 2016,
+          "amount": 714,
+          "effective_date": "2016-10-01"
+        },
+        {
+          "fiscal_year": 2017,
+          "amount": 737,
+          "effective_date": "2017-10-01"
+        },
+        {
+          "fiscal_year": 2018,
+          "amount": 762,
+          "effective_date": "2018-10-03"
+        },
+        {
+          "fiscal_year": 2019,
+          "amount": 790,
+          "effective_date": "2019-10-03"
+        },
+        {
+          "fiscal_year": 2020,
+          "amount": 792,
+          "effective_date": "2020-10-03"
+        },
+        {
+          "fiscal_year": 2021,
+          "amount": 820,
+          "effective_date": "2021-10-08"
+        },
+        {
+          "fiscal_year": 2022,
+          "amount": 853,
+          "effective_date": "2022-10-06"
+        },
+        {
+          "fiscal_year": 2023,
+          "amount": 896,
+          "effective_date": "2023-10-08"
+        },
+        {
+          "fiscal_year": 2024,
+          "amount": 952,
+          "effective_date": "2024-10-09"
+        },
+        {
+          "fiscal_year": 2025,
+          "amount": 1023,
+          "effective_date": "2025-12-01"
+        }
+      ]
+    }
   },
   "prefs": {
     "北海道": {

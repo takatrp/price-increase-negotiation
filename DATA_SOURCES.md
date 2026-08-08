@@ -23,12 +23,13 @@
 3. CSVの列番号を固定せず、系列名が「生鮮食品を除く総合」であることを確認して次を実行します。
 
 ```powershell
-node scripts/build-cpi-monthly.mjs <e-Stat長期時系列CSV> <小数第3位参考指数CSV> cpi_monthly_2025base.json
+node scripts/build-cpi-monthly.mjs <e-Stat長期時系列CSV> <小数第3位参考指数CSV> cpi_monthly_2025base.json --updated YYYY-MM-DD --latest-official-yoy N.N --publication-date YYYY-MM-DD --accessed-date YYYY-MM-DD
 ```
 
-4. `cpi_monthly_2025base.json` の `meta`（公表日、最新月、URL、確認日）を確認します。
-5. `pref_cost_data.json` の `national.cpi_yoy` には、最新結果で公表された前年同月比を転記します。
-6. 検証スクリプトを実行します。
+4. `updated`、公式前年同月比、`publication_date`、`accessed_date` は毎回CLIで明示します。いずれかがない場合、生成スクリプトはエラー終了します。
+5. `cpi_monthly_2025base.json` の `meta`（公表日、最新月、URL、確認日）を確認します。
+6. `pref_cost_data.json` の `national.cpi_yoy` には、最新結果で公表された前年同月比を転記します。
+7. 検証スクリプトを実行します。
 
 2025年基準への改定に伴い、1970年1月～2024年12月はe-Statの公表接続指数（小数第1位）、2025年1月以降は総務省統計局の小数第3位参考指数を収録しています。基準改定時は旧基準値を混在させず、最新基準の接続指数へ全期間を入れ替えてください。公表変化率は接続指数で再計算せず、各基準で公表された値を使用します。
 
@@ -60,7 +61,7 @@ node scripts/build-cpi-monthly.mjs <e-Stat長期時系列CSV> <小数第3位参�
 - 更新頻度：原則年1回、47都道府県の確定額と発効日がそろった時点
 - 区分：令和7年度は確定値。令和8年度は目安段階であり計算未使用です。
 
-令和8年度の中央最低賃金審議会の目安（Aランク54円、Bランク56円、Cランク56円、目安どおりの場合の全国加重平均1,176円）は参考メタデータだけに保持します。47都道府県すべての確定額と発効日が全国一覧へ掲載されるまで、一部の都道府県だけを更新しません。更新時は `min_wage_by_pref`、`min_wage_history_by_pref`、`min_wage_history_avg`、`min_wage_avg` を同時に更新します。
+令和8年度の中央最低賃金審議会の目安（Aランク54円、Bランク56円、Cランク56円、目安どおりの場合の全国加重平均1,176円）は参考メタデータだけに保持します。47都道府県すべての確定額と発効日が全国一覧へ掲載されるまで、一部の都道府県だけを更新しません。更新時は `min_wage_by_pref`、`min_wage_history_by_pref`、`min_wage_history_by_pref_effective`、`min_wage_history_avg`、`min_wage_avg` を同時に更新します。累積計算は、現行価格決定日以下で最も新しい発効日の金額を基準値にします。公式Excelの最古履歴より前は算出不可です。
 
 次回確認の目安：厚生労働省の全国一覧に令和8年度の47都道府県確定額・発効日が掲載された時点
 

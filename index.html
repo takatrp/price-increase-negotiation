@@ -36,6 +36,8 @@
     .hint{font-size:.78rem;color:var(--muted);margin-top:4px}
     .danger{color:var(--warn);font-weight:900;margin-top:8px}
     .warningBox{background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:10px;border-radius:8px;font-size:.82rem;margin-top:8px;white-space:pre-wrap;}
+    .dataLoadAlert{display:none;margin:10px 0 0;padding:12px 14px;border:2px solid #dc2626;border-radius:10px;background:#fef2f2;color:#991b1b;font-weight:900;line-height:1.55;}
+    .dataLoadAlert.show{display:block}
 
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 12px;font-weight:900;font-size:.92rem;cursor:pointer;transition: opacity .2s;}
     .btn:hover{opacity:.9}
@@ -187,12 +189,13 @@
       <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
         <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56" />
       </a>
-      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok">r43</span></div>
+      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok">r44</span></div>
       <div class="headRight">
         <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
       </div>
     </div>
     <div class="sub">背景要因（外部データ＋事情）を整理し、本文（顧客向け）と根拠メモ（社内用）を生成します。</div>
+    <div id="dataLoadAlert" class="dataLoadAlert" role="alert" aria-live="assertive"></div>
 
     <div id="importStatus" class="importStatus" role="status" aria-live="polite"></div>
 
@@ -245,9 +248,9 @@
 
           <div class="inputGrid" style="margin-top:8px;">
             <div>
-              <label for="currentPriceAsOf">現行価格の決定時期（年月）</label>
-              <input type="month" id="currentPriceAsOf" />
-              <div class="hint">STEP2の「外部環境」セクションで根拠データを確認できます。</div>
+              <label for="currentPriceAsOf">現行価格の決定日（年月日）</label>
+              <input type="date" id="currentPriceAsOf" />
+              <div class="hint">この日付時点で実際に適用されていた最低賃金と、同じ月のCPIを基準に計算します。</div>
             </div>
             <div style="display:flex;align-items:flex-end;">
               <button class="btn emphasis" id="openExternalFactorsBtn" type="button">外部環境を確認</button>
@@ -320,12 +323,12 @@
                 <span id="cpiSinceView"><b>物価：— ／ 最低賃金：—</b></span>
                 <span class="badge warn" id="cpiSinceBadge">任意</span>
               </div>
-              <div class="small">※物価は総務省統計局の月次接続指数、最低賃金は厚生労働省の確定値を使用します。小数第3位のCPIは計算用の参考指数であり、価格改定額を自動決定するものではありません。</div>
+              <div class="small">※物価は総務省統計局の月次接続指数、最低賃金は厚生労働省の確定値を使用します。1970年1月～2024年12月は小数第1位、2025年1月以降は小数第3位の参考指数であり、価格改定額を自動決定するものではありません。</div>
 
               <details style="border:none; padding:0; background:transparent !important; margin-top:6px;">
                 <summary style="font-size:0.8rem; font-weight:normal; color:#578899; cursor:pointer; text-decoration:underline;">計算過程を確認する</summary>
                 <div id="calcDetailBox" class="mutedBox" style="font-size:0.75rem; margin-top:4px; line-height:1.5;">
-                  （年月を入力すると計算過程が表示されます）
+                  （年月日を入力すると計算過程が表示されます）
                 </div>
               </details>
 
@@ -354,7 +357,7 @@
                 <input type="text" id="cpiRate" inputmode="decimal" placeholder="例）2.0" />
               </div>
               <div>
-                <label for="wageRate">人件費上昇率（%） <span class="badge" id="wageScopeBadge">—</span></label>
+                <label for="wageRate">賃上げ率（参考）（%） <span class="badge" id="wageScopeBadge">—</span></label>
                 <input type="text" id="wageRate" inputmode="decimal" placeholder="例）4.69" />
               </div>
             </div>
@@ -365,9 +368,15 @@
                 <input type="text" id="cpiAsOf" placeholder="例）2026年6月（生鮮食品を除く総合・2025年基準）" />
               </div>
               <div>
-                <label for="wageAsOf" style="margin-top:0;">人件費データの対象</label>
+                <label for="wageAsOf" style="margin-top:0;">賃上げ率データの対象</label>
                 <input type="text" id="wageAsOf" placeholder="例）2026年春季生活闘争（最終・300人未満）" />
               </div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <label for="actualLaborRate">自社の実際の人件費上昇率（手入力・任意）（%）</label>
+              <input type="text" id="actualLaborRate" inputmode="decimal" placeholder="例）6.2" />
+              <div class="hint">自社の給与・社会保険料等の実績に基づく率を入力してください。春闘の参考値とは分けて管理します。</div>
             </div>
 
             <details>
@@ -382,7 +391,7 @@
                   <span class="badge warn" id="linkNoteBadge">全国値が多い</span>
                 </div>
                 <div class="small" id="linkNoteText" style="margin-top:6px;">
-                  ※都道府県別の物価/賃金がJSONに無い場合は「全国値」を表示します（バッジで明記）。
+                  ※都道府県別の物価/賃上げ率がJSONに無い場合は「全国値」を表示します（バッジで明記）。
                   都道府県別で運用したい場合は pref_cost_data.json の prefs.[都道府県キー].cpi_yoy / wage_yoy を設定してください。
                 </div>
 
@@ -397,7 +406,7 @@
                 <div class="small" style="font-weight:900;color:#0f172a;">説明（社内向け）</div>
                 <div class="chipGroup" style="margin-top:6px;">
                   <button class="chip" type="button" id="helpCpi">物価上昇率とは？</button>
-                  <button class="chip" type="button" id="helpWage">人件費上昇率とは？</button>
+                  <button class="chip" type="button" id="helpWage">賃上げ率（参考）とは？</button>
                   <button class="chip" type="button" id="helpScope">都道府県別でない理由</button>
                 </div>
                 <div class="small" id="helpBox" style="margin-top:8px;line-height:1.6;color:#334155;"></div>
@@ -420,7 +429,7 @@
                   <div class="small" style="margin-bottom:6px;"><b>JSONキー例（最小）</b></div>
                   <pre class="sample" id="jsonSample"></pre>
                 </div>
-                <div class="small">※キーは「兵庫 / 鳥取 / 和歌山」等、都道府県名（都・道・府・県を除いた形）で入れてください。最低賃金は <span class="kbd">national.min_wage_by_pref.[都道府県]</span>、都道府県履歴は <span class="kbd">national.min_wage_history_by_pref.[都道府県].[年]</span> で管理します。未確認値を全国値や推測値で補完しないでください。</div>
+                <div class="small">※キーは「北海道 / 兵庫 / 鳥取 / 和歌山」等で入れてください。最低賃金は <span class="kbd">national.min_wage_by_pref.[都道府県]</span>、発効日付き履歴は <span class="kbd">national.min_wage_history_by_pref_effective.[都道府県]</span> で管理します。未確認値を全国値や推測値で補完しないでください。</div>
               </details>
             </details>
           </div>
@@ -566,7 +575,7 @@
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
     <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">r43</span>（データ確認日：<span id="last-updated-date">—</span>）
+    <span id="build-rev">r44</span>（データ確認日：<span id="last-updated-date">—</span>）
   </footer>
   <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
   </div>
@@ -620,6 +629,17 @@
       if(!m) return String(s);
       return `${m[1]}年${parseInt(m[2],10)}月`;
     };
+    const fmtDecisionDate = s => {
+      if(!s) return '';
+      const m = String(s).trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if(!m) return String(s);
+      return `${m[1]}年${parseInt(m[2],10)}月${parseInt(m[3],10)}日`;
+    };
+    const formatCpiIndex = (month, value) => {
+      const n = Number(value);
+      if(!Number.isFinite(n)) return '—';
+      return String(month) <= '2024-12' ? n.toFixed(1) : n.toFixed(3);
+    };
     const joinJa = (arr) => {
       const a = (arr||[]).filter(Boolean);
       if(a.length===0) return '';
@@ -645,9 +665,9 @@
       return `公表主体：${source.publisher || '—'}／資料名：${source.title || '—'}／公表日：${source.publication_date || '—'}／対象期間：${source.target_period || '—'}／URL：${source.url || '—'}／データ確認日：${source.accessed_date || '—'}／区分：${status}`;
     }
 
-    // 「約◯年」算出（年月から現在までの経過を年換算）
-    function approxYearsFromYM(ym /* 'YYYY-MM' */){
-      const m = String(ym||'').trim().match(/^(\d{4})-(\d{2})$/);
+    // 「約◯年」算出（年月日から現在までの経過を月単位で年換算）
+    function approxYearsFromYM(ymd /* 'YYYY-MM-DD' */){
+      const m = String(ymd||'').trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
       if(!m) return null;
       const by = parseInt(m[1],10);
       const bm = parseInt(m[2],10) - 1;
@@ -704,6 +724,7 @@
 
     const cpiRate = $('#cpiRate');
     const wageRate = $('#wageRate');
+    const actualLaborRate = $('#actualLaborRate');
     const cpiAsOf = $('#cpiAsOf');
     const wageAsOf = $('#wageAsOf');
 
@@ -727,6 +748,7 @@
     const loadDataBtn = $('#loadDataBtn');
     const clearDataBtn = $('#clearDataBtn');
     const dataLoadStatus = $('#dataLoadStatus');
+    const dataLoadAlert = $('#dataLoadAlert');
     const jsonSample = $('#jsonSample');
 
     const extraFactors = $('#extraFactors');
@@ -889,6 +911,7 @@
           valueFreeText: valueFreeText.value,
           cpiRate: cpiRate.value,
           wageRate: wageRate.value,
+          actualLaborRate: actualLaborRate.value,
           cpiAsOf: cpiAsOf.value,
           wageAsOf: wageAsOf.value,
           embedNumbersInLetter: !!embedNumbersInLetter.checked,
@@ -924,13 +947,14 @@
         if(typeof d.productName === 'string') productName.value = d.productName;
         if(typeof d.currentPrice === 'string') currentPrice.value = d.currentPrice;
         if(typeof d.newPrice === 'string') newPrice.value = d.newPrice;
-        if(typeof d.currentPriceAsOf === 'string') currentPriceAsOf.value = d.currentPriceAsOf;
+        if(typeof d.currentPriceAsOf === 'string') currentPriceAsOf.value = /^\d{4}-\d{2}$/.test(d.currentPriceAsOf) ? `${d.currentPriceAsOf}-01` : d.currentPriceAsOf;
         if(typeof d.effectiveDate === 'string') effectiveDate.value = d.effectiveDate;
         if(typeof d.extraFactors === 'string') extraFactors.value = d.extraFactors;
         if(typeof d.effortFreeText === 'string') effortFreeText.value = d.effortFreeText;
         if(typeof d.valueFreeText === 'string') valueFreeText.value = d.valueFreeText;
         if(typeof d.cpiRate === 'string') cpiRate.value = d.cpiRate;
         if(typeof d.wageRate === 'string') wageRate.value = d.wageRate;
+        if(typeof d.actualLaborRate === 'string') actualLaborRate.value = d.actualLaborRate;
         if(typeof d.cpiAsOf === 'string') cpiAsOf.value = d.cpiAsOf;
         if(typeof d.wageAsOf === 'string') wageAsOf.value = d.wageAsOf;
         if(typeof d.embedNumbersInLetter === 'boolean') embedNumbersInLetter.checked = d.embedNumbersInLetter;
@@ -1018,6 +1042,7 @@
     };
     cpiRate.addEventListener('blur', () => formatPctInput(cpiRate, 1));
     wageRate.addEventListener('blur', () => formatPctInput(wageRate, 2));
+    actualLaborRate.addEventListener('blur', () => formatPctInput(actualLaborRate, 1));
 
     function setupChips(groupId, multiple) {
       const group = $(groupId);
@@ -1090,9 +1115,18 @@
     let COST_DATA_URL = './pref_cost_data.json';
 
     function setStatus(msg, ok){
-      if(!dataLoadStatus) return;
-      dataLoadStatus.textContent = msg || '';
-      dataLoadStatus.style.color = ok ? '#0f172a' : '#b91c1c';
+      if(dataLoadStatus){
+        dataLoadStatus.textContent = msg || '';
+        dataLoadStatus.style.color = ok ? '#0f172a' : '#b91c1c';
+      }
+      if(dataLoadAlert){
+        dataLoadAlert.textContent = ok ? '' : `公的統計データの読込エラー：${msg} 公的統計値を含む顧客向け文章は生成しません。`;
+        dataLoadAlert.classList.toggle('show', !ok);
+      }
+    }
+
+    function officialDataReady(){
+      return Boolean(COST_DATA && CPI_MONTHLY_DATA && !COST_DATA_ERROR && !CPI_DATA_ERROR);
     }
 
     function updateLoadStatus(){
@@ -1107,11 +1141,81 @@
     }
 
     function clearLinkedOfficialRates(){
-      if(!linkRates || !linkRates.checked) return;
       for(const el of [cpiRate, cpiAsOf, wageRate, wageAsOf]){
+        if(el.dataset.origin === 'manual') continue;
         el.value = '';
         el.dataset.origin = 'none';
       }
+    }
+
+    function isIsoDate(value){
+      const text = String(value || '');
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(text)) return false;
+      const date = new Date(`${text}T00:00:00Z`);
+      return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
+    }
+
+    function hasFiniteNumber(value){
+      return value !== null && String(value ?? '').trim() !== '' && Number.isFinite(Number(value));
+    }
+
+    function validateCostDataPayload(json){
+      if(!json || typeof json !== 'object' || Array.isArray(json)) throw new Error('JSONのルート形式が不正です');
+      const prefKeys = Object.keys(PREF_LABEL);
+      const prefs = json.prefs;
+      const national = json.national;
+      if(!prefs || typeof prefs !== 'object' || Object.keys(prefs).length !== prefKeys.length || prefKeys.some(key => !Object.prototype.hasOwnProperty.call(prefs, key))){
+        throw new Error('都道府県データが47件そろっていません');
+      }
+      if(!national || typeof national !== 'object') throw new Error('全国データがありません');
+      if(!hasFiniteNumber(national.cpi_yoy) || !String(national.cpi_asof || '').trim()) throw new Error('全国CPIデータが不正です');
+      if(!hasFiniteNumber(national.wage_yoy) || !String(national.wage_asof || '').trim()) throw new Error('全国賃上げ率データが不正です');
+
+      const currentByPref = national.min_wage_by_pref;
+      const historyByPref = national.min_wage_history_by_pref_effective;
+      if(!currentByPref || typeof currentByPref !== 'object' || !historyByPref || typeof historyByPref !== 'object'){
+        throw new Error('最低賃金データまたは発効日付き履歴がありません');
+      }
+      for(const key of prefKeys){
+        const current = currentByPref[key];
+        if(!current || !hasFiniteNumber(current.new) || Number(current.new) <= 0 || !hasFiniteNumber(current.old) || Number(current.old) <= 0 || !isIsoDate(current.eff)){
+          throw new Error(`${PREF_LABEL[key]}の最低賃金データが不正です`);
+        }
+        const events = historyByPref[key];
+        if(!Array.isArray(events) || events.length === 0 || events.some(event => !Number.isFinite(Number(event.amount)) || Number(event.amount) <= 0 || !isIsoDate(event.effective_date))){
+          throw new Error(`${PREF_LABEL[key]}の発効日付き最低賃金履歴が不正です`);
+        }
+        const latest = [...events].sort((a, b) => String(a.effective_date).localeCompare(String(b.effective_date))).at(-1);
+        if(Number(latest.amount) !== Number(current.new) || String(latest.effective_date) !== String(current.eff)){
+          throw new Error(`${PREF_LABEL[key]}の最新最低賃金と履歴が一致しません`);
+        }
+      }
+
+      const sources = national.sources;
+      for(const key of ['cpi', 'wage', 'min_wage']){
+        if(!sources?.[key] || !/^https:\/\//.test(String(sources[key].url || ''))) throw new Error(`${key}の公式出典が不正です`);
+      }
+      return json;
+    }
+
+    function validateCpiDataPayload(json){
+      if(!json || typeof json !== 'object' || Array.isArray(json) || !json.meta || !json.values || typeof json.values !== 'object'){
+        throw new Error('CPIデータの形式が不正です');
+      }
+      const latestMonth = String(json.meta.latest_month || '');
+      const entries = Object.entries(json.values);
+      if(!/^\d{4}-\d{2}$/.test(latestMonth) || entries.length === 0) throw new Error('CPIの最新月または月次系列がありません');
+      if(entries.some(([month, value]) => !/^\d{4}-\d{2}$/.test(month) || !Number.isFinite(Number(value)) || Number(value) <= 0)){
+        throw new Error('CPI月次系列に不正な値があります');
+      }
+      const lastMonth = entries.map(([month]) => month).sort().at(-1);
+      if(lastMonth !== latestMonth || !Number.isFinite(Number(json.values[latestMonth]))) throw new Error('CPIの最新月と月次系列が一致しません');
+      if(!hasFiniteNumber(json.meta.latest_official_yoy)) throw new Error('CPIの公式前年同月比が不正です');
+      if(!String(json.meta.source_title || '').trim() || !/^https:\/\//.test(String(json.meta.source_url || ''))) throw new Error('CPIの公式出典が不正です');
+      for(const key of ['updated', 'publication_date', 'accessed_date']){
+        if(!isIsoDate(json.meta[key])) throw new Error(`CPIの${key}が不正です`);
+      }
+      return json;
     }
 
     function buildJsonSample(){
@@ -1178,12 +1282,8 @@
     function normalizePrefKey(k){
       if(!k) return '';
       let s = String(k).trim();
-      s = s.replace(/[都道府県]$/,'');
-      if(s==="東京都") s="東京";
-      if(s==="大阪府") s="大阪";
-      if(s==="京都府") s="京都";
-      if(s==="北海道") s="北海道";
-      return s;
+      if(s === '北海道') return '北海道';
+      return s.replace(/[都府県]$/,'');
     }
 
     function getPrefData(prefKey){
@@ -1203,10 +1303,10 @@
       const u = (url && url.trim()) ? url.trim() : './pref_cost_data.json';
       COST_DATA_URL = u;
       COST_DATA_ERROR = '';
-      if(!silent) updateLoadStatus();
+      COST_DATA = null;
+      updateLoadStatus();
       try{
-        const json = await fetchJson(u);
-        COST_DATA = json;
+        COST_DATA = validateCostDataPayload(await fetchJson(u));
         setLocal('mk_cost_data_url', u);
       }catch(e){
         COST_DATA = null;
@@ -1226,15 +1326,15 @@
 
     async function loadCpiData(){
       CPI_DATA_ERROR = '';
+      CPI_MONTHLY_DATA = null;
+      updateLoadStatus();
       try{
-        const json = await fetchJson('./cpi_monthly_2025base.json');
-        if(!json || !json.meta || !json.values) throw new Error('CPIデータの形式が不正です');
-        CPI_MONTHLY_DATA = json;
+        CPI_MONTHLY_DATA = validateCpiDataPayload(await fetchJson('./cpi_monthly_2025base.json'));
       }catch(e){
         CPI_MONTHLY_DATA = null;
         CPI_DATA_ERROR = 'CPI月次データ：' + e.message;
       }
-      try{ updateLoadStatus(); generate(); }catch(err){ console.error('CPIデータ反映時エラー', err); }
+      try{ updateLoadStatus(); renderAllByPref(); generate(); }catch(err){ console.error('CPIデータ反映時エラー', err); }
     }
 
     function clearCostData(){
@@ -1338,6 +1438,14 @@
       const wage = resolveRate(key,'wage');
 
       if(linkRates.checked){
+        if(!officialDataReady()){
+          clearLinkedOfficialRates();
+          cpiRate.readOnly = false; cpiAsOf.readOnly = false;
+          wageRate.readOnly = false; wageAsOf.readOnly = false;
+          setScopeBadge(cpiScopeBadge, 'none');
+          setScopeBadge(wageScopeBadge, 'none');
+          return;
+        }
         if(isFinite(cpi.v)){
           cpiRate.value = pct1(cpi.v);
           cpiAsOf.value = cpi.asof || '';
@@ -1364,6 +1472,8 @@
       }else{
         cpiRate.readOnly = false; cpiAsOf.readOnly = false;
         wageRate.readOnly = false; wageAsOf.readOnly = false;
+        cpiRate.dataset.origin = 'manual'; cpiAsOf.dataset.origin = 'manual';
+        wageRate.dataset.origin = 'manual'; wageAsOf.dataset.origin = 'manual';
         setScopeBadge(cpiScopeBadge, 'manual');
         setScopeBadge(wageScopeBadge, 'manual');
       }
@@ -1373,11 +1483,12 @@
        6-1) 公式月次CPI接続指数に基づく累積上昇率（1970年〜）
        ========================= */
     function calcCpiSince(){
-      const base = (currentPriceAsOf.value||'').trim();
-      if(!base) return null;
+      const decisionDate = (currentPriceAsOf.value||'').trim();
+      if(!decisionDate) return null;
 
-      const m = base.match(/^(\d{4})-(\d{2})$/);
-      if(!m) return { error: '現行価格の決定時期を年月で入力してください。' };
+      const m = decisionDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if(!m) return { error: '現行価格の決定日を年月日で入力してください。' };
+      const baseMonth = decisionDate.slice(0, 7);
 
       const by = parseInt(m[1],10);
       const bm = parseInt(m[2],10) - 1;
@@ -1389,11 +1500,11 @@
       const latestMonth = String(CPI_MONTHLY_DATA.meta.latest_month || '');
       const latestMatch = latestMonth.match(/^(\d{4})-(\d{2})$/);
       if(!latestMatch) return { error: 'CPIの最新公表月を確認できないため算出できません。' };
-      if(base > latestMonth){
+      if(baseMonth > latestMonth){
         return { error: '入力された現行価格決定月は、CPIの最新公表月より後であるため算出できません。' };
       }
 
-      const baseCpi = Number(CPI_MONTHLY_DATA.values[base]);
+      const baseCpi = Number(CPI_MONTHLY_DATA.values[baseMonth]);
       const latestCpi = Number(CPI_MONTHLY_DATA.values[latestMonth]);
       if(!Number.isFinite(baseCpi) || baseCpi <= 0){
         return { error: '入力された月のCPI公表物価指数がないため算出できません。' };
@@ -1406,101 +1517,66 @@
       const nm = parseInt(latestMatch[2],10) - 1;
       const months = (ny - by)*12 + (nm - bm);
       const cum = (latestCpi / baseCpi - 1) * 100;
-      return { months, cum, baseCpi, nowCpi: latestCpi, by, bm, ny, nm, baseMonth: base, latestMonth, meta: CPI_MONTHLY_DATA.meta };
+      return { months, cum, baseCpi, nowCpi: latestCpi, by, bm, ny, nm, decisionDate, baseMonth, latestMonth, meta: CPI_MONTHLY_DATA.meta };
     }
 
     const hasCpiResult = x => Boolean(x && !x.error && Number.isFinite(x.cum));
 
     /* =========================
-       6-2) エリア別 最低賃金の推移に基づく累積概算
+       6-2) 発効日付き最低賃金履歴に基づく累積上昇率
        ========================= */
-    function getMinWageMaxYear(){
-      const series = COST_DATA && COST_DATA.national ? COST_DATA.national.min_wage_history_avg : null;
-      if(!series || typeof series !== 'object') return null;
-      const years = Object.keys(series).map(Number).filter(Number.isFinite);
-      return years.length ? Math.max(...years) : null;
-    }
-
-
-    function getHistoricalMinWageForPref(prefKey, year) {
-      const y = Number(year);
-      if(!isFinite(y)) return null;
-
-      // 1) 推奨: JSONに履歴がある場合（全年度）
-      const histMap = COST_DATA && COST_DATA.national && COST_DATA.national.min_wage_history_by_pref
-        ? COST_DATA.national.min_wage_history_by_pref
+    function getMinWageEffectiveHistory(prefKey){
+      const historyMap = COST_DATA && COST_DATA.national
+        ? COST_DATA.national.min_wage_history_by_pref_effective
         : null;
-      if(histMap){
-        const direct = histMap[prefKey];
-        if(direct && isFinite(toNum(direct[y]))) return toNum(direct[y]);
-        for(const key in histMap){
-          if(normalizePrefKey(key) === prefKey){
-            const rec = histMap[key];
-            if(rec && isFinite(toNum(rec[y]))) return toNum(rec[y]);
-          }
+      if(!historyMap || typeof historyMap !== 'object') return [];
+      let raw = historyMap[prefKey];
+      if(!Array.isArray(raw)){
+        for(const key in historyMap){
+          if(normalizePrefKey(key) === prefKey){ raw = historyMap[key]; break; }
         }
       }
-
-      // 2) フォールバック: min_wage_by_pref の old/new から 2024/2025 を復元
-      const byPref = COST_DATA && COST_DATA.national && COST_DATA.national.min_wage_by_pref
-        ? COST_DATA.national.min_wage_by_pref
-        : null;
-      if(!byPref) return null;
-
-      let rec = byPref[prefKey] || null;
-      if(!rec){
-        for(const key in byPref){
-          if(normalizePrefKey(key) === prefKey){ rec = byPref[key]; break; }
-        }
-      }
-      if(!rec) return null;
-
-      const old = toNum(rec.old ?? rec.o);
-      const newer = toNum(rec.new ?? rec.n);
-      if(!isFinite(old) || !isFinite(newer)) return null;
-      if(y === 2024) return old;
-      if(y >= 2025) return newer;
-
-      return null;
+      if(!Array.isArray(raw)) return [];
+      return raw
+        .map(event => ({
+          fiscalYear: Number(event.fiscal_year),
+          amount: Number(event.amount),
+          effectiveDate: String(event.effective_date || '')
+        }))
+        .filter(event => Number.isFinite(event.amount) && event.amount > 0 && /^\d{4}-\d{2}-\d{2}$/.test(event.effectiveDate))
+        .sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate));
     }
 
-    function calcMwSince() {
-      const base = (currentPriceAsOf.value||'').trim();
+    function calcMwSince(){
+      const decisionDate = (currentPriceAsOf.value||'').trim();
       const prefKey = prefSelect.value || '東京';
-      if(!base) return null;
+      if(!decisionDate) return null;
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(decisionDate)) return { error: '現行価格の決定日を年月日で入力してください。' };
 
-      const m = base.match(/^(\d{4})-(\d{2})$/);
-      if(!m) return null;
+      const history = getMinWageEffectiveHistory(prefKey);
+      if(!history.length) return { error: '発効日付きの最低賃金履歴を読み込めないため算出できません。' };
+      const applicable = history.filter(event => event.effectiveDate <= decisionDate);
+      if(!applicable.length){
+        return { error: `公式履歴の開始日（${fmtYMD(history[0].effectiveDate)}）より前のため算出できません。` };
+      }
 
-      const by = parseInt(m[1],10);
-      const dataYear = getMinWageMaxYear();
-      if(!dataYear) return null;
-
-      const histMap = COST_DATA && COST_DATA.national && COST_DATA.national.min_wage_history_by_pref
-        ? COST_DATA.national.min_wage_history_by_pref
-        : null;
-      const hasExactHistory = (() => {
-        if(!histMap) return false;
-        const direct = histMap[prefKey];
-        if(direct && isFinite(toNum(direct[by]))) return true;
-        for(const key in histMap){
-          if(normalizePrefKey(key) === prefKey){
-            const rec = histMap[key];
-            if(rec && isFinite(toNum(rec[by]))) return true;
-          }
-        }
-        return false;
-      })();
-
-      const baseMw = getHistoricalMinWageForPref(prefKey, by);
-      const currentMwInfo = minWageInfo(prefKey);
-      const nowMw = currentMwInfo ? currentMwInfo.n : getHistoricalMinWageForPref(prefKey, dataYear);
-
-      if(!baseMw || !nowMw || !hasExactHistory) return null;
-
-      const cum = (nowMw / baseMw - 1) * 100;
-      return { cum: cum > 0 ? cum : 0, baseMw, nowMw, by, ny: dataYear, prefKey, estimated: false };
+      const baseEvent = applicable[applicable.length - 1];
+      const latestEvent = history[history.length - 1];
+      const cum = (latestEvent.amount / baseEvent.amount - 1) * 100;
+      return {
+        cum,
+        baseMw: baseEvent.amount,
+        nowMw: latestEvent.amount,
+        baseEffectiveDate: baseEvent.effectiveDate,
+        latestEffectiveDate: latestEvent.effectiveDate,
+        baseFiscalYear: baseEvent.fiscalYear,
+        latestFiscalYear: latestEvent.fiscalYear,
+        decisionDate,
+        prefKey
+      };
     }
+
+    const hasMwResult = x => Boolean(x && !x.error && Number.isFinite(x.cum));
 
     function updateCpiSinceView(){
       const x = calcCpiSince();
@@ -1510,7 +1586,8 @@
 
       const cpiOk = hasCpiResult(x);
       const cpiText = cpiOk ? `物価：${pct1(x.cum)}%` : (x && x.error ? '物価：算出不可' : '物価：—');
-      const mwText = mwX ? `最低賃金：約${pct1(mwX.cum)}%` : '最低賃金：—';
+      const mwOk = hasMwResult(mwX);
+      const mwText = mwOk ? `最低賃金：${pct1(mwX.cum)}%` : (mwX && mwX.error ? '最低賃金：算出不可' : '最低賃金：—');
       const monthText = cpiOk ? ` <b>（${x.months}ヶ月）</b>` : '';
       const summaryHtml = `<span class="cumValue">${cpiText} ／ ${mwText}</span>${monthText}`;
 
@@ -1527,8 +1604,8 @@
       }
 
       if(!x && !mwX){
-        if(calcDetailBox) calcDetailBox.innerHTML = '（年月を入力すると計算過程が表示されます）';
-        if(calcDetailBoxModal) calcDetailBoxModal.innerHTML = '（年月を入力すると計算過程が表示されます）';
+        if(calcDetailBox) calcDetailBox.innerHTML = '（年月日を入力すると計算過程が表示されます）';
+        if(calcDetailBoxModal) calcDetailBoxModal.innerHTML = '（年月日を入力すると計算過程が表示されます）';
         return;
       }
 
@@ -1540,25 +1617,28 @@
           `<b>【累積物価上昇率の計算式】</b><br>` +
           `基準月：${fmtYM(x.baseMonth)}<br>` +
           `最新公表月：${fmtYM(x.latestMonth)}<br>` +
-          `基準月の公表物価指数：${x.baseCpi.toFixed(3)}<br>` +
-          `最新月の公表物価指数：${x.nowCpi.toFixed(3)}<br>` +
-          `⇒ (${x.nowCpi.toFixed(3)} ÷ ${x.baseCpi.toFixed(3)} - 1) × 100 = <b>${x.cum.toFixed(2)}%</b><br>` +
+          `基準月の公表物価指数：${formatCpiIndex(x.baseMonth, x.baseCpi)}<br>` +
+          `最新月の公表物価指数：${formatCpiIndex(x.latestMonth, x.nowCpi)}<br>` +
+          `⇒ (${formatCpiIndex(x.latestMonth, x.nowCpi)} ÷ ${formatCpiIndex(x.baseMonth, x.baseCpi)} - 1) × 100 = <b>${x.cum.toFixed(2)}%</b><br>` +
           `基準：2025年=100（2025年基準接続指数）<br>` +
           `出典：<a href="${sourceUrl}" target="_blank" rel="noopener">${sourceTitle}</a><br>` +
-          `※小数第3位の指数は計算用参考値です。価格改定額そのものを自動決定するものではありません。`
+          `※1970年1月～2024年12月は小数第1位、2025年1月以降は小数第3位の参考指数です。価格改定額そのものを自動決定するものではありません。`
         );
       }else if(x && x.error){
         detailParts.push(`<b>【累積物価上昇率】</b><br><span style="color:#b91c1c;">${x.error}</span>`);
       }
 
-      if(mwX){
+      if(mwOk){
         detailParts.push(
           `<b>【累積最低賃金上昇率の計算式】</b><br>` +
           `対象エリア：${mwX.prefKey}<br>` +
-          `基準年（${mwX.by}年）の最低賃金：${Math.round(mwX.baseMw)}円<br>` +
-          `最新確定年度（${mwX.ny}年）の最低賃金：${Math.round(mwX.nowMw)}円<br>` +
+          `現行価格の決定日：${fmtYMD(mwX.decisionDate)}<br>` +
+          `決定日時点の適用最低賃金：${Math.round(mwX.baseMw)}円（発効：${fmtYMD(mwX.baseEffectiveDate)}）<br>` +
+          `最新の適用最低賃金：${Math.round(mwX.nowMw)}円（発効：${fmtYMD(mwX.latestEffectiveDate)}）<br>` +
           `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`
         );
+      }else if(mwX && mwX.error){
+        detailParts.push(`<b>【累積最低賃金上昇率】</b><br><span style="color:#b91c1c;">${mwX.error}</span>`);
       }
 
       const detailHtml = detailParts.join('<br><br>');
@@ -1645,19 +1725,25 @@
     function buildNaturalEvidencePhrase(){
       if(!embedNumbersInLetter.checked) return '';
       const key = prefSelect.value || '東京';
+      const sentences = [];
+      if(officialDataReady()){
+        const w = minWageInfo(key);
+        const mw = w ? `最低賃金（前年度比 +${pct1(w.pct)}%）` : '';
+        const p = toNum(cpiRate.value);
+        const price = isFinite(p) && cpiRate.dataset.origin !== 'manual' ? `物価（前年同月比 +${pct1(p)}%）` : '';
+        const bits = [mw, price].filter(Boolean);
+        if(bits.length) sentences.push(`背景として、${bits.join('、')}の上昇といった外部環境の変化が重なっております。`);
 
-      const w = minWageInfo(key);
-      const mw = w ? `最低賃金（前年度比 +${pct1(w.pct)}%）` : '';
+        const h = toNum(wageRate.value);
+        if(isFinite(h) && wageRate.dataset.origin !== 'manual') sentences.push(`連合の2026年春闘最終集計では、300人未満の組合における定昇相当込みの賃上げ率は${pct2(h)}％となっています。`);
+      }
 
-      const p = toNum(cpiRate.value);
-      const price = isFinite(p) ? `物価（前年同月比 +${pct1(p)}%）` : '';
-
-      const h = toNum(wageRate.value);
-      const labor = isFinite(h) ? `人件費（前年比 +${pct1(h)}%）` : '';
-
-      const bits = [mw, price, labor].filter(Boolean);
-      if(bits.length===0) return '';
-      return `背景として、${bits.join('、')}の上昇といった外部環境の変化が重なっております。`;
+      const actual = toNum(actualLaborRate.value);
+      if(isFinite(actual)){
+        const sign = actual >= 0 ? '+' : '-';
+        sentences.push(`自社の実績では、人件費が前年比${sign}${pct1(Math.abs(actual))}％変動しています。`);
+      }
+      return sentences.join('\n');
     }
 
     function buildReferenceBlock(decidedYM){
@@ -1666,28 +1752,26 @@
 
       const lines = [];
 
-      if(embedNumbersInLetter.checked) {
+      if(embedNumbersInLetter.checked && officialDataReady()) {
         const w = minWageInfo(key);
         if (w) lines.push(`・最低賃金（${prefLabel}）：${Math.round(w.o)}円 → ${Math.round(w.n)}円（前年度比 +${pct1(w.pct)}%、発効：${fmtYMD(w.eff)}、出典：${sourceShort('min_wage')}）`);
 
         const p = toNum(cpiRate.value);
         const pAsOf = (cpiAsOf.value||'').trim();
-        if (isFinite(p)) lines.push(`・消費者物価指数（全国・生鮮食品を除く総合）：前年同月比 +${pct1(p)}%（対象：${pAsOf || '未入力'}、出典：${sourceShort('cpi')}）`);
+        if (isFinite(p) && cpiRate.dataset.origin !== 'manual') lines.push(`・消費者物価指数（全国・生鮮食品を除く総合）：前年同月比 +${pct1(p)}%（対象：${pAsOf || '未入力'}、出典：${sourceShort('cpi')}）`);
 
         const h = toNum(wageRate.value);
         const hAsOf = (wageAsOf.value||'').trim();
-        if (isFinite(h)) lines.push(`・賃上げ率：+${pct2(h)}%（対象：${hAsOf || '未入力'}、出典：${sourceShort('wage')}）`);
+        if (isFinite(h) && wageRate.dataset.origin !== 'manual') lines.push(`・賃上げ率：+${pct2(h)}%（対象：${hAsOf || '未入力'}、出典：${sourceShort('wage')}）`);
       }
 
       const x = calcCpiSince();
-      if (decidedYM && hasCpiResult(x) && x.cum > 0) {
+      if (officialDataReady() && decidedYM && hasCpiResult(x) && x.cum > 0) {
         lines.push(`・累積物価上昇率：約${pct1(x.cum)}%（現行価格決定の${decidedYM}からCPI最新公表月${fmtYM(x.latestMonth)}まで）`);
       }
 
-      const mwX = calcMwSince();
-      if (decidedYM && mwX && mwX.cum > 0) {
-        lines.push(`・累積最低賃金上昇率：約${pct1(mwX.cum)}%（現行価格決定の${decidedYM}から最新確定年度まで、${prefLabel}）`);
-      }
+      const actual = toNum(actualLaborRate.value);
+      if(embedNumbersInLetter.checked && isFinite(actual)) lines.push(`・自社の実際の人件費上昇率：${actual >= 0 ? '+' : '-'}${pct1(Math.abs(actual))}%（手入力）`);
 
       if(lines.length === 0) return '';
       return `\n\n--------------------------------------------------\n※参考データ\n${lines.join('\n')}`;
@@ -1714,7 +1798,7 @@
         rateStr = `${cpStr} → ${npStr}（約${pct1(Math.abs(r))}%${sign}）`;
       }
 
-      const decidedYM = fmtYM(currentPriceAsOf.value);
+      const decidedYM = fmtDecisionDate(currentPriceAsOf.value);
 
       const clauseArr = getSelectedValues('#clauseGroup');
       const clauseType = clauseArr[0] || 'clause_unknown';
@@ -1739,21 +1823,26 @@
         ? `賃上げ率（定昇相当込み・300人未満・加重平均）：+${pct2(h)}%（${hAsOf||'対象未入力'}）／スコープ：${hScope}`
         : `賃上げ率：未設定`;
 
+      const actualLabor = toNum(actualLaborRate.value);
+      const actualLaborLine = isFinite(actualLabor)
+        ? `自社の実際の人件費上昇率：${actualLabor >= 0 ? '+' : '-'}${pct1(Math.abs(actualLabor))}%（手入力）`
+        : `自社の実際の人件費上昇率：未設定`;
+
       const x = calcCpiSince();
       const cpiSinceLine = (decidedYM && hasCpiResult(x))
         ? `累積物価上昇率：現行価格=${decidedYM}決定 → 最新公表月=${fmtYM(x.latestMonth)} ${pct1(x.cum)}%（${x.months}ヶ月）`
         : `累積物価上昇率：${x && x.error ? x.error : '算出不可'}`;
 
       const mwX = calcMwSince();
-      const mwSinceLine = (decidedYM && mwX)
-        ? `累積最低賃金（概算）：現行価格=${decidedYM}決定 → 最新確定年度まで 約${pct1(mwX.cum)}%（${prefLabel}）`
-        : `累積最低賃金（概算）：算出不可`;
+      const mwSinceLine = (decidedYM && hasMwResult(mwX))
+        ? `累積最低賃金上昇率：現行価格=${decidedYM}決定時 ${Math.round(mwX.baseMw)}円（${fmtYMD(mwX.baseEffectiveDate)}発効）→ 最新 ${Math.round(mwX.nowMw)}円（${fmtYMD(mwX.latestEffectiveDate)}発効） ${pct1(mwX.cum)}%（${prefLabel}）`
+        : `累積最低賃金上昇率：${mwX && mwX.error ? mwX.error : '算出不可'}`;
 
       const cpiSinceHow = (decidedYM && hasCpiResult(x))
-        ? `算出式：(${x.nowCpi.toFixed(3)} ÷ ${x.baseCpi.toFixed(3)} - 1) × 100 = ${x.cum.toFixed(2)}%（2025年基準接続指数）`
+        ? `算出式：(${formatCpiIndex(x.latestMonth, x.nowCpi)} ÷ ${formatCpiIndex(x.baseMonth, x.baseCpi)} - 1) × 100 = ${x.cum.toFixed(2)}%（2025年基準接続指数）`
         : `算出式：—`;
 
-      const srcLine = `出典情報：\n  ・CPI前年同月比：${sourceEvidence('cpi')}\n  ・CPI月次接続指数：${sourceEvidence('cpi_monthly')}（小数第3位は計算用参考指数）\n  ・賃上げ率：${sourceEvidence('wage')}\n  ・最低賃金：${sourceEvidence('min_wage')}`;
+      const srcLine = `出典情報：\n  ・CPI前年同月比：${sourceEvidence('cpi')}\n  ・CPI月次接続指数：${sourceEvidence('cpi_monthly')}（1970年1月～2024年12月は小数第1位、2025年1月以降は小数第3位の参考指数）\n  ・賃上げ率：${sourceEvidence('wage')}\n  ・最低賃金：${sourceEvidence('min_wage')}`;
 
       const factors = getSelectedValues('#factorGroup');
       const extra = (extraFactors.value||'').trim();
@@ -1794,6 +1883,7 @@
         `- ${mwLine}`,
         `- ${cpiLine}`,
         `- ${wageLine}`,
+        `- ${actualLaborLine}`,
         `- ${cpiSinceLine}`,
         `- ${mwSinceLine}`,
         `  ${cpiSinceHow}`,
@@ -1817,7 +1907,7 @@
       const cp = toNum(currentPrice.value);
       const np = toNum(newPrice.value);
       const dateStr = effectiveDate.value.trim() || '＿＿年＿＿月＿＿日';
-      const decidedYM = fmtYM(currentPriceAsOf.value);
+      const decidedYM = fmtDecisionDate(currentPriceAsOf.value);
       const partnerCompanyStr = (partnerCompany && partnerCompany.value.trim()) || '〇〇株式会社';
       const partnerPersonName = (partnerPerson && partnerPerson.value.trim()) || '〇〇';
       const selectedHonorific = (partnerHonorific && partnerHonorific.value) || '様';
@@ -1919,14 +2009,8 @@
       let decidedLine = '';
       if (decidedYM) {
         const x = calcCpiSince();
-        const mwX = calcMwSince();
-
-        if (hasCpiResult(x) && x.cum > 0 && mwX && mwX.cum > 0) {
-          decidedLine = `${decidedYM}に現行価格を決定して以来、CPIの最新公表月までの累積物価上昇率は${pct1(x.cum)}%を超えております。また、最新確定年度までの最低賃金上昇率は${pct1(mwX.cum)}%を超えております。`;
-        } else if (hasCpiResult(x) && x.cum > 0) {
+        if (officialDataReady() && hasCpiResult(x) && x.cum > 0) {
           decidedLine = `${decidedYM}に現行価格を決定して以来、CPIの最新公表月までの累積物価上昇率は${pct1(x.cum)}%を超えております。`;
-        } else if (mwX && mwX.cum > 0) {
-          decidedLine = `${decidedYM}に現行価格を決定して以来、最新確定年度までの最低賃金上昇率は${pct1(mwX.cum)}%を超えております。`;
         } else {
           decidedLine = `${decidedYM}に現行価格を決定して以来、一定期間が経過しております。`;
         }
@@ -2048,13 +2132,8 @@ ${customerStrategy}
       let decidedTalk = '';
       if (decidedYM) {
         const xTalk = calcCpiSince();
-        const mwTalk = calcMwSince();
-        if (hasCpiResult(xTalk) && xTalk.cum > 0 && mwTalk && mwTalk.cum > 0) {
-          decidedTalk = `「${decidedYM}に現行価格を決定して以来、CPIの最新公表月までの累積物価上昇率は${pct1(xTalk.cum)}%を超えています。加えて、最新確定年度までの最低賃金上昇率も${pct1(mwTalk.cum)}%を超えています。」`;
-        } else if (hasCpiResult(xTalk) && xTalk.cum > 0) {
+        if (officialDataReady() && hasCpiResult(xTalk) && xTalk.cum > 0) {
           decidedTalk = `「${decidedYM}に現行価格を決定して以来、CPIの最新公表月までの累積物価上昇率は${pct1(xTalk.cum)}%を超えています。」`;
-        } else if (mwTalk && mwTalk.cum > 0) {
-          decidedTalk = `「${decidedYM}に現行価格を決定して以来、最新確定年度までの最低賃金上昇率は${pct1(mwTalk.cum)}%を超えています。」`;
         } else {
           decidedTalk = `「${decidedYM}に現行価格を決定して以来、一定期間が経過しています。」`;
         }
@@ -2093,7 +2172,7 @@ ${objectionHandling}
       const prod = (productName.value || '').trim() || '対象商品・サービス';
       const cp = toNum(currentPrice.value);
       const np = toNum(newPrice.value);
-      const decidedYM = fmtYM(currentPriceAsOf.value);
+      const decidedYM = fmtDecisionDate(currentPriceAsOf.value);
       const dateStr = (effectiveDate.value || '').trim() || '近日';
       const factors = getSelectedValues('#factorGroup');
       const extra = (extraFactors.value||'').trim();
@@ -2269,7 +2348,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
 
     [partnerCompany, partnerPerson, partnerHonorific, partnerHonorificCustom, ownCompany, ownPerson,
      productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText, valueFreeText,
-     embedNumbersInLetter, linkRates, cpiRate, wageRate, cpiAsOf, wageAsOf]
+     embedNumbersInLetter, linkRates, cpiRate, wageRate, actualLaborRate, cpiAsOf, wageAsOf]
       .forEach(el => el.addEventListener('input', generate));
 
     if(openExternalFactorsBtn) openExternalFactorsBtn.addEventListener('click', openExternalFactorsModal);
@@ -2334,6 +2413,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
         const k = normalizePrefKey(pref);
         if(PREF_LABEL[k]){
           prefSelect.value = k;
+          renderAllByPref();
           markImported(prefSelect);
           hasParam = true;
         }
@@ -2376,7 +2456,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     }
 
     resetBtn.addEventListener('click', () => {
-      [partnerCompany,partnerPerson,partnerHonorificCustom,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText,valueFreeText].forEach(el=>{
+      [partnerCompany,partnerPerson,partnerHonorificCustom,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText,valueFreeText,actualLaborRate].forEach(el=>{
         el.value='';
         el.classList.remove('imported-value');
       });
@@ -2413,7 +2493,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
       setHelp('物価上昇率は、公的統計（CPI=消費者物価指数など）を参考に「物価がどの程度上がっているか」を示す目的で置いています。本文では専門用語を避け、「公的統計では物価が…」の表現に置換しています。');
     });
     if(helpWage) helpWage.addEventListener('click', ()=>{
-      setHelp('人件費上昇率は、賃上げ率だけでなく採用難（求人条件の上振れ）・外注単価上昇なども含む「実務の負担増」を説明するための参考値です。可能なら自社の採用単価や求人条件の変化を補足欄に一文入れると強いです。');
+      setHelp('4.69％は、連合の2026年春闘最終回答集計における、300人未満の組合・定昇相当込み・加重平均の賃上げ率です。一般的な人件費上昇率ではありません。自社の実際の人件費上昇率は、専用の手入力欄へ入力してください。');
     });
     if(helpScope) helpScope.addEventListener('click', ()=>{
       setHelp('物価/賃金の都道府県別データが常に揃うとは限りません。本ツールは「都道府県別がJSONにあればそれを使用、無ければ全国値（参考）」の設計です。画面のバッジでスコープを明示します。');
