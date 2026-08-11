@@ -94,6 +94,13 @@
     .audBtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:999px;padding:7px 12px;font-size:.85rem;font-weight:900;cursor:pointer}
     .audBtn.active{background:#0f172a;color:#fff;border-color:#0f172a}
     .hidden{display:none !important;}
+    .choiceRow{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+    .choiceOption{display:flex;align-items:center;gap:7px;margin:0;padding:9px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-size:.86rem;color:#334155;cursor:pointer}
+    .choiceOption:has(input:checked){border-color:var(--brand);background:#eef6fa;color:#0f172a}
+    .choiceOption input{width:auto;accent-color:var(--brand)}
+    .securityNote{margin:10px 0 0;padding:9px 11px;border-radius:9px;background:#f8fafc;border:1px solid #e2e8f0;color:#475569;font-size:.76rem;line-height:1.55}
+    .presetPanel{border:1px solid rgba(87,136,153,.35);background:#f0f8fa}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
 
     /* 参考データパネル */
     .dataPanel{border:1px solid #e5e7eb;border-radius:12px;background:#fafafa;padding:10px 12px;margin-top:10px}
@@ -138,6 +145,7 @@
     /* 管理モード：adminOnly を表示 */
     .adminOnly{display:none !important;}
     .isAdmin .adminOnly{display:block !important;}
+    .isAdmin .adminOnly.hidden{display:none !important;}
 
     /* STEP1：累積物価上昇リンク */
     .sourceLink{display:inline-flex;gap:6px;align-items:center;font-size:.78rem;margin-top:6px;flex-wrap:wrap;}
@@ -173,6 +181,7 @@
       <div class="authLogoFrame"><img src="ロゴ.jpg" alt="松本会計ロゴ" class="authLogo" /></div>
       <div class="authTitle">🔐 値上げ交渉ナビゲーター <span class="authBadge">松本会計</span></div>
       <p class="authMsg">このツールを利用するには、パスワードを入力してください。<br>同じタブを開いている間は再入力不要です。</p>
+      <p class="securityNote">本パスワードは簡易的な利用確認のためのものです。機密性の高い情報や、第三者へ開示できない情報は入力しないでください。<br><a href="./terms.html" target="_blank" rel="noopener">本ツール固有の利用条件を確認する</a></p>
       <div class="authField">
         <input type="password" id="authPassword" class="authInput" placeholder="パスワードを入力" autocomplete="current-password" />
       </div>
@@ -190,9 +199,9 @@
       <a href="https://takatrp.github.io/tool-portal/" target="_blank" rel="noopener noreferrer">
         <img src="ロゴ.jpg" alt="ロゴ" class="logo" width="112" height="56" />
       </a>
-      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok">r44</span></div>
+      <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok" data-app-version></span></div>
       <div class="headRight">
-        <button class="btn ghost sm" id="resetBtn" type="button">リセット</button>
+        <button class="btn ghost sm" id="resetBtn" type="button">入力内容を消去</button>
       </div>
     </div>
     <div class="sub">背景要因（外部データ＋事情）を整理し、本文（顧客向け）と根拠メモ（社内用）を生成します。</div>
@@ -211,12 +220,22 @@
           </div>
         </div>
 
+        <div class="card presetPanel adminOnly" id="adminPresetCard">
+          <div class="pill">管理モード専用</div>
+          <label for="adminPreset">業務プリセット</label>
+          <select id="adminPreset">
+            <option value="general">一般の価格転嫁支援</option>
+            <option value="matsumoto_fee">松本会計・顧問報酬改定</option>
+          </select>
+          <div class="hint">顧問報酬改定では、消費税調整後の累積CPIを基本参考率とし、報酬適正化は別に判断します。</div>
+        </div>
+
         <div class="card" id="step0Card">
           <div class="pill">STEP 0：契約確認（必須）</div>
 
           <label>既存契約における価格改定条項</label>
           <div class="chipGroup" id="clauseGroup">
-            <button class="chip" type="button" data-val="clause_yes">改定条項あり</button>
+            <button class="chip" type="button" data-val="clause_yes">改定条項あり（内容・条件・予告期間・手続を確認）</button>
             <button class="chip" type="button" data-val="clause_no">条項なし（要協議）</button>
             <button class="chip active" type="button" data-val="clause_unknown">未確認</button>
           </div>
@@ -239,6 +258,17 @@
               </div>
             </div>
           </details>
+
+          <details class="quietLaw">
+            <summary>取適法の対象となる委託取引について</summary>
+            <div class="mutedBox small">
+              取適法の適用対象となる委託取引では、代金に関する協議に応じないことや、必要な説明又は情報提供を行わないまま、一方的に代金額を決定することが禁止されています。<br><br>
+              適用対象は資本金、従業員数及び取引類型等によって決まり、すべてのBtoB取引に一律に適用されるものではありません。適用対象かどうかは個別確認が必要です。<br><br>
+              <a href="https://www.jftc.go.jp/toriteki/index.html" target="_blank" rel="noopener">公正取引委員会「取適法」</a> ／
+              <a href="https://www.jftc.go.jp/partnership_package/toritekihou.html" target="_blank" rel="noopener">取適法の解説</a>
+            </div>
+          </details>
+          <div class="hint">本ツールは法的判断を代替するものではありません。契約内容や法令の適用は個別に確認してください。</div>
         </div>
 
         <div class="card">
@@ -247,11 +277,32 @@
           <label for="prefSelect">主な提供エリア（都道府県）</label>
           <select id="prefSelect" aria-label="都道府県選択"></select>
 
+          <label>価格の入力区分</label>
+          <div class="choiceRow" id="priceBasisGroup" role="radiogroup" aria-label="価格の入力区分">
+            <label class="choiceOption"><input type="radio" name="priceBasis" value="exclusive" checked />税抜価格</label>
+            <label class="choiceOption"><input type="radio" name="priceBasis" value="inclusive" />税込価格</label>
+          </div>
+
+          <label>現行価格を決定した時期</label>
+          <div class="choiceRow" id="decisionPrecisionGroup" role="radiogroup" aria-label="現行価格を決定した時期の精度">
+            <label class="choiceOption"><input type="radio" name="decisionDatePrecision" value="exact" />正確な年月日が分かる</label>
+            <label class="choiceOption"><input type="radio" name="decisionDatePrecision" value="month" checked />年月まで分かる</label>
+            <label class="choiceOption"><input type="radio" name="decisionDatePrecision" value="unknown" />不明</label>
+          </div>
+
           <div class="inputGrid" style="margin-top:8px;">
-            <div>
+            <div id="decisionExactWrap" class="hidden">
               <label for="currentPriceAsOf">現行価格の決定日（年月日）</label>
               <input type="date" id="currentPriceAsOf" aria-describedby="currentPriceAsOfHint" />
               <div class="hint" id="currentPriceAsOfHint">この日付時点で実際に適用されていた最低賃金と、同じ月のCPIを基準に計算します。</div>
+            </div>
+            <div id="decisionMonthWrap">
+              <label for="currentPriceMonth">現行価格の決定月</label>
+              <input type="month" id="currentPriceMonth" aria-describedby="currentPriceMonthHint" />
+              <div class="hint" id="currentPriceMonthHint">月内に最低賃金改定がある場合、最低賃金の累積上昇率は算出しません。</div>
+            </div>
+            <div id="decisionUnknownWrap" class="hidden">
+              <div class="mutedBox">決定時期が不明のため、累積CPI及び累積最低賃金上昇率は算出しません。</div>
             </div>
             <div style="display:flex;align-items:flex-end;">
               <button class="btn emphasis" id="openExternalFactorsBtn" type="button">外部環境を確認</button>
@@ -263,11 +314,11 @@
 
           <div class="inputGrid">
             <div>
-              <label for="currentPrice">現在の単価（税抜）</label>
+              <label for="currentPrice" id="currentPriceLabel">現在の単価（税抜）</label>
               <input type="text" id="currentPrice" inputmode="decimal" placeholder="例）1,200" />
             </div>
             <div>
-              <label for="newPrice">改定後単価（税抜）</label>
+              <label for="newPrice" id="newPriceLabel">改定後単価（税抜）</label>
               <input type="text" id="newPrice" inputmode="decimal" placeholder="例）1,320" />
             </div>
           </div>
@@ -285,6 +336,23 @@
           <div id="validateMsg" class="danger" style="display:none;"></div>
         </div>
 
+        <div class="card">
+          <label class="choiceOption" for="autoSaveEnabled"><input type="checkbox" id="autoSaveEnabled" />この端末に入力内容を自動保存する</label>
+          <div class="securityNote">入力内容は、この端末のブラウザ内に保存される場合があります。共用端末では自動保存をOFFにするか、利用終了後に「入力内容を消去」を押してください。</div>
+        </div>
+
+        <div class="card adminOnly hidden" id="cpiCapCard">
+          <div class="pill">松本会計・顧問報酬改定</div>
+          <div class="dataRow"><span class="dataKey">現行顧問報酬</span><span id="cpiCapCurrent">—</span></div>
+          <div class="dataRow"><span class="dataKey">累積CPI</span><span id="cpiCapRate">—</span></div>
+          <div class="dataRow"><span class="dataKey">CPI反映後の厳密な参考額</span><span id="cpiCapExact">—</span></div>
+          <label for="cpiCapRounding">丸め単位（切り下げ）</label>
+          <select id="cpiCapRounding"><option value="100">100円</option><option value="500">500円</option><option value="1000" selected>1,000円</option></select>
+          <div class="dataRow"><span class="dataKey">CPI範囲内の提案額</span><strong id="cpiCapSuggested">—</strong></div>
+          <button class="btn sm" id="applyCpiCapBtn" type="button" disabled>この金額を改定後価格へ反映</button>
+          <div id="cpiCapWarning" class="warningBox" style="display:none;"></div>
+        </div>
+
         <div class="card" id="externalEnvSection">
           <div class="pill">STEP 2：背景（外部環境＋根拠データ）</div>
           <div class="hint">「外部環境を確認」ボタンで、確認項目をフローティング表示します。</div>
@@ -294,10 +362,10 @@
 
           <div class="hint">入力項目：該当するものを選択（複数可）</div>
           <div class="chipGroup" id="factorGroup">
-            <button class="chip active" type="button" data-val="原材料・仕入コストの上昇">原材料・仕入</button>
+            <button class="chip" type="button" data-val="原材料・仕入コストの上昇">原材料・仕入</button>
             <button class="chip" type="button" data-val="物流費・運賃の上昇">物流</button>
             <button class="chip" type="button" data-val="エネルギー（電気・ガス・燃料）価格の上昇">エネルギー</button>
-            <button class="chip active" type="button" data-val="人件費（賃上げ・採用難）による負担増">人件費</button>
+            <button class="chip" type="button" data-val="人件費（賃上げ・採用難）による負担増">人件費</button>
             <button class="chip" type="button" data-val="最低賃金の改定">最低賃金</button>
             <button class="chip" type="button" data-val="IT/サブスク費用の増加">IT/サブスク</button>
             <button class="chip" type="button" data-val="金利上昇・資金調達コスト増">金利</button>
@@ -462,14 +530,14 @@
             <label>自助努力</label>
             <div class="hint">これまでの努力（複数可）</div>
             <div class="chipGroup" id="effortGroup">
-              <button class="chip active" type="button" data-val="徹底した経費削減">経費削減</button>
+              <button class="chip" type="button" data-val="徹底した経費削減">経費削減</button>
               <button class="chip" type="button" data-val="業務のDX化・効率化">DX・効率化</button>
               <button class="chip" type="button" data-val="仕入先の見直し・統合">仕入先見直し</button>
               <button class="chip" type="button" data-val="在庫・発注精度の改善">在庫最適化</button>
               <button class="chip" type="button" data-val="歩留まり改善・廃棄ロス削減">歩留まり改善</button>
               <button class="chip" type="button" data-val="設備更新による省人化・省エネ化">設備更新</button>
               <button class="chip" type="button" data-val="共同配送・配送頻度最適化">共同配送</button>
-              <button class="chip active" type="button" data-val="数年間にわたる価格据え置き">価格据え置き</button>
+              <button class="chip" type="button" data-val="数年間にわたる価格据え置き">価格据え置き</button>
             </div>
             <label for="effortFreeText">自助努力（任意）</label>
             <textarea id="effortFreeText" rows="2" placeholder="例）配送ルートの見直し、作業工程の標準化による残業削減 等"></textarea>
@@ -548,7 +616,9 @@
             <button class="btn alt" id="printBtn" type="button">印刷/PDF（案内文＆面談トーク・根拠メモ）</button>
             <button class="btn ghost" id="wordBtn" type="button">Word（.docx）出力</button>
           </div>
+          <div id="exportBlockReason" class="warningBox" style="display:none;"></div>
           <div class="hint" style="margin-top:8px;">※印刷/PDFは「案内文」と「面談トーク・根拠メモ（社内用）」を出力します。</div>
+          <div class="hint">本ツールは価格改定額の自動決定や、法務・税務・契約上の判断を代替するものではありません。最終判断は利用者が行ってください。</div>
         </div>
       </div>
     </div>
@@ -575,8 +645,9 @@
     © <span id="cpy-year">2026</span>
     <a href="https://www.matsumoto-kaikei.or.jp/" target="_blank" rel="noopener license">税理士法人松本会計事務所</a> ｜ 
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener">CC BY-NC-SA 4.0</a> ｜ 
-    <a href="/tool-portal/terms.html" target="_blank" rel="noopener">利用条件</a> ｜ 
-    <span id="build-rev">r44</span>（データ確認日：<span id="last-updated-date">—</span>）
+    <a href="./terms.html" target="_blank" rel="noopener">本ツール固有の利用条件</a> ｜
+    <a href="/tool-portal/terms.html" target="_blank" rel="noopener">共通利用条件</a> ｜
+    <span id="build-rev" data-app-version></span>（データ確認日：<span id="last-updated-date">—</span>）
   </footer>
   <div class="note">本ツールは文面生成の補助です。最終判断は、取引実態・競合・需給・契約条項等も踏まえて行ってください。</div>
   </div>
@@ -591,6 +662,8 @@
     try{ document.documentElement.classList.toggle('isAdmin', !!IS_ADMIN); }catch(e){}
     const TARGET_PASSWORD = 'price2026';
     const AUTH_SESSION_KEY = 'mk_session_unlocked';
+    const APP_VERSION = 'r45';
+    document.querySelectorAll('[data-app-version]').forEach(el => { el.textContent = APP_VERSION; });
 
     /* =========================
        1) 対象都道府県（全国）
@@ -632,7 +705,7 @@
     };
     const fmtDecisionDate = s => {
       if(!s) return '';
-      const m = String(s).trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      const m = String(s).trim().match(/^(\d{4})-(\d{2})(?:-(\d{2}))?$/);
       if(!m) return String(s);
       return `${m[1]}年${parseInt(m[2],10)}月`;
     };
@@ -666,9 +739,9 @@
       return `公表主体：${source.publisher || '—'}／資料名：${source.title || '—'}／公表日：${source.publication_date || '—'}／対象期間：${source.target_period || '—'}／URL：${source.url || '—'}／データ確認日：${source.accessed_date || '—'}／区分：${status}`;
     }
 
-    // 「約◯年」算出（年月日から現在までの経過を月単位で年換算）
-    function approxYearsFromYM(ymd /* 'YYYY-MM-DD' */){
-      const m = String(ymd||'').trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    // 「約◯年」算出（年月又は年月日から現在までの経過を月単位で年換算）
+    function approxYearsFromYM(value){
+      const m = String(value||'').trim().match(/^(\d{4})-(\d{2})(?:-(\d{2}))?$/);
       if(!m) return null;
       const by = parseInt(m[1],10);
       const bm = parseInt(m[2],10) - 1;
@@ -689,6 +762,23 @@
     const currentPrice = $('#currentPrice');
     const newPrice = $('#newPrice');
     const currentPriceAsOf = $('#currentPriceAsOf');
+    const currentPriceMonth = $('#currentPriceMonth');
+    const decisionExactWrap = $('#decisionExactWrap');
+    const decisionMonthWrap = $('#decisionMonthWrap');
+    const decisionUnknownWrap = $('#decisionUnknownWrap');
+    const currentPriceLabel = $('#currentPriceLabel');
+    const newPriceLabel = $('#newPriceLabel');
+    const autoSaveEnabled = $('#autoSaveEnabled');
+    const adminPreset = $('#adminPreset');
+    const cpiCapCard = $('#cpiCapCard');
+    const cpiCapCurrent = $('#cpiCapCurrent');
+    const cpiCapRate = $('#cpiCapRate');
+    const cpiCapExact = $('#cpiCapExact');
+    const cpiCapRounding = $('#cpiCapRounding');
+    const cpiCapSuggested = $('#cpiCapSuggested');
+    const applyCpiCapBtn = $('#applyCpiCapBtn');
+    const cpiCapWarning = $('#cpiCapWarning');
+    const exportBlockReason = $('#exportBlockReason');
     const effectiveDate = $('#effectiveDate');
     const outputArea = $('#outputArea');
     const partnerCompany = $('#partnerCompany');
@@ -775,8 +865,96 @@
     const printDate = $('#printDate');
 
     let currentOutputMode = 'letter';
-    const AUTOSAVE_KEY = 'mk_autosave_v1';
+    const AUTOSAVE_KEY = 'mk_autosave_v2';
+    const LEGACY_AUTOSAVE_KEY = 'mk_autosave_v1';
     let INITIAL_DRAFT_READY = false;
+    let currentPriceBasis = 'exclusive';
+    let priceBasisManuallySet = false;
+    let currentDecisionPrecision = 'month';
+    let currentPreset = 'general';
+
+    function priceBasisLabel(){
+      return currentPriceBasis === 'inclusive' ? '税込' : '税抜';
+    }
+
+    function priceText(amount){
+      return `${yen(amount)}（${priceBasisLabel()}）`;
+    }
+
+    function syncPriceBasisUi(){
+      document.querySelectorAll('input[name="priceBasis"]').forEach(radio => {
+        radio.checked = radio.value === currentPriceBasis;
+      });
+      const basis = priceBasisLabel();
+      if(currentPriceLabel) currentPriceLabel.textContent = `現在の単価（${basis}）`;
+      if(newPriceLabel) newPriceLabel.textContent = `改定後単価（${basis}）`;
+    }
+
+    function setPriceBasis(value, options = {}){
+      currentPriceBasis = value === 'inclusive' ? 'inclusive' : 'exclusive';
+      if(options.manual) priceBasisManuallySet = true;
+      syncPriceBasisUi();
+    }
+
+    function syncDecisionPrecisionUi(){
+      document.querySelectorAll('input[name="decisionDatePrecision"]').forEach(radio => {
+        radio.checked = radio.value === currentDecisionPrecision;
+      });
+      decisionExactWrap?.classList.toggle('hidden', currentDecisionPrecision !== 'exact');
+      decisionMonthWrap?.classList.toggle('hidden', currentDecisionPrecision !== 'month');
+      decisionUnknownWrap?.classList.toggle('hidden', currentDecisionPrecision !== 'unknown');
+    }
+
+    function setDecisionPrecision(value){
+      currentDecisionPrecision = ['exact','month','unknown'].includes(value) ? value : 'month';
+      syncDecisionPrecisionUi();
+    }
+
+    function lastDayOfMonth(ym){
+      const m = String(ym || '').match(/^(\d{4})-(\d{2})$/);
+      if(!m) return '';
+      const date = new Date(Number(m[1]), Number(m[2]), 0);
+      return `${m[1]}-${m[2]}-${z2(date.getDate())}`;
+    }
+
+    function decisionPrecisionLabel(){
+      if(currentDecisionPrecision === 'exact') return '正確な年月日が分かる';
+      if(currentDecisionPrecision === 'month') return '年月まで分かる';
+      return '不明';
+    }
+
+    function getDecisionContext(){
+      if(currentDecisionPrecision === 'unknown'){
+        return { precision:'unknown', error:'現行価格の決定時期が不明のため算出できません。' };
+      }
+      if(currentDecisionPrecision === 'exact'){
+        const value = (currentPriceAsOf.value || '').trim();
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(value) || !isIsoDate(value)){
+          return { precision:'exact', error:'現行価格の決定日を正確な年月日で入力してください。' };
+        }
+        return { precision:'exact', value, month:value.slice(0,7), firstDate:value, lastDate:value, display:fmtDecisionDate(value) };
+      }
+      const value = (currentPriceMonth.value || '').trim();
+      if(!/^\d{4}-\d{2}$/.test(value)){
+        return { precision:'month', error:'現行価格の決定月を年月で入力してください。' };
+      }
+      return { precision:'month', value, month:value, firstDate:`${value}-01`, lastDate:lastDayOfMonth(value), display:fmtYM(value) };
+    }
+
+    function getDecisionInputValue(){
+      const ctx = getDecisionContext();
+      return ctx && !ctx.error ? ctx.value : '';
+    }
+
+    function setExportAvailability(reasons){
+      const unique = [...new Set((reasons || []).filter(Boolean))];
+      const blocked = unique.length > 0;
+      for(const button of [copyBtn, printBtn, wordBtn]) if(button) button.disabled = blocked;
+      if(exportBlockReason){
+        exportBlockReason.style.display = blocked ? 'block' : 'none';
+        exportBlockReason.textContent = blocked ? `外部送信用の出力はまだ利用できません：${unique.join('／')}` : '';
+      }
+    }
 
     function unlockApp(saveSession){
       if(appShell){
@@ -860,7 +1038,10 @@
     }
 
     function setAudience(mode, silent){
-      currentAudience = (mode === 'btoc') ? 'btoc' : 'btob';
+      currentAudience = (mode === 'btoc' && currentPreset !== 'matsumoto_fee') ? 'btoc' : 'btob';
+      if(!priceBasisManuallySet){
+        setPriceBasis(currentAudience === 'btoc' ? 'inclusive' : 'exclusive');
+      }
       if(audBtob) audBtob.classList.toggle('active', currentAudience === 'btob');
       if(audBtoc) audBtoc.classList.toggle('active', currentAudience === 'btoc');
       if(step0Card) step0Card.classList.toggle('hidden', currentAudience === 'btoc');
@@ -904,7 +1085,13 @@
 
     function saveDraft(){
       try{
+        if(!autoSaveEnabled || !autoSaveEnabled.checked){
+          localStorage.removeItem(AUTOSAVE_KEY);
+          return;
+        }
         const payload = {
+          schemaVersion: 2,
+          autoSaveEnabled: true,
           partnerCompany: partnerCompany.value,
           partnerPerson: partnerPerson.value,
           partnerHonorific: partnerHonorific.value,
@@ -915,6 +1102,11 @@
           currentPrice: currentPrice.value,
           newPrice: newPrice.value,
           currentPriceAsOf: currentPriceAsOf.value,
+          currentPriceMonth: currentPriceMonth.value,
+          decisionDatePrecision: currentDecisionPrecision,
+          priceBasis: currentPriceBasis,
+          priceBasisManuallySet,
+          preset: currentPreset,
           effectiveDate: effectiveDate.value,
           extraFactors: extraFactors.value,
           effortFreeText: effortFreeText.value,
@@ -941,12 +1133,42 @@
       }catch(e){}
     }
 
+    function readDraftForRestore(){
+      const v2Raw = localStorage.getItem(AUTOSAVE_KEY);
+      if(v2Raw) return { data:JSON.parse(v2Raw), migrated:false };
+      const v1Raw = localStorage.getItem(LEGACY_AUTOSAVE_KEY);
+      if(!v1Raw) return null;
+      const legacy = JSON.parse(v1Raw);
+      if(!legacy || typeof legacy !== 'object') return null;
+      const oldDecision = String(legacy.currentPriceAsOf || '').trim();
+      let monthOnly = false;
+      if(/^\d{4}-\d{2}-\d{2}$/.test(oldDecision)){
+        legacy.decisionDatePrecision = 'exact';
+        legacy.currentPriceMonth = '';
+      }else if(/^\d{4}-\d{2}$/.test(oldDecision)){
+        monthOnly = true;
+        legacy.decisionDatePrecision = 'month';
+        legacy.currentPriceMonth = oldDecision;
+        legacy.currentPriceAsOf = '';
+      }else{
+        legacy.decisionDatePrecision = 'unknown';
+        legacy.currentPriceMonth = '';
+        legacy.currentPriceAsOf = '';
+      }
+      legacy.schemaVersion = 2;
+      legacy.autoSaveEnabled = true;
+      return { data:legacy, migrated:true, monthOnly };
+    }
+
     function restoreDraft(){
       try{
-        const raw = localStorage.getItem(AUTOSAVE_KEY);
-        if(!raw) return false;
-        const d = JSON.parse(raw);
+        const restored = readDraftForRestore();
+        if(!restored) return false;
+        const d = restored.data;
         if(!d || typeof d !== 'object') return false;
+
+        autoSaveEnabled.checked = d.autoSaveEnabled === true;
+        if(!autoSaveEnabled.checked) return false;
 
         if(typeof d.partnerCompany === 'string') partnerCompany.value = d.partnerCompany;
         if(typeof d.partnerPerson === 'string') partnerPerson.value = d.partnerPerson;
@@ -957,7 +1179,16 @@
         if(typeof d.productName === 'string') productName.value = d.productName;
         if(typeof d.currentPrice === 'string') currentPrice.value = d.currentPrice;
         if(typeof d.newPrice === 'string') newPrice.value = d.newPrice;
-        if(typeof d.currentPriceAsOf === 'string') currentPriceAsOf.value = /^\d{4}-\d{2}$/.test(d.currentPriceAsOf) ? `${d.currentPriceAsOf}-01` : d.currentPriceAsOf;
+        if(typeof d.currentPriceAsOf === 'string') currentPriceAsOf.value = d.currentPriceAsOf;
+        if(typeof d.currentPriceMonth === 'string') currentPriceMonth.value = d.currentPriceMonth;
+        setDecisionPrecision(d.decisionDatePrecision);
+        if(typeof d.priceBasis === 'string'){
+          setPriceBasis(d.priceBasis);
+          priceBasisManuallySet = d.priceBasisManuallySet !== false;
+        }
+        if(IS_ADMIN && d.preset === 'matsumoto_fee' && adminPreset){
+          applyAdminPreset('matsumoto_fee', { restore:true, silent:true });
+        }
         if(typeof d.effectiveDate === 'string') effectiveDate.value = d.effectiveDate;
         if(typeof d.extraFactors === 'string') extraFactors.value = d.extraFactors;
         if(typeof d.effortFreeText === 'string') effortFreeText.value = d.effortFreeText;
@@ -980,7 +1211,15 @@
         applyChipState('#relationGroup', chips.relation);
         applyChipState('#customerGroup', chips.customer);
 
-        showImportStatus('📝 下書きを復元しました（自動保存データ）');
+        if(restored.migrated){
+          localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ ...d, autoSaveEnabled:true }));
+          localStorage.removeItem(LEGACY_AUTOSAVE_KEY);
+          showImportStatus(restored.monthOnly
+            ? '📝 旧版では年月のみ保存されていたため、年月情報として復元しました。最低賃金の改定月に該当する場合は正確な日付を確認してください。'
+            : `📝 旧版の自動保存データを${APP_VERSION}形式へ移行して復元しました。`);
+        }else{
+          showImportStatus('📝 下書きを復元しました（自動保存データ）');
+        }
         return true;
       }catch(e){
         return false;
@@ -1120,8 +1359,10 @@
 
     let COST_DATA = null;
     let CPI_MONTHLY_DATA = null;
+    let CPI_TAX_ADJUSTED_DATA = null;
     let COST_DATA_ERROR = '';
     let CPI_DATA_ERROR = '';
+    let CPI_TAX_ADJUSTED_ERROR = '';
     let COST_DATA_URL = './pref_cost_data.json';
 
     function setStatus(msg, ok){
@@ -1136,15 +1377,15 @@
     }
 
     function officialDataReady(){
-      return Boolean(COST_DATA && CPI_MONTHLY_DATA && !COST_DATA_ERROR && !CPI_DATA_ERROR);
+      return Boolean(COST_DATA && CPI_MONTHLY_DATA && CPI_TAX_ADJUSTED_DATA && !COST_DATA_ERROR && !CPI_DATA_ERROR && !CPI_TAX_ADJUSTED_ERROR);
     }
 
     function updateLoadStatus(){
-      const errors = [COST_DATA_ERROR, CPI_DATA_ERROR].filter(Boolean);
+      const errors = [COST_DATA_ERROR, CPI_DATA_ERROR, CPI_TAX_ADJUSTED_ERROR].filter(Boolean);
       if(errors.length){
         setStatus('外部データを読み込めませんでした。再読込または手入力を行ってください（' + errors.join('／') + '）', false);
-      }else if(COST_DATA && CPI_MONTHLY_DATA){
-        setStatus('読み込みOK（' + COST_DATA_URL + '／CPI月次データ）', true);
+      }else if(COST_DATA && CPI_MONTHLY_DATA && CPI_TAX_ADJUSTED_DATA){
+        setStatus('読み込みOK（' + COST_DATA_URL + '／通常CPI／消費税調整済CPI）', true);
       }else{
         setStatus('読み込み中…', true);
       }
@@ -1228,6 +1469,38 @@
       return json;
     }
 
+    function validateTaxAdjustedCpiDataPayload(json){
+      if(!json || typeof json !== 'object' || Array.isArray(json) || Number(json.schema_version) !== 1 || !json.meta || !json.values || typeof json.values !== 'object'){
+        throw new Error('消費税調整済CPIデータの形式が不正です');
+      }
+      const meta = json.meta;
+      if(meta.official_start_month !== '1990-01' || meta.official_end_month !== '2019-12' || meta.bridge_month !== '2019-12'){
+        throw new Error('消費税調整済CPIの公式期間又は接続月が不正です');
+      }
+      if(meta.status !== 'official_reference_index' || !String(meta.note || '').includes('参考')){
+        throw new Error('消費税調整済CPIの参考指数表示が不正です');
+      }
+      for(const key of ['publisher','series_name','base','source_title']){
+        if(!String(meta[key] || '').trim()) throw new Error(`消費税調整済CPIの${key}がありません`);
+      }
+      for(const key of ['source_url','methodology_url']){
+        if(!/^https:\/\/www\.stat\.go\.jp\//.test(String(meta[key] || ''))) throw new Error(`消費税調整済CPIの${key}が公式URLではありません`);
+      }
+      if(!isIsoDate(meta.accessed_date)) throw new Error('消費税調整済CPIのデータ確認日が不正です');
+      const months = [];
+      for(let year=1990; year<=2019; year++){
+        for(let month=1; month<=12; month++) months.push(`${year}-${z2(month)}`);
+      }
+      const keys = Object.keys(json.values).sort();
+      if(keys.length !== 360 || months.some((month, index) => keys[index] !== month)){
+        throw new Error('消費税調整済CPIは1990年1月から2019年12月までの360か月が必要です');
+      }
+      if(months.some(month => !Number.isFinite(Number(json.values[month])) || Number(json.values[month]) <= 0)){
+        throw new Error('消費税調整済CPI月次系列に不正な値があります');
+      }
+      return json;
+    }
+
     function buildJsonSample(){
       if(!COST_DATA) return {
         meta: { updated: 'YYYY-MM-DD', note: '' },
@@ -1306,7 +1579,10 @@
       return null;
     }
 
-    function setLocal(key, val){ try{ localStorage.setItem(key, val); }catch(e){} }
+    function setLocal(key, val){
+      if(!autoSaveEnabled?.checked) return;
+      try{ localStorage.setItem(key, val); }catch(e){}
+    }
     function getLocal(key){ try{ return localStorage.getItem(key) || ''; }catch(e){ return ''; } }
 
     async function loadCostData(url, silent){
@@ -1345,6 +1621,19 @@
         CPI_DATA_ERROR = 'CPI月次データ：' + e.message;
       }
       try{ updateLoadStatus(); renderAllByPref(); generate(); }catch(err){ console.error('CPIデータ反映時エラー', err); }
+    }
+
+    async function loadTaxAdjustedCpiData(){
+      CPI_TAX_ADJUSTED_ERROR = '';
+      CPI_TAX_ADJUSTED_DATA = null;
+      updateLoadStatus();
+      try{
+        CPI_TAX_ADJUSTED_DATA = validateTaxAdjustedCpiDataPayload(await fetchJson('./cpi_monthly_tax_adjusted.json'));
+      }catch(e){
+        CPI_TAX_ADJUSTED_DATA = null;
+        CPI_TAX_ADJUSTED_ERROR = '消費税調整済CPI：' + e.message;
+      }
+      try{ updateLoadStatus(); renderAllByPref(); generate(); }catch(err){ console.error('消費税調整済CPI反映時エラー', err); }
     }
 
     function clearCostData(){
@@ -1490,21 +1779,23 @@
     }
 
     /* =========================
-       6-1) 公式月次CPI接続指数に基づく累積上昇率（1970年〜）
+       6-1) 価格の入力区分に応じた累積CPI
        ========================= */
     function calcCpiSince(){
-      const decisionDate = (currentPriceAsOf.value||'').trim();
-      if(!decisionDate) return null;
-
-      const m = decisionDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-      if(!m) return { error: '現行価格の決定日を年月日で入力してください。' };
-      const baseMonth = decisionDate.slice(0, 7);
-
-      const by = parseInt(m[1],10);
-      const bm = parseInt(m[2],10) - 1;
-      if(by < 1970) return { error: '1970年1月より前はCPI月次データがないため算出できません。' };
+      const decision = getDecisionContext();
+      if(decision.error) return { error:decision.error, decision };
+      const baseMonth = decision.month;
+      const [byText, bmText] = baseMonth.split('-');
+      const by = Number(byText);
+      const bm = Number(bmText) - 1;
+      if(currentPriceBasis === 'exclusive' && baseMonth < '1990-01'){
+        return { error:'公式の消費税調整済指数が1990年1月からのため算出できません。', decision, priceBasis:currentPriceBasis };
+      }
+      if(currentPriceBasis === 'inclusive' && baseMonth < '1970-01'){
+        return { error:'1970年1月より前は通常CPI月次データがないため算出できません。', decision, priceBasis:currentPriceBasis };
+      }
       if(!CPI_MONTHLY_DATA || !CPI_MONTHLY_DATA.meta || !CPI_MONTHLY_DATA.values){
-        return { error: 'CPI月次データを読み込めないため算出できません。' };
+        return { error:'通常CPI月次データを読み込めないため算出できません。', decision, priceBasis:currentPriceBasis };
       }
 
       const latestMonth = String(CPI_MONTHLY_DATA.meta.latest_month || '');
@@ -1514,11 +1805,7 @@
         return { error: '入力された現行価格決定月は、CPIの最新公表月より後であるため算出できません。' };
       }
 
-      const baseCpi = Number(CPI_MONTHLY_DATA.values[baseMonth]);
       const latestCpi = Number(CPI_MONTHLY_DATA.values[latestMonth]);
-      if(!Number.isFinite(baseCpi) || baseCpi <= 0){
-        return { error: '入力された月のCPI公表物価指数がないため算出できません。' };
-      }
       if(!Number.isFinite(latestCpi) || latestCpi <= 0){
         return { error: 'CPIの最新月指数を確認できないため算出できません。' };
       }
@@ -1526,8 +1813,50 @@
       const ny = parseInt(latestMatch[1],10);
       const nm = parseInt(latestMatch[2],10) - 1;
       const months = (ny - by)*12 + (nm - bm);
-      const cum = (latestCpi / baseCpi - 1) * 100;
-      return { months, cum, baseCpi, nowCpi: latestCpi, by, bm, ny, nm, decisionDate, baseMonth, latestMonth, meta: CPI_MONTHLY_DATA.meta };
+
+      if(currentPriceBasis === 'exclusive' && baseMonth <= '2019-12'){
+        if(!CPI_TAX_ADJUSTED_DATA || !CPI_TAX_ADJUSTED_DATA.meta || !CPI_TAX_ADJUSTED_DATA.values){
+          return { error:'消費税調整済CPIを読み込めないため算出できません。', decision, priceBasis:currentPriceBasis };
+        }
+        const bridgeMonth = '2019-12';
+        const adjustedBase = Number(CPI_TAX_ADJUSTED_DATA.values[baseMonth]);
+        const adjustedBridge = Number(CPI_TAX_ADJUSTED_DATA.values[bridgeMonth]);
+        const normalBridge = Number(CPI_MONTHLY_DATA.values[bridgeMonth]);
+        if(!Number.isFinite(adjustedBase) || adjustedBase <= 0) return { error:'入力月の消費税調整済CPIがないため算出できません。', decision, priceBasis:currentPriceBasis };
+        if(!Number.isFinite(adjustedBridge) || adjustedBridge <= 0 || !Number.isFinite(normalBridge) || normalBridge <= 0){
+          return { error:'2019年12月の接続用指数を確認できないため算出できません。', decision, priceBasis:currentPriceBasis };
+        }
+        const segmentA = adjustedBridge / adjustedBase;
+        const segmentB = latestCpi / normalBridge;
+        const multiplier = segmentA * segmentB;
+        return {
+          months, cum:(multiplier - 1) * 100, multiplier, segmentA, segmentB,
+          baseCpi:adjustedBase, nowCpi:latestCpi, adjustedBase, adjustedBridge, normalBridge,
+          by, bm, ny, nm, baseMonth, latestMonth, bridgeMonth, decision,
+          priceBasis:currentPriceBasis, method:'tax_adjusted_bridge',
+          cpiKind:'消費税調整済CPI（参考指数）', meta:CPI_TAX_ADJUSTED_DATA.meta,
+          normalMeta:CPI_MONTHLY_DATA.meta,
+          caution:'消費税調整済指数は、消費税率改定の直接的な影響等を機械的に除いた総務省統計局の参考指数です。実際の課税状況と完全には一致せず、過剰調整又は調整不足となる場合があります。非課税取引、軽減税率対象取引その他特殊な取引については個別確認が必要です。'
+        };
+      }
+
+      const baseCpi = Number(CPI_MONTHLY_DATA.values[baseMonth]);
+      if(!Number.isFinite(baseCpi) || baseCpi <= 0){
+        return { error:'入力された月の通常CPI公表指数がないため算出できません。', decision, priceBasis:currentPriceBasis };
+      }
+      const multiplier = latestCpi / baseCpi;
+      return {
+        months, cum:(multiplier - 1) * 100, multiplier, baseCpi, nowCpi:latestCpi,
+        by, bm, ny, nm, baseMonth, latestMonth, decision, priceBasis:currentPriceBasis,
+        method:'normal_ratio',
+        cpiKind:currentPriceBasis === 'inclusive'
+          ? '通常CPI（消費税を含む消費者が実際に支払う価格）'
+          : '通常CPI（2020年1月以降・消費税率改定なし）',
+        meta:CPI_MONTHLY_DATA.meta,
+        caution:currentPriceBasis === 'exclusive'
+          ? '2020年1月以降は消費税率の改定がないため、通常CPIの月次指数比を使用します。非課税取引、軽減税率対象取引その他特殊な取引については個別確認が必要です。'
+          : ''
+      };
     }
 
     const hasCpiResult = x => Boolean(x && !x.error && Number.isFinite(x.cum));
@@ -1558,19 +1887,27 @@
     }
 
     function calcMwSince(){
-      const decisionDate = (currentPriceAsOf.value||'').trim();
+      const decision = getDecisionContext();
       const prefKey = prefSelect.value || '東京';
-      if(!decisionDate) return null;
-      if(!/^\d{4}-\d{2}-\d{2}$/.test(decisionDate)) return { error: '現行価格の決定日を年月日で入力してください。' };
+      if(decision.error) return { error:decision.error, decision, prefKey };
 
       const history = getMinWageEffectiveHistory(prefKey);
       if(!history.length) return { error: '発効日付きの最低賃金履歴を読み込めないため算出できません。' };
-      const applicable = history.filter(event => event.effectiveDate <= decisionDate);
-      if(!applicable.length){
+      const applicableAt = date => history.filter(event => event.effectiveDate <= date).at(-1) || null;
+      const firstEvent = applicableAt(decision.firstDate);
+      const lastEvent = applicableAt(decision.lastDate);
+      if(!firstEvent){
         return { error: `公式履歴の開始日（${fmtYMD(history[0].effectiveDate)}）より前のため算出できません。` };
       }
 
-      const baseEvent = applicable[applicable.length - 1];
+      if(decision.precision === 'month' && (!lastEvent || firstEvent.amount !== lastEvent.amount)){
+        return {
+          error:'この月の途中で最低賃金が改定されているため、正確な日付が分からない場合は累積上昇率を算出できません。',
+          decision, prefKey, firstMw:firstEvent.amount, lastMw:lastEvent ? lastEvent.amount : null
+        };
+      }
+
+      const baseEvent = firstEvent;
       const latestEvent = history[history.length - 1];
       const cum = (latestEvent.amount / baseEvent.amount - 1) * 100;
       return {
@@ -1581,7 +1918,9 @@
         latestEffectiveDate: latestEvent.effectiveDate,
         baseFiscalYear: baseEvent.fiscalYear,
         latestFiscalYear: latestEvent.fiscalYear,
-        decisionDate,
+        decision,
+        decisionInput:decision.value,
+        decisionPrecision:decision.precision,
         prefKey
       };
     }
@@ -1613,42 +1952,50 @@
         cpiSinceBadgeModal.className = badgeClass;
       }
 
-      if(!x && !mwX){
-        if(calcDetailBox) calcDetailBox.innerHTML = '（年月日を入力すると計算過程が表示されます）';
-        if(calcDetailBoxModal) calcDetailBoxModal.innerHTML = '（年月日を入力すると計算過程が表示されます）';
-        return;
-      }
-
       let detailParts = [];
       if(cpiOk){
-        const sourceTitle = x.meta.source_title || '2025年基準消費者物価指数 長期時系列データ';
-        const sourceUrl = x.meta.source_url || 'https://www.stat.go.jp/data/cpi/historic.html';
-        detailParts.push(
-          `<b>【累積物価上昇率の計算式】</b><br>` +
-          `基準月：${fmtYM(x.baseMonth)}<br>` +
-          `最新公表月：${fmtYM(x.latestMonth)}<br>` +
-          `基準月の公表物価指数：${formatCpiIndex(x.baseMonth, x.baseCpi)}<br>` +
-          `最新月の公表物価指数：${formatCpiIndex(x.latestMonth, x.nowCpi)}<br>` +
-          `⇒ (${formatCpiIndex(x.latestMonth, x.nowCpi)} ÷ ${formatCpiIndex(x.baseMonth, x.baseCpi)} - 1) × 100 = <b>${x.cum.toFixed(2)}%</b><br>` +
-          `基準：2025年=100（2025年基準接続指数）<br>` +
-          `出典：<a href="${sourceUrl}" target="_blank" rel="noopener">${sourceTitle}</a><br>` +
-          `※1970年1月～2024年12月は小数第1位、2025年1月以降は小数第3位の参考指数です。価格改定額そのものを自動決定するものではありません。`
-        );
+        const common = `<b>【累積物価上昇率の計算式】</b><br>` +
+          `価格の入力区分：${priceBasisLabel()}価格<br>` +
+          `使用したCPI：${x.cpiKind}<br>` +
+          `入力精度：${decisionPrecisionLabel()}／実際の入力：${x.decision.value}<br>` +
+          `基準月：${fmtYM(x.baseMonth)}／最新公表月：${fmtYM(x.latestMonth)}<br>`;
+        if(x.method === 'tax_adjusted_bridge'){
+          detailParts.push(common +
+            `基準月の消費税調整済指数：${formatCpiIndex(x.baseMonth, x.adjustedBase)}<br>` +
+            `接続月（${fmtYM(x.bridgeMonth)}）の消費税調整済指数：${formatCpiIndex(x.bridgeMonth, x.adjustedBridge)}<br>` +
+            `接続月の通常CPI：${formatCpiIndex(x.bridgeMonth, x.normalBridge)}<br>` +
+            `最新月の通常CPI：${formatCpiIndex(x.latestMonth, x.nowCpi)}<br>` +
+            `A = ${formatCpiIndex(x.bridgeMonth, x.adjustedBridge)} ÷ ${formatCpiIndex(x.baseMonth, x.adjustedBase)} = ${x.segmentA.toFixed(6)}<br>` +
+            `B = ${formatCpiIndex(x.latestMonth, x.nowCpi)} ÷ ${formatCpiIndex(x.bridgeMonth, x.normalBridge)} = ${x.segmentB.toFixed(6)}<br>` +
+            `⇒ (A × B - 1) × 100 = <b>${x.cum.toFixed(2)}%</b><br>` +
+            `公表主体：${x.meta.publisher}／資料名：<a href="${x.meta.source_url}" target="_blank" rel="noopener">${x.meta.source_title}</a>／データ確認日：${x.meta.accessed_date}<br>` +
+            `<span style="color:#92400e;">※${x.caution}</span>`
+          );
+        }else{
+          detailParts.push(common +
+            `基準月の公表物価指数：${formatCpiIndex(x.baseMonth, x.baseCpi)}<br>` +
+            `最新月の公表物価指数：${formatCpiIndex(x.latestMonth, x.nowCpi)}<br>` +
+            `⇒ (${formatCpiIndex(x.latestMonth, x.nowCpi)} ÷ ${formatCpiIndex(x.baseMonth, x.baseCpi)} - 1) × 100 = <b>${x.cum.toFixed(2)}%</b><br>` +
+            `公表主体：${x.meta.publisher || '総務省統計局'}／資料名：<a href="${x.meta.source_url}" target="_blank" rel="noopener">${x.meta.source_title}</a>／データ確認日：${x.meta.accessed_date}<br>` +
+            `※1970年1月～2024年12月は小数第1位、2025年1月以降は小数第3位の参考指数です。${x.caution ? `<br>${x.caution}` : ''}`
+          );
+        }
       }else if(x && x.error){
-        detailParts.push(`<b>【累積物価上昇率】</b><br><span style="color:#b91c1c;">${x.error}</span>`);
+        detailParts.push(`<b>【累積物価上昇率】</b><br>価格の入力区分：${priceBasisLabel()}価格<br>入力精度：${decisionPrecisionLabel()}<br><span style="color:#b91c1c;">${x.error}</span>`);
       }
 
       if(mwOk){
         detailParts.push(
           `<b>【累積最低賃金上昇率の計算式】</b><br>` +
           `対象エリア：${mwX.prefKey}<br>` +
-          `現行価格の決定日：${fmtYMD(mwX.decisionDate)}<br>` +
-          `決定日時点の適用最低賃金：${Math.round(mwX.baseMw)}円（発効：${fmtYMD(mwX.baseEffectiveDate)}）<br>` +
+          `入力精度：${decisionPrecisionLabel()}／実際の入力：${mwX.decisionInput}<br>` +
+          `最低賃金計算：可能／使用した発効日：${fmtYMD(mwX.baseEffectiveDate)}<br>` +
+          `決定時点の適用最低賃金：${Math.round(mwX.baseMw)}円（発効：${fmtYMD(mwX.baseEffectiveDate)}）<br>` +
           `最新の適用最低賃金：${Math.round(mwX.nowMw)}円（発効：${fmtYMD(mwX.latestEffectiveDate)}）<br>` +
           `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`
         );
       }else if(mwX && mwX.error){
-        detailParts.push(`<b>【累積最低賃金上昇率】</b><br><span style="color:#b91c1c;">${mwX.error}</span>`);
+        detailParts.push(`<b>【累積最低賃金上昇率】</b><br>入力精度：${decisionPrecisionLabel()}／最低賃金計算：不可<br><span style="color:#b91c1c;">${mwX.error}</span>`);
       }
 
       const detailHtml = detailParts.join('<br><br>');
@@ -1676,17 +2023,28 @@
       const cp = toNum(currentPrice.value);
       const np = toNum(newPrice.value);
       const customerType = getSelectedValues('#customerGroup')[0] || '';
-      const efforts = getSelectedValues('#effortGroup');
-      const effortFree = (effortFreeText.value || '').trim();
+      const factors = getSelectedValues('#factorGroup');
+      const backgroundEntered = factors.length > 0 || Boolean((extraFactors.value || '').trim());
+      const clauseType = getSelectedValues('#clauseGroup')[0] || 'clause_unknown';
 
-      let msg = '';
-      if(currentAudience==='btob' && !customerType) msg = '「顧客タイプ」は必須です。1つ選択してください。';
-      if(isFinite(cp) && isFinite(np) && cp>0 && np<0) msg = '「改定後単価」に負の値が入っています。';
-      if(isFinite(cp) && isFinite(np) && cp>0 && np===0) msg = '「改定後単価」が0円です。意図した入力か確認してください。';
+      const messages = [];
+      const exportReasons = [];
+      if(!prod) exportReasons.push('対象商品・サービス名を入力してください');
+      if(!isFinite(cp) || cp <= 0) exportReasons.push('現在価格を正しく入力してください');
+      if(!isFinite(np) || np < 0) exportReasons.push('改定後価格を正しく入力してください');
+      if(!(effectiveDate.value || '').trim()) exportReasons.push('適用開始時期を入力してください');
+      if(!backgroundEntered) exportReasons.push('価格改定の背景要因を選択又は入力してください');
+      if(currentAudience === 'btob' && clauseType === 'clause_unknown'){
+        exportReasons.push('契約書を確認するまで外部送付しないでください');
+      }
+      if(currentAudience==='btob' && !customerType) messages.push('「顧客タイプ」は必須です。1つ選択してください。');
+      if(isFinite(cp) && isFinite(np) && cp>0 && np===0) messages.push('「改定後単価」が0円です。意図した入力か確認してください。');
+      messages.push(...exportReasons);
+      setExportAvailability(exportReasons);
 
-      if(msg){
+      if(messages.length){
         validateMsg.style.display = 'block';
-        validateMsg.textContent = msg;
+        validateMsg.textContent = [...new Set(messages)].join('／');
       }else{
         validateMsg.style.display = 'none';
         validateMsg.textContent = '';
@@ -1767,16 +2125,11 @@
     function buildMwCumulativeEvidenceSentence(spoken = false){
       if(!officialDataReady()) return '';
       const mwSince = calcMwSince();
-      if(!hasMwResult(mwSince)) return '';
+      if(!hasMwResult(mwSince) || mwSince.cum <= 0) return '';
 
       const baseMw = Math.round(mwSince.baseMw).toLocaleString('ja-JP');
       const nowMw = Math.round(mwSince.nowMw).toLocaleString('ja-JP');
-      if(Math.abs(mwSince.cum) < 1e-9){
-        return `また、最低賃金については、現行価格の決定時点と最新時点がともに${nowMw}円で、累積上昇率は0.0%となって${spoken ? 'います' : 'おります'}。`;
-      }
-
-      const direction = mwSince.cum > 0 ? '上昇' : '低下';
-      return `また、最低賃金についても、現行価格の決定時点に適用されていた${baseMw}円から最新の${nowMw}円まで、累積で約${pct1(Math.abs(mwSince.cum))}%${direction}して${spoken ? 'います' : 'おります'}。`;
+      return `また、最低賃金についても、現行価格の決定時点に適用されていた${baseMw}円から最新の${nowMw}円まで、累積で約${pct1(mwSince.cum)}%上昇して${spoken ? 'います' : 'おります'}。`;
     }
 
     function buildReferenceBlock(decidedYM){
@@ -1800,13 +2153,12 @@
 
       const x = calcCpiSince();
       if (officialDataReady() && decidedYM && hasCpiResult(x) && x.cum > 0) {
-        lines.push(`・累積物価上昇率：約${pct1(x.cum)}%（現行価格決定の${decidedYM}からCPI最新公表月${fmtYM(x.latestMonth)}まで）`);
+        lines.push(`・累積物価上昇率：約${pct1(x.cum)}%（${priceBasisLabel()}価格、${x.cpiKind}、現行価格決定の${decidedYM}からCPI最新公表月${fmtYM(x.latestMonth)}まで）`);
       }
 
       const mwSince = calcMwSince();
-      if (officialDataReady() && decidedYM && hasMwResult(mwSince)) {
-        const sign = mwSince.cum >= 0 ? '+' : '-';
-        lines.push(`・最低賃金の累積上昇率（${prefLabel}）：${sign}${pct1(Math.abs(mwSince.cum))}%（現行価格を決定した${decidedYM}時点：${Math.round(mwSince.baseMw).toLocaleString('ja-JP')}円 → 最新：${Math.round(mwSince.nowMw).toLocaleString('ja-JP')}円、発効日ベース、出典：${sourceShort('min_wage')}）`);
+      if (officialDataReady() && decidedYM && hasMwResult(mwSince) && mwSince.cum > 0) {
+        lines.push(`・最低賃金の累積上昇率（${prefLabel}）：+${pct1(mwSince.cum)}%（現行価格を決定した${decidedYM}時点：${Math.round(mwSince.baseMw).toLocaleString('ja-JP')}円 → 最新：${Math.round(mwSince.nowMw).toLocaleString('ja-JP')}円、発効日ベース、出典：${sourceShort('min_wage')}）`);
       }
 
       const actual = toNum(actualLaborRate.value);
@@ -1826,8 +2178,8 @@
       const prod = productName.value.trim() || '＿＿＿＿（対象商品・サービス）';
       const cp = toNum(currentPrice.value);
       const np = toNum(newPrice.value);
-      const cpStr = isFinite(cp) ? yen(cp) : '＿＿＿円';
-      const npStr = isFinite(np) ? yen(np) : '＿＿＿円';
+      const cpStr = isFinite(cp) ? priceText(cp) : `＿＿＿円（${priceBasisLabel()}）`;
+      const npStr = isFinite(np) ? priceText(np) : `＿＿＿円（${priceBasisLabel()}）`;
       const dateStr = effectiveDate.value.trim() || '＿＿年＿＿月＿＿日';
 
       let rateStr = `${cpStr} → ${npStr}`;
@@ -1837,11 +2189,14 @@
         rateStr = `${cpStr} → ${npStr}（約${pct1(Math.abs(r))}%${sign}）`;
       }
 
-      const decidedYM = fmtDecisionDate(currentPriceAsOf.value);
+      const decision = getDecisionContext();
+      const decidedYM = decision.error ? '' : decision.display;
 
       const clauseArr = getSelectedValues('#clauseGroup');
       const clauseType = clauseArr[0] || 'clause_unknown';
-      const clauseStr = clauseType === 'clause_yes' ? 'あり（通知のみで可の可能性）' : clauseType === 'clause_no' ? 'なし（合意・協議が必須）' : '未確認（要確認）';
+      const clauseStr = clauseType === 'clause_yes'
+        ? 'あり（内容・条件・予告期間・手続を契約書で確認）'
+        : clauseType === 'clause_no' ? 'なし（協議が必要）' : '未確認（契約書を確認するまで外部送付不可）';
 
       const w = minWageInfo(key);
       const mwLine = w
@@ -1869,19 +2224,25 @@
 
       const x = calcCpiSince();
       const cpiSinceLine = (decidedYM && hasCpiResult(x))
-        ? `累積物価上昇率：現行価格=${decidedYM}決定 → 最新公表月=${fmtYM(x.latestMonth)} ${pct1(x.cum)}%（${x.months}ヶ月）`
+        ? `累積物価上昇率：${priceBasisLabel()}価格／${x.cpiKind}／入力精度=${decisionPrecisionLabel()}（入力=${x.decision.value}）／現行価格=${decidedYM}決定 → 最新公表月=${fmtYM(x.latestMonth)} ${pct1(x.cum)}%（${x.months}ヶ月）`
         : `累積物価上昇率：${x && x.error ? x.error : '算出不可'}`;
 
       const mwX = calcMwSince();
       const mwSinceLine = (decidedYM && hasMwResult(mwX))
-        ? `累積最低賃金上昇率：現行価格=${decidedYM}決定時 ${Math.round(mwX.baseMw)}円（${fmtYMD(mwX.baseEffectiveDate)}発効）→ 最新 ${Math.round(mwX.nowMw)}円（${fmtYMD(mwX.latestEffectiveDate)}発効） ${pct1(mwX.cum)}%（${prefLabel}）`
+        ? `累積最低賃金上昇率：入力精度=${decisionPrecisionLabel()}（入力=${mwX.decisionInput}）／計算可能／現行価格=${decidedYM}決定時 ${Math.round(mwX.baseMw)}円（使用した発効日=${fmtYMD(mwX.baseEffectiveDate)}）→ 最新 ${Math.round(mwX.nowMw)}円（${fmtYMD(mwX.latestEffectiveDate)}発効） ${pct1(mwX.cum)}%（${prefLabel}）`
         : `累積最低賃金上昇率：${mwX && mwX.error ? mwX.error : '算出不可'}`;
 
-      const cpiSinceHow = (decidedYM && hasCpiResult(x))
-        ? `算出式：(${formatCpiIndex(x.latestMonth, x.nowCpi)} ÷ ${formatCpiIndex(x.baseMonth, x.baseCpi)} - 1) × 100 = ${x.cum.toFixed(2)}%（2025年基準接続指数）`
-        : `算出式：—`;
+      let cpiSinceHow = '算出式：—';
+      if(decidedYM && hasCpiResult(x)){
+        cpiSinceHow = x.method === 'tax_adjusted_bridge'
+          ? `算出式：A（消費税調整済 ${fmtYM(x.bridgeMonth)} ${formatCpiIndex(x.bridgeMonth,x.adjustedBridge)} ÷ ${fmtYM(x.baseMonth)} ${formatCpiIndex(x.baseMonth,x.adjustedBase)}）× B（通常CPI ${fmtYM(x.latestMonth)} ${formatCpiIndex(x.latestMonth,x.nowCpi)} ÷ ${fmtYM(x.bridgeMonth)} ${formatCpiIndex(x.bridgeMonth,x.normalBridge)}）- 1 = ${x.cum.toFixed(2)}%`
+          : `算出式：(${formatCpiIndex(x.latestMonth, x.nowCpi)} ÷ ${formatCpiIndex(x.baseMonth, x.baseCpi)} - 1) × 100 = ${x.cum.toFixed(2)}%（2025年基準接続指数）`;
+      }
 
-      const srcLine = `出典情報：\n  ・CPI前年同月比：${sourceEvidence('cpi')}\n  ・CPI月次接続指数：${sourceEvidence('cpi_monthly')}（1970年1月～2024年12月は小数第1位、2025年1月以降は小数第3位の参考指数）\n  ・賃上げ率：${sourceEvidence('wage')}\n  ・最低賃金：${sourceEvidence('min_wage')}`;
+      const taxSource = CPI_TAX_ADJUSTED_DATA?.meta
+        ? `${CPI_TAX_ADJUSTED_DATA.meta.publisher}「${CPI_TAX_ADJUSTED_DATA.meta.source_title}」／URL：${CPI_TAX_ADJUSTED_DATA.meta.source_url}／データ確認日：${CPI_TAX_ADJUSTED_DATA.meta.accessed_date}／区分：参考指数`
+        : '未読込';
+      const srcLine = `出典情報：\n  ・CPI前年同月比：${sourceEvidence('cpi')}\n  ・通常CPI月次接続指数：${sourceEvidence('cpi_monthly')}（1970年1月～2024年12月は小数第1位、2025年1月以降は小数第3位の参考指数）\n  ・消費税調整済CPI：${taxSource}\n  ・賃上げ率：${sourceEvidence('wage')}\n  ・最低賃金：${sourceEvidence('min_wage')}`;
 
       const factors = getSelectedValues('#factorGroup');
       const extra = (extraFactors.value||'').trim();
@@ -1890,7 +2251,7 @@
 
       // 自助努力：価格据え置きを「約◯年」に置換
       let efforts = getSelectedValues('#effortGroup');
-      const ap = approxYearsFromYM(currentPriceAsOf.value);
+      const ap = approxYearsFromYM(getDecisionInputValue());
       if (ap && ap.years >= 0.5) {
         efforts = efforts.map(e => e === '数年間にわたる価格据え置き' ? `約${ap.yearsStr}年の価格据え置き` : e);
       }
@@ -1913,8 +2274,9 @@
 
       return [
         `【対象】${prod}`,
+        `【価格の入力区分】${priceBasisLabel()}価格`,
         `【改定】${rateStr} ／ 適用：${dateStr}`,
-        decidedYM ? `【現行価格の決定時期】${decidedYM}` : `【現行価格の決定時期】未入力`,
+        `【現行価格の決定時期】入力精度=${decisionPrecisionLabel()}／実際の入力=${decision.error ? '未入力又は不明' : decision.value}`,
         `【契約における改定条項】${clauseStr}`,
         `【顧客タイプ（戦略）】${customerTypeStr}`,
         ``,
@@ -1934,6 +2296,7 @@
         ``,
         `■ 自助努力（選択）`,
         `- ${effortText}`,
+        x && x.caution ? `\n【CPI利用上の注意】${x.caution}` : '',
         dataFreshnessNote
       ].join('\n');
     }
@@ -1946,7 +2309,8 @@
       const cp = toNum(currentPrice.value);
       const np = toNum(newPrice.value);
       const dateStr = effectiveDate.value.trim() || '＿＿年＿＿月＿＿日';
-      const decidedYM = fmtDecisionDate(currentPriceAsOf.value);
+      const decision = getDecisionContext();
+      const decidedYM = decision.error ? '' : decision.display;
       const partnerCompanyStr = (partnerCompany && partnerCompany.value.trim()) || '〇〇株式会社';
       const partnerPersonName = (partnerPerson && partnerPerson.value.trim()) || '〇〇';
       const selectedHonorific = (partnerHonorific && partnerHonorific.value) || '様';
@@ -1956,8 +2320,8 @@
       const ownCompanyStr = (ownCompany && ownCompany.value.trim()) || '弊社';
       const ownPersonStr = (ownPerson && ownPerson.value.trim()) || '営業担当';
 
-      const cpStr = isFinite(cp) ? yen(cp) : '＿＿＿円';
-      const npStr = isFinite(np) ? yen(np) : '＿＿＿円';
+      const cpStr = isFinite(cp) ? priceText(cp) : `＿＿＿円（${priceBasisLabel()}）`;
+      const npStr = isFinite(np) ? priceText(np) : `＿＿＿円（${priceBasisLabel()}）`;
 
       let rateStr = `${cpStr} → ${npStr}`;
       if(isFinite(cp) && isFinite(np) && cp > 0) {
@@ -1968,18 +2332,18 @@
 
       const factors = getSelectedValues('#factorGroup');
       const extra = (extraFactors.value||'').trim();
-      const factorText = factors.length > 0 ? joinJa(factors) : '原材料費・物流費・人件費等の上昇';
-      const combinedFactors = extra ? `${factorText}に加え、${extra}` : factorText;
+      const factorText = factors.length > 0 ? joinJa(factors) : '';
+      const combinedFactors = [factorText, extra].filter(Boolean).join('に加え、') || '（価格改定の背景要因が未入力です）';
 
       // 自助努力：価格据え置きを「約◯年」に置換
       let efforts = getSelectedValues('#effortGroup');
-      const ap = approxYearsFromYM(currentPriceAsOf.value);
+      const ap = approxYearsFromYM(getDecisionInputValue());
       if (ap && ap.years >= 0.5) {
         efforts = efforts.map(e => e === '数年間にわたる価格据え置き' ? `約${ap.yearsStr}年の価格据え置き` : e);
       }
       const effortFree = (effortFreeText.value||'').trim();
       const effortJoined = efforts.length > 0 ? joinJa(efforts) : '';
-      const effortText = [effortJoined, effortFree].filter(Boolean).join('／') || '徹底したコスト削減';
+      const effortText = [effortJoined, effortFree].filter(Boolean).join('／') || '（実際に行った自助努力が未入力です）';
 
       const valueChips = getSelectedValues('#valueGroup');
       const valFree = (valueFreeText && valueFreeText.value) ? valueFreeText.value.trim() : '';
@@ -2164,7 +2528,7 @@ ${customerStrategy}
 回答例: 「最低賃金改定・物価上昇は公的統計でも明らかな外部環境です（資料提示）。当社だけの都合ではなく、業界全体が直面している構造的な課題です。」
 
 【反論3】「契約期間中の変更は認められない」
-回答例: 「現契約は○年○月までと承知しております。本日は次回更新時の価格についてご相談です。（または：事情変更の原則に基づき、契約期間中でも協議をお願いできればと存じます）」
+回答例: 「契約書の改定条項、予告期間及び必要な手続を確認したうえで、適用時期を含めて改めて協議させてください。」
 
 【反論4】「値上げなら取引停止も検討する」
 回答例: 「それは大変残念です。ただ、現行価格では赤字が続き、いずれ提供体制の維持が困難です。取引継続を前提に、段階改定や条件調整など、何か折衷案を探れませんでしょうか。」`;
@@ -2214,15 +2578,16 @@ ${objectionHandling}
       const prod = (productName.value || '').trim() || '対象商品・サービス';
       const cp = toNum(currentPrice.value);
       const np = toNum(newPrice.value);
-      const decidedYM = fmtDecisionDate(currentPriceAsOf.value);
+      const decision = getDecisionContext();
+      const decidedYM = decision.error ? '' : decision.display;
       const dateStr = (effectiveDate.value || '').trim() || '近日';
       const factors = getSelectedValues('#factorGroup');
       const extra = (extraFactors.value||'').trim();
-      const baseFactors = factors.length > 0 ? joinJa(factors) : '原材料費・物流費・人件費などのコスト';
-      const factorsText = extra ? `${baseFactors}など` : baseFactors;
+      const baseFactors = factors.length > 0 ? joinJa(factors) : '';
+      const factorsText = [baseFactors, extra].filter(Boolean).join('に加え、') || '（価格改定の背景要因が未入力です）';
       const rateStr = (isFinite(cp) && cp>0 && isFinite(np) && np>=0)
-        ? `${yen(cp)} → ${yen(np)}（約${pct1(((np/cp)-1)*100)}%）`
-        : `改定後価格：${(newPrice.value||'未入力')}`;
+        ? `${priceText(cp)} → ${priceText(np)}（約${pct1(((np/cp)-1)*100)}%）`
+        : `改定後価格（${priceBasisLabel()}）：${(newPrice.value||'未入力')}`;
 
       const poster =
 `【価格改定のお知らせ】
@@ -2263,7 +2628,7 @@ ${decidedYM ? `・現行価格の設定時期：${decidedYM}` : ''}
 
 ■ よくあるご質問
 Q.「高くなったね」
-A.「ご負担をおかけして申し訳ありません。原材料費や物流費などの上昇が続いており、品質を保つために見直しを行いました。」
+A.「ご負担をおかけして申し訳ありません。ご案内している背景事情を踏まえ、品質を保つために見直しを行いました。」
 
 Q.「なんで今なの？」
 A.「できる限り価格維持に努めてきましたが、継続的なコスト上昇の影響が大きく、今回のタイミングで改定となりました。」
@@ -2282,6 +2647,133 @@ A.「ご意見ありがとうございます。当店としては品質とサー
       return { letter: poster, talk: dm, memo: qa };
     }
 
+    function computeCpiCap(){
+      if(!IS_ADMIN || currentPreset !== 'matsumoto_fee') return null;
+      const cp = toNum(currentPrice.value);
+      const x = calcCpiSince();
+      if(!Number.isFinite(cp) || cp <= 0 || !hasCpiResult(x)) return null;
+      const exact = cp * (1 + x.cum / 100);
+      const unit = Number(cpiCapRounding?.value || 1000);
+      const suggested = Math.floor(exact / unit) * unit;
+      return { cp, x, exact, unit, suggested };
+    }
+
+    function updateCpiCapPanel(){
+      const active = IS_ADMIN && currentPreset === 'matsumoto_fee';
+      cpiCapCard?.classList.toggle('hidden', !active);
+      if(!active) return;
+      const cap = computeCpiCap();
+      if(!cap){
+        if(cpiCapCurrent) cpiCapCurrent.textContent = '—';
+        if(cpiCapRate) cpiCapRate.textContent = '—';
+        if(cpiCapExact) cpiCapExact.textContent = '—';
+        if(cpiCapSuggested) cpiCapSuggested.textContent = '—';
+        if(applyCpiCapBtn) applyCpiCapBtn.disabled = true;
+        if(cpiCapWarning){ cpiCapWarning.style.display = 'none'; cpiCapWarning.textContent = ''; }
+        return;
+      }
+      cpiCapCurrent.textContent = priceText(cap.cp);
+      cpiCapRate.textContent = `${pct2(cap.x.cum)}%（${cap.x.cpiKind}）`;
+      cpiCapExact.textContent = `${cap.exact.toLocaleString('ja-JP', { minimumFractionDigits:2, maximumFractionDigits:6 })}円（税抜）`;
+      cpiCapSuggested.textContent = `${Math.round(cap.suggested).toLocaleString('ja-JP')}円（税抜・${cap.unit.toLocaleString('ja-JP')}円単位で切り下げ）`;
+      applyCpiCapBtn.disabled = false;
+      const np = toNum(newPrice.value);
+      const over = Number.isFinite(np) && np > cap.exact + 1e-9;
+      cpiCapWarning.style.display = over ? 'block' : 'none';
+      cpiCapWarning.textContent = over
+        ? '入力された改定後価格は、消費税調整後の累積CPIによる参考上限額を超えています。物価調整とは別の報酬適正化を行う場合は、業務量・難易度・標準報酬との差を別途確認してください。'
+        : '';
+    }
+
+    function buildMatsumotoReferenceBlock(){
+      if(!officialDataReady()) return '';
+      const x = calcCpiSince();
+      if(!hasCpiResult(x)) return '';
+      return `\n\n--------------------------------------------------\n※参考データ\n・消費税調整後の累積CPI：約${pct1(x.cum)}%（${x.cpiKind}、${fmtYM(x.baseMonth)}から${fmtYM(x.latestMonth)}まで）\n・公表主体：${x.meta.publisher || '総務省統計局'}／資料名：${x.meta.source_title}／URL：${x.meta.source_url}／データ確認日：${x.meta.accessed_date}\n※消費税調整済指数は参考指数です。実際の課税状況と完全には一致せず、非課税取引、軽減税率対象取引その他特殊な取引は個別確認が必要です。`;
+    }
+
+    function buildMatsumotoOutputs(){
+      const cp = toNum(currentPrice.value);
+      const np = toNum(newPrice.value);
+      const cpStr = Number.isFinite(cp) ? priceText(cp) : '＿＿＿円（税抜）';
+      const npStr = Number.isFinite(np) ? priceText(np) : '＿＿＿円（税抜）';
+      const dateStr = (effectiveDate.value || '').trim() || '＿＿年＿＿月＿＿日';
+      const partnerCompanyStr = (partnerCompany?.value || '').trim() || '〇〇株式会社';
+      const partnerPersonName = (partnerPerson?.value || '').trim() || '〇〇';
+      const selectedHonorific = partnerHonorific?.value || '様';
+      const customHonorific = (partnerHonorificCustom?.value || '').trim();
+      const partnerPersonStr = `${partnerPersonName}${selectedHonorific === 'custom' ? (customHonorific || '様') : selectedHonorific}`;
+      const ownCompanyStr = (ownCompany?.value || '').trim() || '税理士法人松本会計';
+      const ownPersonStr = (ownPerson?.value || '').trim() || '担当者';
+      const decision = getDecisionContext();
+      const decidedYM = decision.error ? '' : decision.display;
+      const x = calcCpiSince();
+      const cumulativeSentence = officialDataReady() && hasCpiResult(x)
+        ? `現行報酬を設定した${decidedYM}から最新公表月までの消費税調整後の累積CPIは、約${pct1(x.cum)}％となっています。これは顧問報酬改定を自動決定する値ではなく、基本改定率を検討する際の参考値です。`
+        : '';
+      const referenceBlock = buildMatsumotoReferenceBlock();
+
+      const letter = `件名：顧問報酬改定のお願い
+
+${partnerCompanyStr}
+${partnerPersonStr}
+
+平素より格別のご高配を賜り、誠にありがとうございます。
+${ownCompanyStr}の${ownPersonStr}でございます。
+
+当事務所では、これまで長年にわたり顧問報酬を据え置きながら、法令改正への継続対応、会計・税務システムの整備、情報セキュリティの強化、職員研修及び専門知識の維持、巡回監査及び経営支援の品質維持・向上に取り組んでまいりました。
+
+一方、現行報酬を設定して以降、物価、人件費及びシステム関連費用が継続的に上昇しております。${cumulativeSentence}
+今後も現在のサービス品質を維持し、経営者の皆様の迅速な意思決定と黒字経営をご支援するため、顧問報酬の見直しをお願いすることといたしました。
+
+【改定内容】
+・現行報酬：${cpStr}
+・改定後報酬：${npStr}
+・適用開始：${dateStr}
+
+ご不明点や個別のご事情がございましたら、まずは担当者にお申し付けください。内容を承ったうえで、必要に応じて責任者又は税理士から改めてご説明申し上げます。
+
+何卒ご理解賜りますようお願い申し上げます。${referenceBlock}`;
+
+      const talk = `【顧問報酬改定・ご説明用トーク】
+
+■ ご挨拶
+「いつも大変お世話になっております。本日は、今後も現在のサービス品質を維持するための顧問報酬見直しについて、ご説明の機会をいただきありがとうございます。」
+
+■ これまでの対応
+「当事務所では、長年にわたり報酬を据え置きながら、法令改正対応、会計・税務システムの整備、情報セキュリティ、職員研修、巡回監査及び経営支援の品質向上に取り組んでまいりました。」
+
+■ 改定の考え方
+「基本的な物価調整の参考として、消費税調整後の累積CPIを確認しています。最低賃金や賃上げ率を単純に加算して改定額を決めるものではありません。」
+
+■ ご相談内容
+「${dateStr}から、顧問報酬を${cpStr}から${npStr}へ見直したく、ご相談申し上げます。個別のご事情も伺い、必要に応じて責任者又は税理士から改めてご説明いたします。」`;
+
+      const memo = `${buildMemoText()}\n\n■ 松本会計・顧問報酬改定の判断区分\n- 基本改定率：消費税調整後の累積CPIを参考に検討\n- 最低賃金、春闘賃上げ率、自社人件費上昇率：単純加算しない\n- 不採算先の報酬適正化：物価調整とは分け、業務量・難易度・標準報酬との差を別途確認`;
+      return { letter, talk, memo };
+    }
+
+    function applyAdminPreset(value, options = {}){
+      currentPreset = IS_ADMIN && value === 'matsumoto_fee' ? 'matsumoto_fee' : 'general';
+      if(adminPreset) adminPreset.value = currentPreset;
+      if(currentPreset === 'matsumoto_fee'){
+        priceBasisManuallySet = true;
+        setPriceBasis('exclusive');
+        setAudience('btob', true);
+        if(!options.restore || !productName.value.trim()) productName.value = '税務・会計顧問サービス';
+        if(!options.restore || !extraFactors.value.trim()) extraFactors.value = '法令改正への継続対応、会計・税務システムの整備、情報セキュリティの強化、職員研修及び専門知識の維持';
+        applyChipState('#factorGroup', []);
+        applyChipState('#effortGroup', []);
+      }else if(!options.restore){
+        if(productName.value === '税務・会計顧問サービス') productName.value = '';
+        if(extraFactors.value === '法令改正への継続対応、会計・税務システムの整備、情報セキュリティの強化、職員研修及び専門知識の維持') extraFactors.value = '';
+        priceBasisManuallySet = false;
+        setPriceBasis(currentAudience === 'btoc' ? 'inclusive' : 'exclusive');
+      }
+      updateCpiCapPanel();
+      if(!options.silent) generate();
+    }
+
     let CACHE = { letter:'', talk:'', memo:'' };
 
     function renderOutput(){
@@ -2296,8 +2788,14 @@ A.「ご意見ありがとうございます。当店としては品質とサー
         validateBasic();
         validatePriceIncrease();
         updateCpiSinceView();
+        updateCpiCapPanel();
 
-        if(currentAudience === 'btoc'){
+        if(IS_ADMIN && currentPreset === 'matsumoto_fee'){
+          const special = buildMatsumotoOutputs();
+          CACHE.letter = special.letter;
+          CACHE.talk = special.talk;
+          CACHE.memo = special.memo;
+        }else if(currentAudience === 'btoc'){
           const b2c = buildBtocOutputs();
           CACHE.letter = b2c.letter;
           CACHE.talk = b2c.talk;
@@ -2389,9 +2887,31 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     });
 
     [partnerCompany, partnerPerson, partnerHonorific, partnerHonorificCustom, ownCompany, ownPerson,
-     productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText, valueFreeText,
+     productName, currentPriceAsOf, currentPriceMonth, effectiveDate, extraFactors, effortFreeText, valueFreeText,
      embedNumbersInLetter, linkRates, cpiRate, wageRate, actualLaborRate, cpiAsOf, wageAsOf]
       .forEach(el => el.addEventListener('input', generate));
+
+    document.querySelectorAll('input[name="priceBasis"]').forEach(radio => {
+      radio.addEventListener('change', () => { if(radio.checked){ setPriceBasis(radio.value, { manual:true }); generate(); } });
+    });
+    document.querySelectorAll('input[name="decisionDatePrecision"]').forEach(radio => {
+      radio.addEventListener('change', () => { if(radio.checked){ setDecisionPrecision(radio.value); generate(); } });
+    });
+    if(autoSaveEnabled) autoSaveEnabled.addEventListener('change', () => {
+      try{
+        if(autoSaveEnabled.checked) saveDraft();
+        else localStorage.removeItem(AUTOSAVE_KEY);
+      }catch(e){}
+      generate();
+    });
+    if(adminPreset) adminPreset.addEventListener('change', () => applyAdminPreset(adminPreset.value));
+    if(cpiCapRounding) cpiCapRounding.addEventListener('change', generate);
+    if(applyCpiCapBtn) applyCpiCapBtn.addEventListener('click', () => {
+      const cap = computeCpiCap();
+      if(!cap) return;
+      newPrice.value = Math.round(cap.suggested).toLocaleString('ja-JP');
+      generate();
+    });
 
     if(openExternalFactorsBtn) openExternalFactorsBtn.addEventListener('click', openExternalFactorsModal);
     if(openExternalFactorsBtn2) openExternalFactorsBtn2.addEventListener('click', openExternalFactorsModal);
@@ -2482,14 +3002,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
         if(b) b.classList.add('active');
         return;
       }
-      if(groupId==='#effortGroup'){
-        chips.filter(x=>['徹底した経費削減','数年間にわたる価格据え置き'].includes(x.getAttribute('data-val'))).forEach(x=>x.classList.add('active'));
-        return;
-      }
-      if(groupId==='#factorGroup'){
-        chips.filter(x=>['原材料・仕入コストの上昇','人件費（賃上げ・採用難）による負担増'].includes(x.getAttribute('data-val'))).forEach(x=>x.classList.add('active'));
-        return;
-      }
+      if(groupId==='#effortGroup' || groupId==='#factorGroup') return;
       if(groupId==='#customerGroup'){
         const p = chips.find(x=>x.getAttribute('data-val')==='profitable');
         if(p) p.classList.add('active');
@@ -2498,17 +3011,27 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     }
 
     resetBtn.addEventListener('click', () => {
-      [partnerCompany,partnerPerson,partnerHonorificCustom,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,effectiveDate,extraFactors,effortFreeText,valueFreeText,actualLaborRate].forEach(el=>{
+      [partnerCompany,partnerPerson,partnerHonorificCustom,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,currentPriceMonth,effectiveDate,extraFactors,effortFreeText,valueFreeText,actualLaborRate].forEach(el=>{
         el.value='';
         el.classList.remove('imported-value');
       });
-      try{ localStorage.removeItem(AUTOSAVE_KEY); }catch(e){}
+      try{
+        localStorage.removeItem(AUTOSAVE_KEY);
+        localStorage.removeItem(LEGACY_AUTOSAVE_KEY);
+      }catch(e){}
       closeExternalFactorsModal();
 
       if(partnerHonorific) partnerHonorific.value = '様';
 
       embedNumbersInLetter.checked = true;
       linkRates.checked = true;
+      autoSaveEnabled.checked = false;
+      currentPreset = 'general';
+      if(adminPreset) adminPreset.value = 'general';
+      priceBasisManuallySet = false;
+      setDecisionPrecision('month');
+      setPriceBasis('exclusive');
+      setAudience('btob', true);
 
       validationWarning.style.display = 'none';
 
@@ -2543,6 +3066,8 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     });
 
     buildPrefOptions();
+    setDecisionPrecision('month');
+    setPriceBasis('exclusive');
 
     const savedPref = getLocal('mk_pref_key');
     if(savedPref && PREF_LABEL[savedPref]) prefSelect.value = savedPref;
@@ -2558,7 +3083,8 @@ A.「ご意見ありがとうございます。当店としては品質とサー
 
     Promise.all([
       loadCostData(savedUrl || './pref_cost_data.json', true),
-      loadCpiData()
+      loadCpiData(),
+      loadTaxAdjustedCpiData()
     ]).then(() => {
       renderAllByPref();
       updateDataMetaUi();

@@ -49,8 +49,12 @@ function applicableMinimumWage(events, date) {
 
 const cost = readJson('pref_cost_data.json');
 const cpi = readJson('cpi_monthly_2025base.json');
+const taxAdjustedCpi = readJson('cpi_monthly_tax_adjusted.json');
 const indexHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const cpiBuilder = fs.readFileSync(path.join(root, 'scripts', 'build-cpi-monthly.mjs'), 'utf8');
+const taxAdjustedBuilder = fs.readFileSync(path.join(root, 'scripts', 'build-cpi-tax-adjusted.mjs'), 'utf8');
+const termsHtml = fs.readFileSync(path.join(root, 'terms.html'), 'utf8');
+const validationWorkflow = fs.readFileSync(path.join(root, '.github', 'workflows', 'validate-data.yml'), 'utf8');
 
 if (cost) {
   const prefNames = Object.keys(cost.prefs || {});
@@ -102,11 +106,14 @@ if (cost) {
   const hyogoLatest = hyogoEvents.at(-1);
   const hyogoJanuary = applicableMinimumWage(hyogoEvents, '2025-01-01');
   const hyogoNovember = applicableMinimumWage(hyogoEvents, '2025-11-01');
+  const hyogoOctoberFirst = applicableMinimumWage(hyogoEvents, '2025-10-01');
+  const hyogoOctoberLast = applicableMinimumWage(hyogoEvents, '2025-10-31');
   check(Number(hyogoJanuary?.amount) === 1052, '兵庫県2025年1月1日の基準最低賃金が1,052円である');
   check(Number(hyogoLatest?.amount) === 1116, '兵庫県の最新最低賃金が1,116円である');
   check(Math.abs(((Number(hyogoLatest?.amount) / Number(hyogoJanuary?.amount) - 1) * 100) - 6.083650190114065) < 1e-10, '兵庫県2025年1月1日基準の累積上昇率が約6.1%である');
   check(Number(hyogoNovember?.amount) === 1116, '兵庫県2025年11月1日の基準最低賃金が1,116円である');
   check(((Number(hyogoLatest?.amount) / Number(hyogoNovember?.amount) - 1) * 100) === 0, '兵庫県2025年11月1日基準の累積上昇率が0.0%である');
+  check(Number(hyogoOctoberFirst?.amount) === 1052 && Number(hyogoOctoberLast?.amount) === 1116, '兵庫県2025年10月は月途中で最低賃金が改定される');
 
   const averageHistory = cost.national?.min_wage_history_avg || {};
   check(
@@ -156,6 +163,34 @@ if (cost) {
   for (const term of ['第7回', '最終', '300人未満']) {
     check(wageSourceText.includes(term), `賃上げ率の資料情報に「${term}」がある`);
   }
+}
+
+if (taxAdjustedCpi) {
+  const meta = taxAdjustedCpi.meta || {};
+  const entries = Object.entries(taxAdjustedCpi.values || {});
+  check(taxAdjustedCpi.schema_version === 1, '消費税調整済CPIのschema_versionが1である');
+  check(meta.publisher === '総務省統計局', '消費税調整済CPIの公表主体が総務省統計局である');
+  check(meta.series_name?.includes('全国・生鮮食品を除く総合・消費税調整済指数'), '消費税調整済CPIの対象系列が正しい');
+  check(meta.base === '2020年=100', '消費税調整済CPIの基準が2020年=100である');
+  check(meta.official_start_month === '1990-01' && meta.official_end_month === '2019-12', '消費税調整済CPIの公式期間が1990年1月～2019年12月である');
+  check(meta.bridge_month === '2019-12', '消費税調整済CPIの接続月が2019年12月である');
+  check(meta.status === 'official_reference_index' && meta.note?.includes('参考指数'), '消費税調整済CPIを公式の参考指数として明示する');
+  check(/^https:\/\/www\.stat\.go\.jp\//.test(meta.source_url || '') && /^https:\/\/www\.stat\.go\.jp\//.test(meta.methodology_url || ''), '消費税調整済CPIの公式資料URLがある');
+  check(validDate(meta.accessed_date), '消費税調整済CPIのデータ確認日が有効である');
+  check(entries.length === 360, '消費税調整済CPIが360か月である');
+  check(entries[0]?.[0] === '1990-01' && entries.at(-1)?.[0] === '2019-12', '消費税調整済CPIの端点月が正しい');
+  check(Number(entries[0]?.[1]) === 91.9 && Number(entries.at(-1)?.[1]) === 100.6, '消費税調整済CPIの端点指数が公式Excelと一致する');
+  for (let index = 0; index < entries.length; index += 1) {
+    const [month, value] = entries[index];
+    check(Number.isFinite(value) && value > 0, `${month}: 消費税調整済CPI指数が正の数値である`);
+    if (index > 0) check(month === nextMonth(entries[index - 1][0]), `${month}: 消費税調整済CPIが前月から欠損なく連続する`);
+  }
+  const bridgeAdjusted = Number(taxAdjustedCpi.values?.['2019-12']);
+  const bridgeNormal = Number(cpi?.values?.['2019-12']);
+  const latestNormal = Number(cpi?.values?.[cpi?.meta?.latest_month]);
+  const baseAdjusted = Number(taxAdjustedCpi.values?.['1990-01']);
+  const connectedMultiplier = (bridgeAdjusted / baseAdjusted) * (latestNormal / bridgeNormal);
+  check(Number.isFinite(connectedMultiplier) && connectedMultiplier > 0, '税抜価格の1990～2019年は同系列内の比を2019年12月で接続できる');
 }
 
 if (cpi) {
@@ -215,6 +250,9 @@ check(!indexHtml.includes('getHistoricalCpi'), '年次CPIハードコード関�
 check(!indexHtml.includes('DEFAULT_NATIONAL_MIN_WAGE_SERIES'), '最低賃金の内蔵全国系列を使用していない');
 check(!indexHtml.includes('document.lastModified'), 'フッター更新日にdocument.lastModifiedを使用していない');
 check(indexHtml.includes('<input type="date" id="currentPriceAsOf"'), '現行価格の決定時期が年月日入力である');
+check(indexHtml.includes('<input type="month" id="currentPriceMonth"'), '現行価格の決定時期を年月入力できる');
+check(indexHtml.includes('name="decisionDatePrecision" value="unknown"'), '現行価格の決定時期を不明として扱える');
+check(indexHtml.includes('name="priceBasis" value="exclusive"') && indexHtml.includes('name="priceBasis" value="inclusive"'), '税抜価格と税込価格を選択できる');
 check(!indexHtml.includes('openCurrentPriceCalendarBtn') && !indexHtml.includes('カレンダーから選ぶ'), 'スマートフォンで機能しない重複カレンダーボタンがない');
 check(!indexHtml.includes('入力例の日付は、作業日の翌々月1日に自動更新されます。'), '適用開始時期の不要な説明文がない');
 check(indexHtml.includes("if(s === '北海道') return '北海道';"), '北海道を末尾正規化の前に保持している');
@@ -223,6 +261,7 @@ check(indexHtml.includes('id="dataLoadAlert"') && indexHtml.includes('role="aler
 check(indexHtml.includes('公的統計値を含む顧客向け文章は生成しません'), 'データ読込エラー時の顧客文抑止を明示している');
 check(indexHtml.includes('function validateCostDataPayload(json)'), '基本データのランタイム構造検証がある');
 check(indexHtml.includes('function validateCpiDataPayload(json)'), 'CPIデータのランタイム構造検証がある');
+check(indexHtml.includes('function validateTaxAdjustedCpiDataPayload(json)'), '消費税調整済CPIのランタイム構造検証がある');
 check(indexHtml.includes('賃上げ率（参考）（%）'), '4.69%の画面ラベルが「賃上げ率（参考）」である');
 check(indexHtml.includes('id="actualLaborRate"'), '自社の実際の人件費上昇率が別入力欄である');
 check(!indexHtml.includes('人件費（前年比 +'), '顧客文の旧「人件費（前年比）」表現が残っていない');
@@ -246,7 +285,7 @@ if (decisionFormatterSource) {
   }
 }
 check(indexHtml.includes('・最低賃金の累積上昇率（${prefLabel}）') && indexHtml.includes('発効日ベース、出典：${sourceShort(\'min_wage\')}'), '参考データに発効日ベースの最低賃金累積上昇率を表示する');
-check(indexHtml.includes('officialDataReady() && decidedYM && hasMwResult(mwSince)'), '最低賃金累積上昇率は正常に算出できた場合だけ参考データへ表示する');
+check(indexHtml.includes('officialDataReady() && decidedYM && hasMwResult(mwSince) && mwSince.cum > 0'), '最低賃金累積上昇率は正の値を正常に算出できた場合だけ参考データへ表示する');
 
 const suggestedDateFunctionSource = indexHtml.match(/function suggestedEffectiveDateText\(now = new Date\(\)\)\{[\s\S]*?\n    \}/)?.[0] || '';
 check(Boolean(suggestedDateFunctionSource), '適用開始時期の動的プレースホルダー関数を検出できる');
@@ -320,7 +359,7 @@ if (mwCumulativeEvidenceFunctionSource) {
       () => true, () => ({ baseMw: 1116, nowMw: 1116, cum: 0 }),
       hasMwResultForTest, (value) => Number(value).toFixed(1)
     );
-    check(buildMwZeroEvidence().includes('累積上昇率は0.0%'), '算出可能な最低賃金累積上昇率0.0%を後半へ表示する');
+    check(buildMwZeroEvidence() === '', '最低賃金累積上昇率0.0%を顧客向け文書へ表示しない');
 
     const buildMwErrorEvidence = makeMwCumulativeEvidenceBuilder(
       () => true, () => ({ error: '算出不可' }),
@@ -346,12 +385,33 @@ const cpiFunction = indexHtml.match(/function calcCpiSince\(\)\{[\s\S]*?\n    \}
 check(Boolean(cpiFunction), 'calcCpiSince関数を検出できる');
 check(cpiFunction.includes('meta.latest_month'), '累積CPIの比較月にmeta.latest_monthを使用している');
 check(cpiFunction.includes('CPI_MONTHLY_DATA.values[baseMonth]'), '累積CPIの基準指数を決定日の月次JSONから直接取得している');
+check(cpiFunction.includes('adjustedBridge / adjustedBase') && cpiFunction.includes('latestCpi / normalBridge') && cpiFunction.includes('segmentA * segmentB'), '税抜価格の過去期間は2019年12月で消費税調整済CPIと通常CPIを接続する');
+check(cpiFunction.includes("baseMonth < '1990-01'") && cpiFunction.includes('公式の消費税調整済指数が1990年1月からのため算出できません。'), '税抜価格の1990年1月より前を通常CPIへフォールバックしない');
+check(cpiFunction.includes("currentPriceBasis === 'inclusive' && baseMonth < '1970-01'"), '税込価格は1970年1月以降を計算対象にする');
 check(!cpiFunction.includes('new Date'), '累積CPIの比較月にブラウザ現在年月を使用していない');
 check(!cpiFunction.includes('cpiRate'), '累積CPIを入力欄の前年同月比で外挿していない');
 check(cpiFunction.includes('最新公表月より後であるため算出できません'), '最新公表月より後の入力を算出不可としている');
 
-const releases = [...indexHtml.matchAll(/r(\d+)/g)].map((match) => Number(match[1]));
-check(releases.length >= 2 && releases.every((release) => release === 44), '画面内のリリース番号がr44で統一されている');
+check(indexHtml.includes("const APP_VERSION = 'r45';"), 'リリース番号を単一定数r45で管理する');
+check((indexHtml.match(/r45/g) || []).length === 1, 'index.html内のr45リテラルが単一定数だけである');
+check(indexHtml.includes("const AUTOSAVE_KEY = 'mk_autosave_v2';") && indexHtml.includes("const LEGACY_AUTOSAVE_KEY = 'mk_autosave_v1';"), '自動保存v2と旧v1移行元を分ける');
+check(indexHtml.includes('if(!autoSaveEnabled || !autoSaveEnabled.checked)') && indexHtml.includes('localStorage.removeItem(AUTOSAVE_KEY)'), '自動保存OFFではv2へ保存せず解除時に削除する');
+check(indexHtml.includes("legacy.decisionDatePrecision = 'month';") && indexHtml.includes('legacy.currentPriceMonth = oldDecision;') && !indexHtml.includes('`${d.currentPriceAsOf}-01`'), '旧YYYY-MMを日付へ変換せず年月として移行する');
+check(indexHtml.includes('localStorage.removeItem(LEGACY_AUTOSAVE_KEY)'), '入力内容消去又は移行時に旧v1を削除する');
+check(indexHtml.includes('id="adminPreset"') && indexHtml.includes('松本会計・顧問報酬改定'), '管理モードに松本会計・顧問報酬改定プリセットがある');
+check(indexHtml.includes('function buildMatsumotoOutputs()') && indexHtml.includes('税務・会計顧問サービス'), '会計事務所専用テンプレートを生成する');
+for (const term of ['法令改正への継続対応','会計・税務システムの整備','情報セキュリティの強化','職員研修及び専門知識の維持','巡回監査及び経営支援の品質維持・向上']) {
+  check(indexHtml.includes(term), `会計事務所専用文面に「${term}」がある`);
+}
+check(indexHtml.includes('Math.floor(exact / unit) * unit'), 'CPI参考額を指定単位で切り下げる');
+check(indexHtml.includes('この金額を改定後価格へ反映') && indexHtml.includes('入力された改定後価格は、消費税調整後の累積CPIによる参考上限額を超えています。'), 'CPI参考額の手動反映と上限超過警告がある');
+check(indexHtml.includes('setExportAvailability(exportReasons)') && indexHtml.includes('契約書を確認するまで外部送付しないでください'), '必須項目不足と契約未確認時に外部出力を停止する');
+check(!indexHtml.includes('事情変更の原則に基づき') && !indexHtml.includes('通知のみで可の可能性'), '契約条項の断定的な旧表現が残っていない');
+
+check(taxAdjustedBuilder.includes("args['accessed-date']") && taxAdjustedBuilder.includes('YYYYMM形式の年月列を確認できません'), '消費税調整済CPI生成スクリプトが必須確認日と動的年月列を検証する');
+check(taxAdjustedBuilder.includes('targetColumn') && taxAdjustedBuilder.includes('TARGET_SERIES_JA'), '消費税調整済CPI生成スクリプトが系列列を名称から特定する');
+check(validationWorkflow.includes('node-version: 22') && validationWorkflow.includes('node scripts/validate-data.mjs'), 'GitHub ActionsがNode.js 22でデータ検証を実行する');
+check(termsHtml.includes('本ツール」といいます）に固有の利用条件') && termsHtml.includes('事業上利用できます') && termsHtml.includes('自社の取引先への交付') && termsHtml.includes('商用利用である場合も許可されます'), '本ツール固有の利用条件に顧問先の業務利用と生成文書交付を許諾する');
 
 if (errors.length) {
   console.error(`データ検証: ${errors.length}件のエラー`);
