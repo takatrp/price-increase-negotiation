@@ -634,7 +634,7 @@
       if(!s) return '';
       const m = String(s).trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
       if(!m) return String(s);
-      return `${m[1]}年${parseInt(m[2],10)}月${parseInt(m[3],10)}日`;
+      return `${m[1]}年${parseInt(m[2],10)}月`;
     };
     const formatCpiIndex = (month, value) => {
       const n = Number(value);
@@ -1738,7 +1738,17 @@
       const sentences = [];
       if(officialDataReady()){
         const w = minWageInfo(key);
-        const mw = w ? `最低賃金が前年度比 +${pct1(w.pct)}%` : '';
+        const mwSince = calcMwSince();
+        const mwCumulative = hasMwResult(mwSince)
+          ? `${mwSince.cum >= 0 ? '+' : '-'}${pct1(Math.abs(mwSince.cum))}%`
+          : '';
+        const mw = w && mwCumulative
+          ? `最低賃金が前年度比 +${pct1(w.pct)}%（現行価格の決定時点からの累積上昇率は ${mwCumulative}）`
+          : w
+            ? `最低賃金が前年度比 +${pct1(w.pct)}%`
+            : mwCumulative
+              ? `最低賃金の累積上昇率が現行価格の決定時点から ${mwCumulative}`
+              : '';
         const p = toNum(cpiRate.value);
         const price = isFinite(p) && cpiRate.dataset.origin !== 'manual' ? `物価が前年同月比 +${pct1(p)}%` : '';
         const bits = [mw, price].filter(Boolean);
@@ -1786,6 +1796,12 @@
       const x = calcCpiSince();
       if (officialDataReady() && decidedYM && hasCpiResult(x) && x.cum > 0) {
         lines.push(`・累積物価上昇率：約${pct1(x.cum)}%（現行価格決定の${decidedYM}からCPI最新公表月${fmtYM(x.latestMonth)}まで）`);
+      }
+
+      const mwSince = calcMwSince();
+      if (officialDataReady() && decidedYM && hasMwResult(mwSince)) {
+        const sign = mwSince.cum >= 0 ? '+' : '-';
+        lines.push(`・最低賃金の累積上昇率（${prefLabel}）：${sign}${pct1(Math.abs(mwSince.cum))}%（現行価格を決定した${decidedYM}時点：${Math.round(mwSince.baseMw)}円 → 最新：${Math.round(mwSince.nowMw)}円、発効日ベース、出典：${sourceShort('min_wage')}）`);
       }
 
       const actual = toNum(actualLaborRate.value);
