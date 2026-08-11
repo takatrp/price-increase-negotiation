@@ -262,14 +262,14 @@ if (suggestedDateFunctionSource) {
   }
 }
 
-const naturalEvidenceFunctionSource = indexHtml.match(/function buildNaturalEvidencePhrase\(\)\{[\s\S]*?function buildReferenceBlock/)?.[0]
-  ?.replace(/\s*function buildReferenceBlock$/, '') || '';
+const naturalEvidenceFunctionSource = indexHtml.match(/function buildNaturalEvidencePhrase\(\)\{[\s\S]*?function buildMwCumulativeEvidenceSentence/)?.[0]
+  ?.replace(/\s*function buildMwCumulativeEvidenceSentence$/, '') || '';
 check(Boolean(naturalEvidenceFunctionSource), '本文へ根拠を織り込む関数を検出できる');
 if (naturalEvidenceFunctionSource) {
   try {
     const makeNaturalEvidenceBuilder = Function(
       'embedNumbersInLetter', 'prefSelect', 'cpiRate', 'wageRate', 'actualLaborRate',
-      'officialDataReady', 'minWageInfo', 'calcMwSince', 'hasMwResult', 'toNum', 'pct1', 'pct2',
+      'officialDataReady', 'minWageInfo', 'toNum', 'pct1', 'pct2',
       `return (${naturalEvidenceFunctionSource})`
     );
     const toTestNumber = (value) => String(value ?? '').trim() === '' ? Number.NaN : Number(value);
@@ -278,11 +278,11 @@ if (naturalEvidenceFunctionSource) {
       { value: '2.7', dataset: { origin: 'national' } },
       { value: '4.69', dataset: { origin: 'national' } },
       { value: '' }, () => true, () => ({ pct: 6.1 }),
-      () => ({ cum: 6.1 }), (value) => Boolean(value && !value.error && Number.isFinite(value.cum)),
       toTestNumber, (value) => Number(value).toFixed(1), (value) => Number(value).toFixed(2)
     );
     const officialEvidence = buildOfficialEvidence();
-    check(officialEvidence.includes('最低賃金が前年度比 +6.1%（現行価格の決定時点からの累積上昇率は +6.1%）、物価が前年同月比 +2.7%となっているほか、連合の2026年春闘最終集計でも'), '最低賃金の累積上昇率・物価・春闘参考値が一続きの説明になる');
+    check(officialEvidence.includes('最低賃金が前年度比 +6.1%、物価が前年同月比 +2.7%となっているほか、連合の2026年春闘最終集計でも'), '前半に直近1年間の最低賃金・物価・春闘参考値をまとめる');
+    check(!officialEvidence.includes('累積上昇率'), '前半の直近1年間の説明に累積上昇率を混在させない');
     check(officialEvidence.includes('賃上げ率が4.69％となるなど、事業運営や人材確保にかかる負担は一段と高まっております。'), '春闘参考値をコスト環境の説明へ自然に接続する');
     check(!officialEvidence.includes('\n'), '本文へ織り込む根拠文に不自然な改行がない');
 
@@ -291,24 +291,48 @@ if (naturalEvidenceFunctionSource) {
       { value: '2.7', dataset: { origin: 'manual' } },
       { value: '8.00', dataset: { origin: 'manual' } },
       { value: '' }, () => true, () => ({ pct: 6.1 }),
-      () => ({ cum: 6.1 }), (value) => Boolean(value && !value.error && Number.isFinite(value.cum)),
       toTestNumber, (value) => Number(value).toFixed(1), (value) => Number(value).toFixed(2)
     );
     check(!buildManualEvidence().includes('連合の2026年春闘最終集計'), '手入力の賃上げ率を連合の公式集計として本文へ挿入しない');
-
-    const buildUncalculableEvidence = makeNaturalEvidenceBuilder(
-      { checked: true }, { value: '兵庫' },
-      { value: '2.7', dataset: { origin: 'national' } },
-      { value: '4.69', dataset: { origin: 'national' } },
-      { value: '' }, () => true, () => ({ pct: 6.1 }),
-      () => ({ error: '算出不可' }), (value) => Boolean(value && !value.error && Number.isFinite(value.cum)),
-      toTestNumber, (value) => Number(value).toFixed(1), (value) => Number(value).toFixed(2)
-    );
-    check(!buildUncalculableEvidence().includes('累積上昇率'), '算出できない最低賃金累積上昇率を本文へ表示しない');
   } catch (error) {
     errors.push(`本文へ根拠を織り込む関数を実行できません: ${error.message}`);
   }
 }
+
+const mwCumulativeEvidenceFunctionSource = indexHtml.match(/function buildMwCumulativeEvidenceSentence\(spoken = false\)\{[\s\S]*?\n    \}\n\n    function buildReferenceBlock/)?.[0]
+  ?.replace(/\s*function buildReferenceBlock$/, '') || '';
+check(Boolean(mwCumulativeEvidenceFunctionSource), '最低賃金累積上昇率の後半用文章関数を検出できる');
+if (mwCumulativeEvidenceFunctionSource) {
+  try {
+    const makeMwCumulativeEvidenceBuilder = Function(
+      'officialDataReady', 'calcMwSince', 'hasMwResult', 'pct1',
+      `return (${mwCumulativeEvidenceFunctionSource})`
+    );
+    const hasMwResultForTest = (value) => Boolean(value && !value.error && Number.isFinite(value.cum));
+    const buildMwIncreaseEvidence = makeMwCumulativeEvidenceBuilder(
+      () => true, () => ({ baseMw: 1052, nowMw: 1116, cum: 6.083650190114065 }),
+      hasMwResultForTest, (value) => Number(value).toFixed(1)
+    );
+    check(buildMwIncreaseEvidence() === 'また、最低賃金についても、現行価格の決定時点に適用されていた1,052円から最新の1,116円まで、累積で約6.1%上昇しております。', '後半で累積物価上昇率に続く最低賃金累積上昇率を生成する');
+    check(buildMwIncreaseEvidence(true).endsWith('上昇しています。'), '面談トークでは最低賃金累積上昇率を話し言葉で生成する');
+
+    const buildMwZeroEvidence = makeMwCumulativeEvidenceBuilder(
+      () => true, () => ({ baseMw: 1116, nowMw: 1116, cum: 0 }),
+      hasMwResultForTest, (value) => Number(value).toFixed(1)
+    );
+    check(buildMwZeroEvidence().includes('累積上昇率は0.0%'), '算出可能な最低賃金累積上昇率0.0%を後半へ表示する');
+
+    const buildMwErrorEvidence = makeMwCumulativeEvidenceBuilder(
+      () => true, () => ({ error: '算出不可' }),
+      hasMwResultForTest, (value) => Number(value).toFixed(1)
+    );
+    check(buildMwErrorEvidence() === '', '算出できない最低賃金累積上昇率を後半へ表示しない');
+  } catch (error) {
+    errors.push(`最低賃金累積上昇率の後半用文章関数を実行できません: ${error.message}`);
+  }
+}
+check(indexHtml.includes("decidedLine = [decidedLine, buildMwCumulativeEvidenceSentence()].filter(Boolean).join('\\n');"), '文案で累積物価上昇率の直後に最低賃金累積上昇率を配置する');
+check(indexHtml.includes('mwCumulativeTalk ? `「${mwCumulativeTalk}」`'), '面談トークでも累積物価上昇率の直後に最低賃金累積上昇率を配置する');
 
 for (const option of ['--updated', '--latest-official-yoy', '--publication-date', '--accessed-date']) {
   check(cpiBuilder.includes(option), `CPI生成スクリプトが${option}を必須入力として扱う`);

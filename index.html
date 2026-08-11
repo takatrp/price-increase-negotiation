@@ -1738,17 +1738,7 @@
       const sentences = [];
       if(officialDataReady()){
         const w = minWageInfo(key);
-        const mwSince = calcMwSince();
-        const mwCumulative = hasMwResult(mwSince)
-          ? `${mwSince.cum >= 0 ? '+' : '-'}${pct1(Math.abs(mwSince.cum))}%`
-          : '';
-        const mw = w && mwCumulative
-          ? `最低賃金が前年度比 +${pct1(w.pct)}%（現行価格の決定時点からの累積上昇率は ${mwCumulative}）`
-          : w
-            ? `最低賃金が前年度比 +${pct1(w.pct)}%`
-            : mwCumulative
-              ? `最低賃金の累積上昇率が現行価格の決定時点から ${mwCumulative}`
-              : '';
+        const mw = w ? `最低賃金が前年度比 +${pct1(w.pct)}%` : '';
         const p = toNum(cpiRate.value);
         const price = isFinite(p) && cpiRate.dataset.origin !== 'manual' ? `物価が前年同月比 +${pct1(p)}%` : '';
         const bits = [mw, price].filter(Boolean);
@@ -1772,6 +1762,21 @@
         sentences.push(`また、当社の実績では、人件費が前年比${sign}${pct1(Math.abs(actual))}％変動しております。`);
       }
       return sentences.join(' ');
+    }
+
+    function buildMwCumulativeEvidenceSentence(spoken = false){
+      if(!officialDataReady()) return '';
+      const mwSince = calcMwSince();
+      if(!hasMwResult(mwSince)) return '';
+
+      const baseMw = Math.round(mwSince.baseMw).toLocaleString('ja-JP');
+      const nowMw = Math.round(mwSince.nowMw).toLocaleString('ja-JP');
+      if(Math.abs(mwSince.cum) < 1e-9){
+        return `また、最低賃金については、現行価格の決定時点と最新時点がともに${nowMw}円で、累積上昇率は0.0%となって${spoken ? 'います' : 'おります'}。`;
+      }
+
+      const direction = mwSince.cum > 0 ? '上昇' : '低下';
+      return `また、最低賃金についても、現行価格の決定時点に適用されていた${baseMw}円から最新の${nowMw}円まで、累積で約${pct1(Math.abs(mwSince.cum))}%${direction}して${spoken ? 'います' : 'おります'}。`;
     }
 
     function buildReferenceBlock(decidedYM){
@@ -1801,7 +1806,7 @@
       const mwSince = calcMwSince();
       if (officialDataReady() && decidedYM && hasMwResult(mwSince)) {
         const sign = mwSince.cum >= 0 ? '+' : '-';
-        lines.push(`・最低賃金の累積上昇率（${prefLabel}）：${sign}${pct1(Math.abs(mwSince.cum))}%（現行価格を決定した${decidedYM}時点：${Math.round(mwSince.baseMw)}円 → 最新：${Math.round(mwSince.nowMw)}円、発効日ベース、出典：${sourceShort('min_wage')}）`);
+        lines.push(`・最低賃金の累積上昇率（${prefLabel}）：${sign}${pct1(Math.abs(mwSince.cum))}%（現行価格を決定した${decidedYM}時点：${Math.round(mwSince.baseMw).toLocaleString('ja-JP')}円 → 最新：${Math.round(mwSince.nowMw).toLocaleString('ja-JP')}円、発効日ベース、出典：${sourceShort('min_wage')}）`);
       }
 
       const actual = toNum(actualLaborRate.value);
@@ -2049,6 +2054,7 @@
           decidedLine = `${decidedYM}に現行価格を決定して以来、一定期間が経過しております。`;
         }
       }
+      decidedLine = [decidedLine, buildMwCumulativeEvidenceSentence()].filter(Boolean).join('\n');
 
       let letter = '';
       if(relation === 'A') {
@@ -2172,6 +2178,8 @@ ${customerStrategy}
           decidedTalk = `「${decidedYM}に現行価格を決定して以来、一定期間が経過しています。」`;
         }
       }
+      const mwCumulativeTalk = buildMwCumulativeEvidenceSentence(true);
+      decidedTalk = [decidedTalk, mwCumulativeTalk ? `「${mwCumulativeTalk}」` : ''].filter(Boolean).join('\n');
 
       const talk =
 `【${ttl} 面談トーク】
