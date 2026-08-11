@@ -21,7 +21,9 @@
     .header{display:flex;align-items:center;gap:12px;margin:6px 0 8px}
     .logo{height:56px;width:auto;object-fit:contain;border-radius:8px}
     .title{font-weight:900;font-size:1.22rem;color:#0f172a;display:flex;align-items:center;gap:8px}
-    .headRight{margin-left:auto;display:flex;gap:6px;align-items:center}
+    .headRight{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .modeBadge{display:inline-flex;align-items:center;border:1px solid #cbd5e1;border-radius:999px;padding:6px 10px;background:#fff;color:#334155;font-size:.8rem;font-weight:900;white-space:nowrap}
+    .modeBadge.office{border-color:#b45309;background:#fff7ed;color:#92400e}
     .sub{font-size:.86rem;color:var(--muted);margin:0 0 12px}
 
     .card{background:var(--card);border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);padding:16px;margin-bottom:12px}
@@ -81,6 +83,9 @@
     .authErr.show{display:block}
     @media (max-width:640px){
       .authShell{align-items:flex-start;padding-top:max(8px, env(safe-area-inset-top));}
+      .header{align-items:flex-start;flex-wrap:wrap}
+      .headRight{width:100%;margin-left:0;justify-content:flex-start}
+      .modeBadge{width:100%;box-sizing:border-box;justify-content:center;white-space:normal;text-align:center}
     }
     #appShell{opacity:0;transition:opacity .45s ease}
     #appShell.show{opacity:1}
@@ -142,10 +147,10 @@
     .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
       font-size:.78rem;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;padding:2px 6px}
 
-    /* 管理モード：adminOnly を表示 */
-    .adminOnly{display:none !important;}
-    .isAdmin .adminOnly{display:block !important;}
-    .isAdmin .adminOnly.hidden{display:none !important;}
+    /* officeMode は表示制御専用。認証モードの正本は currentAuthMode。 */
+    .officeOnly{display:none !important;}
+    .officeMode .officeOnly{display:block !important;}
+    .officeMode .officeOnly.hidden{display:none !important;}
 
     /* STEP1：累積物価上昇リンク */
     .sourceLink{display:inline-flex;gap:6px;align-items:center;font-size:.78rem;margin-top:6px;flex-wrap:wrap;}
@@ -171,6 +176,7 @@
       .printDivider{page-break-before:always;}
       .printH1{font-size:1.1rem}
       a{color:#000;text-decoration:underline}
+      html.exportBlocked #printPack{display:none !important;}
     }
   </style>
 </head>
@@ -201,6 +207,8 @@
       </a>
       <div class="title">値上げ交渉ナビゲーター（全国版） <span class="badge ok" data-app-version></span></div>
       <div class="headRight">
+        <span id="authModeBadge" class="modeBadge" aria-live="polite"></span>
+        <button class="btn ghost sm" id="logoutBtn" type="button">ログイン画面に戻る</button>
         <button class="btn ghost sm" id="resetBtn" type="button">入力内容を消去</button>
       </div>
     </div>
@@ -220,15 +228,10 @@
           </div>
         </div>
 
-        <div class="card presetPanel adminOnly" id="adminPresetCard">
-          <div class="pill">管理モード専用</div>
-          <label for="adminPreset">業務プリセット</label>
-          <select id="adminPreset">
-            <option value="general">一般の価格転嫁支援</option>
-            <option value="matsumoto_fee">松本会計・顧問報酬改定</option>
-          </select>
-          <div class="hint">顧問報酬改定では、消費税調整後の累積CPIを基本参考率とし、報酬適正化は別に判断します。</div>
-        </div>
+        <select id="adminPreset" hidden aria-hidden="true" tabindex="-1">
+          <option value="general">一般の価格転嫁支援</option>
+          <option value="matsumoto_fee">松本会計・顧問報酬改定</option>
+        </select>
 
         <div class="card" id="step0Card">
           <div class="pill">STEP 0：契約確認（必須）</div>
@@ -341,7 +344,9 @@
           <div class="securityNote">入力内容は、この端末のブラウザ内に保存される場合があります。共用端末では自動保存をOFFにするか、利用終了後に「入力内容を消去」を押してください。</div>
         </div>
 
-        <div class="card adminOnly hidden" id="cpiCapCard">
+        <div id="cpiUnavailableWarning" class="warningBox" style="display:none;"></div>
+
+        <div class="card officeOnly hidden" id="cpiCapCard">
           <div class="pill">松本会計・顧問報酬改定</div>
           <div class="dataRow"><span class="dataKey">現行顧問報酬</span><span id="cpiCapCurrent">—</span></div>
           <div class="dataRow"><span class="dataKey">累積CPI</span><span id="cpiCapRate">—</span></div>
@@ -481,8 +486,8 @@
                 <div class="small" id="helpBox" style="margin-top:8px;line-height:1.6;color:#334155;"></div>
               </div>
 
-              <details id="dataLoader" class="adminOnly">
-                <summary>都道府県データを読み込み（JSON）</summary>
+              <details id="dataLoader" class="officeOnly">
+                <summary>松本会計内部用：都道府県データを読み込み（JSON）</summary>
                 <div class="hint">同階層の <span class="kbd">pref_cost_data.json</span> またはURLから読み込みます（物価/賃金/最低賃金など）。</div>
 
                 <label for="dataUrl">JSONのURL（空欄なら ./pref_cost_data.json を試行）</label>
@@ -657,15 +662,25 @@
     /* =========================
        0) 定数・設定
        ========================= */
-    const qs = new URLSearchParams(window.location.search);
-    let IS_ADMIN = (qs.get('admin') === '1');
-    try{ document.documentElement.classList.toggle('isAdmin', !!IS_ADMIN); }catch(e){}
     const TARGET_PASSWORD = 'price2026';
     const OFFICE_PASSWORD = 'matsu20180201';
     const AUTH_SESSION_KEY = 'mk_session_unlocked';
     const AUTH_MODE_KEY = 'mk_session_mode';
-    const APP_VERSION = 'r45';
+    const APP_VERSION = 'r46';
+    let currentAuthMode = 'locked';
+    const isGeneralMode = () => currentAuthMode === 'general';
+    const isOfficeMode = () => currentAuthMode === 'office';
     document.querySelectorAll('[data-app-version]').forEach(el => { el.textContent = APP_VERSION; });
+
+    function removeLegacyAdminParam(){
+      try{
+        const url = new URL(window.location.href);
+        if(!url.searchParams.has('admin')) return;
+        url.searchParams.delete('admin');
+        history.replaceState(history.state, '', `${url.pathname}${url.search}${url.hash}`);
+      }catch(e){}
+    }
+    removeLegacyAdminParam();
 
     /* =========================
        1) 対象都道府県（全国）
@@ -780,6 +795,7 @@
     const cpiCapSuggested = $('#cpiCapSuggested');
     const applyCpiCapBtn = $('#applyCpiCapBtn');
     const cpiCapWarning = $('#cpiCapWarning');
+    const cpiUnavailableWarning = $('#cpiUnavailableWarning');
     const exportBlockReason = $('#exportBlockReason');
     const effectiveDate = $('#effectiveDate');
     const outputArea = $('#outputArea');
@@ -804,6 +820,8 @@
     const authUnlockBtn = $('#authUnlockBtn');
     const authError = $('#authError');
     const authShowPassword = $('#authShowPassword');
+    const authModeBadge = $('#authModeBadge');
+    const logoutBtn = $('#logoutBtn');
 
     function suggestedEffectiveDateText(now = new Date()){
       const suggestedDate = new Date(now.getFullYear(), now.getMonth() + 2, 1);
@@ -867,8 +885,12 @@
     const printDate = $('#printDate');
 
     let currentOutputMode = 'letter';
-    const AUTOSAVE_KEY = 'mk_autosave_v2';
-    const LEGACY_AUTOSAVE_KEY = 'mk_autosave_v1';
+    const AUTOSAVE_KEYS = Object.freeze({
+      general: 'mk_autosave_v3_general',
+      office: 'mk_autosave_v3_office'
+    });
+    const LEGACY_AUTOSAVE_V2_KEY = 'mk_autosave_v2';
+    const LEGACY_AUTOSAVE_V1_KEY = 'mk_autosave_v1';
     let INITIAL_DRAFT_READY = false;
     let currentPriceBasis = 'exclusive';
     let priceBasisManuallySet = false;
@@ -952,74 +974,116 @@
       const unique = [...new Set((reasons || []).filter(Boolean))];
       const blocked = unique.length > 0;
       for(const button of [copyBtn, printBtn, wordBtn]) if(button) button.disabled = blocked;
+      document.documentElement.classList.toggle('exportBlocked', blocked);
       if(exportBlockReason){
         exportBlockReason.style.display = blocked ? 'block' : 'none';
         exportBlockReason.textContent = blocked ? `外部送信用の出力はまだ利用できません：${unique.join('／')}` : '';
       }
     }
 
-    function activateOfficeMode(){
-      IS_ADMIN = true;
-      try{ document.documentElement.classList.add('isAdmin'); }catch(e){}
-      if(adminPreset) applyAdminPreset('matsumoto_fee', { restore:true, silent:true });
+    let authHideTimer = null;
+
+    function updateAuthModeUi(){
+      const office = isOfficeMode();
+      try{ document.documentElement.classList.toggle('officeMode', office); }catch(e){}
+      if(authModeBadge){
+        authModeBadge.textContent = office
+          ? '松本会計内部用｜顧問報酬改定モード'
+          : isGeneralMode() ? '関与先向け｜価格転嫁支援モード' : '';
+        authModeBadge.classList.toggle('office', office);
+      }
+      if(ownCompany) ownCompany.readOnly = office;
     }
 
-    function unlockApp(saveSession, authMode = 'general'){
+    function setAuthMode(mode, options = {}){
+      const nextMode = ['general', 'office'].includes(mode) ? mode : 'locked';
+      currentAuthMode = nextMode;
+      updateAuthModeUi();
+
+      if(isOfficeMode()) applyOfficePreset({ restore:true, silent:true });
+      else applyGeneralPreset({ restore:options.restore === true, silent:true });
+
+      try{
+        if(nextMode === 'locked'){
+          sessionStorage.removeItem(AUTH_SESSION_KEY);
+          sessionStorage.removeItem(AUTH_MODE_KEY);
+        }else if(options.saveSession){
+          sessionStorage.setItem(AUTH_SESSION_KEY, '1');
+          sessionStorage.setItem(AUTH_MODE_KEY, nextMode);
+        }
+      }catch(e){}
+    }
+
+    function unlockApp(){
       if(appShell){
         appShell.style.display = '';
         requestAnimationFrame(() => appShell.classList.add('show'));
       }
       if(authShell){
+        if(authHideTimer) clearTimeout(authHideTimer);
         authShell.classList.add('fadeOut');
-        setTimeout(() => { authShell.style.display = 'none'; }, 320);
-      }
-      if(saveSession){
-        try{
-          sessionStorage.setItem(AUTH_SESSION_KEY, '1');
-          sessionStorage.setItem(AUTH_MODE_KEY, authMode);
-        }catch(e){}
+        authHideTimer = setTimeout(() => { authShell.style.display = 'none'; }, 320);
       }
     }
 
-    function initAuthGate(){
-      let unlocked = false;
-      let storedMode = 'general';
-      try{
-        unlocked = sessionStorage.getItem(AUTH_SESSION_KEY) === '1';
-        storedMode = sessionStorage.getItem(AUTH_MODE_KEY) || 'general';
-      }catch(e){}
-      if(unlocked){
-        if(storedMode === 'office') activateOfficeMode();
-        unlockApp(false);
-        generate();
-        return;
+    function showLoginScreen(){
+      if(authHideTimer) clearTimeout(authHideTimer);
+      if(appShell){
+        appShell.classList.remove('show');
+        appShell.style.display = 'none';
       }
-
-      if(appShell) appShell.style.display = 'none';
-      if(appShell) appShell.classList.remove('show');
       if(authShell){
         authShell.style.display = 'flex';
         authShell.classList.remove('fadeOut');
       }
+      if(authPassword){
+        authPassword.value = '';
+        authPassword.type = 'password';
+      }
+      if(authShowPassword) authShowPassword.checked = false;
+      if(authError) authError.classList.remove('show');
+      if(authPassword) setTimeout(() => authPassword.focus(), 10);
+    }
 
-      const attemptUnlock = () => {
-        const input = (authPassword && authPassword.value || '').trim();
-        if(input === OFFICE_PASSWORD){
-          if(authError) authError.classList.remove('show');
-          activateOfficeMode();
-          unlockApp(true, 'office');
-          generate();
-          return;
-        }
-        if(input === TARGET_PASSWORD){
-          if(authError) authError.classList.remove('show');
-          unlockApp(true, 'general');
-          generate();
-          return;
-        }
-        if(authError) authError.classList.add('show');
-      };
+    function startAuthenticatedMode(mode, saveSession){
+      INITIAL_DRAFT_READY = false;
+      setAuthMode(mode, { saveSession, restore:true });
+      restoreDraft();
+      renderAllByPref();
+      getUrlParams();
+      syncHonorificInput();
+      unlockApp();
+      INITIAL_DRAFT_READY = true;
+      generate();
+    }
 
+    function attemptUnlock(){
+      const input = (authPassword && authPassword.value || '').trim();
+      if(input === OFFICE_PASSWORD){
+        if(authError) authError.classList.remove('show');
+        startAuthenticatedMode('office', true);
+        return;
+      }
+      if(input === TARGET_PASSWORD){
+        if(authError) authError.classList.remove('show');
+        startAuthenticatedMode('general', true);
+        return;
+      }
+      if(authError) authError.classList.add('show');
+    }
+
+    function returnToLogin(){
+      INITIAL_DRAFT_READY = false;
+      setAuthMode('locked');
+      resetFormState({ clearStored:false, generateAfter:false });
+      CACHE = { letter:'', talk:'', memo:'' };
+      renderOutput();
+      if(printLetter) printLetter.textContent = '';
+      if(printTalkMemo) printTalkMemo.textContent = '';
+      showLoginScreen();
+    }
+
+    function initAuthGate(){
       if(authUnlockBtn) authUnlockBtn.addEventListener('click', attemptUnlock);
       if(authPassword) authPassword.addEventListener('keydown', (e) => {
         if(e.key === 'Enter') attemptUnlock();
@@ -1029,7 +1093,22 @@
           authPassword.type = authShowPassword.checked ? 'text' : 'password';
         });
       }
-      if(authPassword) setTimeout(() => authPassword.focus(), 10);
+      if(logoutBtn) logoutBtn.addEventListener('click', returnToLogin);
+
+      // sessionStorageは厳格な認証ではなく、同一タブ内の画面モード復元だけに使用する。
+      let unlocked = false;
+      let storedMode = '';
+      try{
+        unlocked = sessionStorage.getItem(AUTH_SESSION_KEY) === '1';
+        storedMode = sessionStorage.getItem(AUTH_MODE_KEY) || '';
+      }catch(e){}
+      if(unlocked && ['general', 'office'].includes(storedMode)){
+        startAuthenticatedMode(storedMode, false);
+        return true;
+      }
+      setAuthMode('locked');
+      showLoginScreen();
+      return false;
     }
 
     let currentAudience = 'btob';
@@ -1061,7 +1140,7 @@
     }
 
     function setAudience(mode, silent){
-      currentAudience = (mode === 'btoc' && currentPreset !== 'matsumoto_fee') ? 'btoc' : 'btob';
+      currentAudience = (mode === 'btoc' && !isOfficeMode()) ? 'btoc' : 'btob';
       if(!priceBasisManuallySet){
         setPriceBasis(currentAudience === 'btoc' ? 'inclusive' : 'exclusive');
       }
@@ -1106,14 +1185,40 @@
       });
     }
 
+    function autosaveKeyForMode(mode = currentAuthMode){
+      return AUTOSAVE_KEYS[mode] || '';
+    }
+
+    function normalizeLegacyDecisionFields(legacy){
+      const oldDecision = String(legacy.currentPriceAsOf || '').trim();
+      let monthOnly = false;
+      if(/^\d{4}-\d{2}-\d{2}$/.test(oldDecision)){
+        legacy.decisionDatePrecision = 'exact';
+        legacy.currentPriceMonth = '';
+      }else if(/^\d{4}-\d{2}$/.test(oldDecision)){
+        monthOnly = true;
+        legacy.decisionDatePrecision = 'month';
+        legacy.currentPriceMonth = oldDecision;
+        legacy.currentPriceAsOf = '';
+      }else{
+        legacy.decisionDatePrecision = 'unknown';
+        legacy.currentPriceMonth = '';
+        legacy.currentPriceAsOf = '';
+      }
+      return monthOnly;
+    }
+
     function saveDraft(){
       try{
+        const autosaveKey = autosaveKeyForMode();
+        if(!autosaveKey) return;
         if(!autoSaveEnabled || !autoSaveEnabled.checked){
-          localStorage.removeItem(AUTOSAVE_KEY);
+          localStorage.removeItem(autosaveKey);
           return;
         }
         const payload = {
-          schemaVersion: 2,
+          schemaVersion: 3,
+          authMode: currentAuthMode,
           autoSaveEnabled: true,
           partnerCompany: partnerCompany.value,
           partnerPerson: partnerPerson.value,
@@ -1129,7 +1234,7 @@
           decisionDatePrecision: currentDecisionPrecision,
           priceBasis: currentPriceBasis,
           priceBasisManuallySet,
-          preset: currentPreset,
+          preset: isOfficeMode() ? 'matsumoto_fee' : 'general',
           effectiveDate: effectiveDate.value,
           extraFactors: extraFactors.value,
           effortFreeText: effortFreeText.value,
@@ -1152,35 +1257,86 @@
             customer: getChipState('#customerGroup')
           }
         };
-        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(payload));
+        localStorage.setItem(autosaveKey, JSON.stringify(payload));
       }catch(e){}
     }
 
-    function readDraftForRestore(){
-      const v2Raw = localStorage.getItem(AUTOSAVE_KEY);
-      if(v2Raw) return { data:JSON.parse(v2Raw), migrated:false };
-      const v1Raw = localStorage.getItem(LEGACY_AUTOSAVE_KEY);
-      if(!v1Raw) return null;
-      const legacy = JSON.parse(v1Raw);
-      if(!legacy || typeof legacy !== 'object') return null;
-      const oldDecision = String(legacy.currentPriceAsOf || '').trim();
-      let monthOnly = false;
-      if(/^\d{4}-\d{2}-\d{2}$/.test(oldDecision)){
-        legacy.decisionDatePrecision = 'exact';
-        legacy.currentPriceMonth = '';
-      }else if(/^\d{4}-\d{2}$/.test(oldDecision)){
-        monthOnly = true;
-        legacy.decisionDatePrecision = 'month';
-        legacy.currentPriceMonth = oldDecision;
-        legacy.currentPriceAsOf = '';
-      }else{
-        legacy.decisionDatePrecision = 'unknown';
-        legacy.currentPriceMonth = '';
-        legacy.currentPriceAsOf = '';
+    function classifyLegacyV2Mode(draft){
+      if(!draft || typeof draft !== 'object') return '';
+      if(draft.preset === 'matsumoto_fee') return 'office';
+      if(draft.preset === 'general' || !Object.prototype.hasOwnProperty.call(draft, 'preset')) return 'general';
+      return '';
+    }
+
+    function migrateLegacyDraft(){
+      let currentMigration = null;
+      const migrationWarnings = [];
+      const v2Raw = localStorage.getItem(LEGACY_AUTOSAVE_V2_KEY);
+      if(v2Raw){
+        let legacyV2;
+        try{ legacyV2 = JSON.parse(v2Raw); }
+        catch(e){
+          migrationWarnings.push('旧版の保存データが残っています。安全のため自動復元しませんでした。');
+        }
+        if(legacyV2){
+          const targetMode = classifyLegacyV2Mode(legacyV2);
+          if(!targetMode){
+            migrationWarnings.push('旧版の保存データが残っています。安全のため自動復元しませんでした。');
+          }else{
+            const targetKey = AUTOSAVE_KEYS[targetMode];
+            if(localStorage.getItem(targetKey)){
+              localStorage.removeItem(LEGACY_AUTOSAVE_V2_KEY);
+              migrationWarnings.push('既存のモード別下書きを優先し、旧版の共有下書きは復元しませんでした。');
+            }else{
+              const migrated = { ...legacyV2, schemaVersion:3, authMode:targetMode, autoSaveEnabled:true };
+              localStorage.setItem(targetKey, JSON.stringify(migrated));
+              localStorage.removeItem(LEGACY_AUTOSAVE_V2_KEY);
+              if(targetMode === currentAuthMode){
+                currentMigration = { data:migrated, migrated:true, source:'v2', monthOnly:false };
+              }
+            }
+          }
+        }
       }
-      legacy.schemaVersion = 2;
-      legacy.autoSaveEnabled = true;
-      return { data:legacy, migrated:true, monthOnly };
+
+      const v1Raw = localStorage.getItem(LEGACY_AUTOSAVE_V1_KEY);
+      if(v1Raw){
+        let legacyV1;
+        try{ legacyV1 = JSON.parse(v1Raw); }
+        catch(e){
+          migrationWarnings.push('旧版の保存データが残っています。安全のため自動復元しませんでした。');
+        }
+        if(legacyV1 && typeof legacyV1 === 'object'){
+          if(localStorage.getItem(AUTOSAVE_KEYS.general)){
+            localStorage.removeItem(LEGACY_AUTOSAVE_V1_KEY);
+            migrationWarnings.push('既存のモード別下書きを優先し、旧版の共有下書きは復元しませんでした。');
+          }else{
+            const monthOnly = normalizeLegacyDecisionFields(legacyV1);
+            const migrated = { ...legacyV1, schemaVersion:3, authMode:'general', autoSaveEnabled:true, preset:'general' };
+            localStorage.setItem(AUTOSAVE_KEYS.general, JSON.stringify(migrated));
+            localStorage.removeItem(LEGACY_AUTOSAVE_V1_KEY);
+            if(isGeneralMode() && !currentMigration){
+              currentMigration = { data:migrated, migrated:true, source:'v1', monthOnly };
+            }
+          }
+        }else if(legacyV1 !== undefined){
+          migrationWarnings.push('旧版の保存データが残っています。安全のため自動復元しませんでした。');
+        }
+      }
+      const migrationWarning = [...new Set(migrationWarnings)].join(' ');
+      if(migrationWarning){
+        if(currentMigration) currentMigration.migrationWarning = migrationWarning;
+        else showImportStatus(migrationWarning);
+      }
+      return currentMigration;
+    }
+
+    function readDraftForRestore(){
+      const autosaveKey = autosaveKeyForMode();
+      if(!autosaveKey) return null;
+      const currentRaw = localStorage.getItem(autosaveKey);
+      if(currentRaw) return { data:JSON.parse(currentRaw), migrated:false };
+      return migrateLegacyDraft();
     }
 
     function restoreDraft(){
@@ -1189,6 +1345,7 @@
         if(!restored) return false;
         const d = restored.data;
         if(!d || typeof d !== 'object') return false;
+        if(d.authMode && d.authMode !== currentAuthMode) return false;
 
         autoSaveEnabled.checked = d.autoSaveEnabled === true;
         if(!autoSaveEnabled.checked) return false;
@@ -1208,9 +1365,6 @@
         if(typeof d.priceBasis === 'string'){
           setPriceBasis(d.priceBasis);
           priceBasisManuallySet = d.priceBasisManuallySet !== false;
-        }
-        if(IS_ADMIN && d.preset === 'matsumoto_fee' && adminPreset){
-          applyAdminPreset('matsumoto_fee', { restore:true, silent:true });
         }
         if(typeof d.effectiveDate === 'string') effectiveDate.value = d.effectiveDate;
         if(typeof d.extraFactors === 'string') extraFactors.value = d.extraFactors;
@@ -1233,15 +1387,15 @@
         applyChipState('#valueGroup', chips.value);
         applyChipState('#relationGroup', chips.relation);
         applyChipState('#customerGroup', chips.customer);
+        if(isOfficeMode()) applyOfficePreset({ restore:true, silent:true });
 
         if(restored.migrated){
-          localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ ...d, autoSaveEnabled:true }));
-          localStorage.removeItem(LEGACY_AUTOSAVE_KEY);
-          showImportStatus(restored.monthOnly
+          const migratedStatus = restored.monthOnly
             ? '📝 旧版では年月のみ保存されていたため、年月情報として復元しました。最低賃金の改定月に該当する場合は正確な日付を確認してください。'
-            : `📝 旧版の自動保存データを${APP_VERSION}形式へ移行して復元しました。`);
+            : `📝 旧版の自動保存データを${APP_VERSION}形式へ移行して復元しました。`;
+          showImportStatus(restored.migrationWarning ? `${restored.migrationWarning} ${migratedStatus}` : migratedStatus);
         }else{
-          showImportStatus('📝 下書きを復元しました（自動保存データ）');
+          showImportStatus('📝 下書きを復元しました（モード別の自動保存データ）');
         }
         return true;
       }catch(e){
@@ -2041,27 +2195,66 @@
       }
     }
 
-    function validateBasic(){
+    function honorificRequiresPerson(honorific){
+      return !['御中', '各位'].includes(honorific);
+    }
+
+    function buildRecipientBlock(company, person, honorific, customHonorific){
+      const companyText = String(company || '').trim();
+      const selected = String(honorific || '様');
+      const resolvedHonorific = selected === 'custom' ? String(customHonorific || '').trim() : selected;
+      if(!honorificRequiresPerson(selected)) return [companyText, resolvedHonorific].filter(Boolean).join('\n');
+      const personText = String(person || '').trim();
+      return [companyText, `${personText}${resolvedHonorific || '様'}`].filter(Boolean).join('\n');
+    }
+
+    function hasExportPlaceholder(text){
+      const value = String(text || '');
+      return ['〇〇株式会社', '〇〇', '＿＿', '未入力', '担当者', '（価格改定の背景要因が未入力です）']
+        .some(marker => value.includes(marker));
+    }
+
+    function getExportValidationErrors(letterText = CACHE.letter || ''){
       const prod = productName.value.trim();
       const cp = toNum(currentPrice.value);
       const np = toNum(newPrice.value);
-      const customerType = getSelectedValues('#customerGroup')[0] || '';
       const factors = getSelectedValues('#factorGroup');
       const backgroundEntered = factors.length > 0 || Boolean((extraFactors.value || '').trim());
       const clauseType = getSelectedValues('#clauseGroup')[0] || 'clause_unknown';
+      const errors = [];
 
-      const messages = [];
-      const exportReasons = [];
-      if(!prod) exportReasons.push('対象商品・サービス名を入力してください');
-      if(!isFinite(cp) || cp <= 0) exportReasons.push('現在価格を正しく入力してください');
-      if(!isFinite(np) || np < 0) exportReasons.push('改定後価格を正しく入力してください');
-      if(!(effectiveDate.value || '').trim()) exportReasons.push('適用開始時期を入力してください');
-      if(!backgroundEntered) exportReasons.push('価格改定の背景要因を選択又は入力してください');
-      if(currentAudience === 'btob' && clauseType === 'clause_unknown'){
-        exportReasons.push('契約書を確認するまで外部送付しないでください');
+      if(!prod) errors.push('対象商品・サービス名を入力してください');
+      if(!isFinite(cp) || cp <= 0) errors.push(isOfficeMode() ? '現行顧問報酬を正しく入力してください' : '現在価格を正しく入力してください');
+      if(isOfficeMode()){
+        if(!isFinite(np) || !isFinite(cp) || np <= cp) errors.push('改定後顧問報酬は現行顧問報酬より高い金額を入力してください');
+        if(!(partnerCompany.value || '').trim()) errors.push('相手社名を入力してください');
+        if(!(ownPerson.value || '').trim()) errors.push('差出人担当者名を入力してください');
+        const honorific = partnerHonorific.value || '様';
+        if(honorificRequiresPerson(honorific) && !(partnerPerson.value || '').trim()) errors.push('選択した敬称では相手担当者名が必要です');
+        if(honorific === 'custom' && !(partnerHonorificCustom.value || '').trim()) errors.push('任意の敬称を入力してください');
+      }else if(!isFinite(np) || np < 0){
+        errors.push('改定後価格を正しく入力してください');
       }
+      if(!(effectiveDate.value || '').trim()) errors.push('適用開始時期を入力してください');
+      if(!backgroundEntered) errors.push('価格改定の背景要因を選択又は入力してください');
+      if(currentAudience === 'btob' && clauseType === 'clause_unknown') errors.push('契約書を確認するまで外部送付しないでください');
+      if(hasExportPlaceholder(letterText)) errors.push('案内文に仮文字又は未入力表示が残っています');
+      return [...new Set(errors)];
+    }
+
+    function canExport(){
+      const errors = getExportValidationErrors(CACHE.letter || '');
+      return { ok: errors.length === 0, errors };
+    }
+
+    function validateBasic(){
+      const cp = toNum(currentPrice.value);
+      const np = toNum(newPrice.value);
+      const customerType = getSelectedValues('#customerGroup')[0] || '';
+      const messages = [];
+      const exportReasons = getExportValidationErrors(CACHE.letter || '');
       if(currentAudience==='btob' && !customerType) messages.push('「顧客タイプ」は必須です。1つ選択してください。');
-      if(isFinite(cp) && isFinite(np) && cp>0 && np===0) messages.push('「改定後単価」が0円です。意図した入力か確認してください。');
+      if(!isOfficeMode() && isFinite(cp) && isFinite(np) && cp>0 && np===0) messages.push('「改定後単価」が0円です。意図した入力か確認してください。');
       messages.push(...exportReasons);
       setExportAvailability(exportReasons);
 
@@ -2339,7 +2532,7 @@
       const selectedHonorific = (partnerHonorific && partnerHonorific.value) || '様';
       const customHonorific = (partnerHonorificCustom && partnerHonorificCustom.value.trim()) || '';
       const partnerHonorificStr = selectedHonorific === 'custom' ? (customHonorific || '様') : selectedHonorific;
-      const partnerPersonStr = `${partnerPersonName}${partnerHonorificStr}`;
+      const partnerPersonStr = honorificRequiresPerson(selectedHonorific) ? `${partnerPersonName}${partnerHonorificStr}` : partnerHonorificStr;
       const ownCompanyStr = (ownCompany && ownCompany.value.trim()) || '弊社';
       const ownPersonStr = (ownPerson && ownPerson.value.trim()) || '営業担当';
 
@@ -2671,7 +2864,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     }
 
     function computeCpiCap(){
-      if(!IS_ADMIN || currentPreset !== 'matsumoto_fee') return null;
+      if(!isOfficeMode()) return null;
       const cp = toNum(currentPrice.value);
       const x = calcCpiSince();
       if(!Number.isFinite(cp) || cp <= 0 || !hasCpiResult(x)) return null;
@@ -2682,19 +2875,31 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     }
 
     function updateCpiCapPanel(){
-      const active = IS_ADMIN && currentPreset === 'matsumoto_fee';
-      cpiCapCard?.classList.toggle('hidden', !active);
-      if(!active) return;
+      const active = isOfficeMode();
+      if(!active){
+        cpiCapCard?.classList.add('hidden');
+        if(cpiUnavailableWarning) cpiUnavailableWarning.style.display = 'none';
+        return;
+      }
       const cap = computeCpiCap();
       if(!cap){
+        cpiCapCard?.classList.add('hidden');
         if(cpiCapCurrent) cpiCapCurrent.textContent = '—';
         if(cpiCapRate) cpiCapRate.textContent = '—';
         if(cpiCapExact) cpiCapExact.textContent = '—';
         if(cpiCapSuggested) cpiCapSuggested.textContent = '—';
         if(applyCpiCapBtn) applyCpiCapBtn.disabled = true;
         if(cpiCapWarning){ cpiCapWarning.style.display = 'none'; cpiCapWarning.textContent = ''; }
+        const x = calcCpiSince();
+        const unavailable = Boolean(x && x.error);
+        if(cpiUnavailableWarning){
+          cpiUnavailableWarning.style.display = unavailable ? 'block' : 'none';
+          cpiUnavailableWarning.textContent = unavailable ? '累積CPIを算出できないため、物価調整額は個別に判断してください' : '';
+        }
         return;
       }
+      cpiCapCard?.classList.remove('hidden');
+      if(cpiUnavailableWarning){ cpiUnavailableWarning.style.display = 'none'; cpiUnavailableWarning.textContent = ''; }
       cpiCapCurrent.textContent = priceText(cap.cp);
       cpiCapRate.textContent = `${pct2(cap.x.cum)}%（${cap.x.cpiKind}）`;
       cpiCapExact.textContent = `${cap.exact.toLocaleString('ja-JP', { minimumFractionDigits:2, maximumFractionDigits:6 })}円（税抜）`;
@@ -2721,19 +2926,24 @@ A.「ご意見ありがとうございます。当店としては品質とサー
       const cpStr = Number.isFinite(cp) ? priceText(cp) : '＿＿＿円（税抜）';
       const npStr = Number.isFinite(np) ? priceText(np) : '＿＿＿円（税抜）';
       const dateStr = (effectiveDate.value || '').trim() || '＿＿年＿＿月＿＿日';
-      const partnerCompanyStr = (partnerCompany?.value || '').trim() || '〇〇株式会社';
+      const partnerCompanyValue = (partnerCompany?.value || '').trim() || '〇〇株式会社';
       const partnerPersonName = (partnerPerson?.value || '').trim() || '〇〇';
       const selectedHonorific = partnerHonorific?.value || '様';
       const customHonorific = (partnerHonorificCustom?.value || '').trim();
-      const partnerPersonStr = `${partnerPersonName}${selectedHonorific === 'custom' ? (customHonorific || '様') : selectedHonorific}`;
+      const partnerCompanyStr = buildRecipientBlock(partnerCompanyValue, partnerPersonName, selectedHonorific, customHonorific);
+      const partnerPersonStr = '';
       const ownCompanyStr = (ownCompany?.value || '').trim() || '税理士法人松本会計';
       const ownPersonStr = (ownPerson?.value || '').trim() || '担当者';
       const decision = getDecisionContext();
       const decidedYM = decision.error ? '' : decision.display;
       const x = calcCpiSince();
-      const cumulativeSentence = officialDataReady() && hasCpiResult(x)
+      const cpiAvailable = officialDataReady() && hasCpiResult(x);
+      const cumulativeSentence = cpiAvailable
         ? `現行報酬を設定した${decidedYM}から最新公表月までの消費税調整後の累積CPIは、約${pct1(x.cum)}％となっています。これは顧問報酬改定を自動決定する値ではなく、基本改定率を検討する際の参考値です。`
         : '';
+      const cpiTalk = cpiAvailable
+        ? '「基本的な物価調整の参考として、消費税調整後の累積CPIを確認しています。最低賃金や賃上げ率を単純に加算して改定額を決めるものではありません。」'
+        : '「報酬額は、業務内容、対応量、難易度及びサービス品質の維持に必要な体制を踏まえて個別に検討しています。」';
       const referenceBlock = buildMatsumotoReferenceBlock();
 
       const letter = `件名：顧問報酬改定のお願い
@@ -2754,7 +2964,7 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
 ・改定後報酬：${npStr}
 ・適用開始：${dateStr}
 
-ご不明点や個別のご事情がございましたら、まずは担当者にお申し付けください。内容を承ったうえで、必要に応じて責任者又は税理士から改めてご説明申し上げます。
+ご不明点や個別のご事情がございましたら、まずは当事務所までお申し付けください。内容を承ったうえで、必要に応じて責任者又は税理士から改めてご説明申し上げます。
 
 何卒ご理解賜りますようお願い申し上げます。${referenceBlock}`;
 
@@ -2767,7 +2977,7 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
 「当事務所では、長年にわたり報酬を据え置きながら、法令改正対応、会計・税務システムの整備、情報セキュリティ、職員研修、巡回監査及び経営支援の品質向上に取り組んでまいりました。」
 
 ■ 改定の考え方
-「基本的な物価調整の参考として、消費税調整後の累積CPIを確認しています。最低賃金や賃上げ率を単純に加算して改定額を決めるものではありません。」
+${cpiTalk}
 
 ■ ご相談内容
 「${dateStr}から、顧問報酬を${cpStr}から${npStr}へ見直したく、ご相談申し上げます。個別のご事情も伺い、必要に応じて責任者又は税理士から改めてご説明いたします。」`;
@@ -2776,20 +2986,32 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
       return { letter, talk, memo };
     }
 
-    function applyAdminPreset(value, options = {}){
-      currentPreset = IS_ADMIN && value === 'matsumoto_fee' ? 'matsumoto_fee' : 'general';
+    function applyOfficePreset(options = {}){
+      currentPreset = 'matsumoto_fee';
       if(adminPreset) adminPreset.value = currentPreset;
-      if(currentPreset === 'matsumoto_fee'){
-        priceBasisManuallySet = true;
-        setPriceBasis('exclusive');
-        setAudience('btob', true);
-        if(!options.restore || !productName.value.trim()) productName.value = '税務・会計顧問サービス';
-        if(!options.restore || !extraFactors.value.trim()) extraFactors.value = '法令改正への継続対応、会計・税務システムの整備、情報セキュリティの強化、職員研修及び専門知識の維持';
+      priceBasisManuallySet = true;
+      setPriceBasis('exclusive');
+      setAudience('btob', true);
+      ownCompany.value = '税理士法人松本会計';
+      ownCompany.readOnly = true;
+      if(!options.restore || !productName.value.trim()) productName.value = '税務・会計顧問サービス';
+      if(!options.restore || !extraFactors.value.trim()) extraFactors.value = '法令改正への継続対応、会計・税務システムの整備、情報セキュリティの強化、職員研修及び専門知識の維持';
+      if(!options.restore){
         applyChipState('#factorGroup', []);
         applyChipState('#effortGroup', []);
-      }else if(!options.restore){
+      }
+      updateCpiCapPanel();
+      if(!options.silent) generate();
+    }
+
+    function applyGeneralPreset(options = {}){
+      currentPreset = 'general';
+      if(adminPreset) adminPreset.value = currentPreset;
+      ownCompany.readOnly = false;
+      if(!options.restore){
         if(productName.value === '税務・会計顧問サービス') productName.value = '';
         if(extraFactors.value === '法令改正への継続対応、会計・税務システムの整備、情報セキュリティの強化、職員研修及び専門知識の維持') extraFactors.value = '';
+        if(ownCompany.value === '税理士法人松本会計') ownCompany.value = '';
         priceBasisManuallySet = false;
         setPriceBasis(currentAudience === 'btoc' ? 'inclusive' : 'exclusive');
       }
@@ -2808,12 +3030,11 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
     function generate(){
       try {
         updateRateHint();
-        validateBasic();
         validatePriceIncrease();
         updateCpiSinceView();
         updateCpiCapPanel();
 
-        if(IS_ADMIN && currentPreset === 'matsumoto_fee'){
+        if(isOfficeMode()){
           const special = buildMatsumotoOutputs();
           CACHE.letter = special.letter;
           CACHE.talk = special.talk;
@@ -2835,6 +3056,7 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
 
         if(printLetter) printLetter.textContent = CACHE.letter || '';
         if(printTalkMemo) printTalkMemo.textContent = `${CACHE.talk || ''}\n\n----------------------------------------\n\n${CACHE.memo || ''}`;
+        validateBasic();
         if(INITIAL_DRAFT_READY) saveDraft();
       } catch (err) {
         console.error(err);
@@ -2886,11 +3108,25 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
     }
 
     copyBtn.addEventListener('click', async () => {
+      generate();
+      const result = canExport();
+      if(!result.ok){
+        setExportAvailability(result.errors);
+        showImportStatus(`外部出力できません：${result.errors.join('／')}`);
+        return;
+      }
       const ok = await copyText(outputArea.value || '');
       if(ok) showCopied();
     });
 
     printBtn.addEventListener('click', () => {
+      generate();
+      const result = canExport();
+      if(!result.ok){
+        setExportAvailability(result.errors);
+        showImportStatus(`外部出力できません：${result.errors.join('／')}`);
+        return;
+      }
       try{
         if(printDate){
           const d = new Date();
@@ -2904,6 +3140,13 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
     });
 
     if(wordBtn) wordBtn.addEventListener('click', async () => {
+      generate();
+      const result = canExport();
+      if(!result.ok){
+        setExportAvailability(result.errors);
+        showImportStatus(`外部出力できません：${result.errors.join('／')}`);
+        return;
+      }
       const modeTitle = currentOutputMode === 'letter' ? '案内文' : (currentOutputMode === 'talk' ? '面談トーク' : '根拠メモ');
       const ymd = new Date().toISOString().slice(0,10);
       await downloadWordDocx(outputArea.value || '', `値上げ交渉_${modeTitle}_${ymd}.docx`);
@@ -2923,11 +3166,13 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
     if(autoSaveEnabled) autoSaveEnabled.addEventListener('change', () => {
       try{
         if(autoSaveEnabled.checked) saveDraft();
-        else localStorage.removeItem(AUTOSAVE_KEY);
+        else{
+          const autosaveKey = autosaveKeyForMode();
+          if(autosaveKey) localStorage.removeItem(autosaveKey);
+        }
       }catch(e){}
       generate();
     });
-    if(adminPreset) adminPreset.addEventListener('change', () => applyAdminPreset(adminPreset.value));
     if(cpiCapRounding) cpiCapRounding.addEventListener('change', generate);
     if(applyCpiCapBtn) applyCpiCapBtn.addEventListener('click', () => {
       const cap = computeCpiCap();
@@ -3033,15 +3278,20 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
       }
     }
 
-    resetBtn.addEventListener('click', () => {
+    function resetFormState(options = {}){
+      const modeAtReset = currentAuthMode;
       [partnerCompany,partnerPerson,partnerHonorificCustom,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,currentPriceMonth,effectiveDate,extraFactors,effortFreeText,valueFreeText,actualLaborRate].forEach(el=>{
         el.value='';
         el.classList.remove('imported-value');
       });
-      try{
-        localStorage.removeItem(AUTOSAVE_KEY);
-        localStorage.removeItem(LEGACY_AUTOSAVE_KEY);
-      }catch(e){}
+      if(options.clearStored){
+        try{
+          const currentKey = autosaveKeyForMode(modeAtReset);
+          if(currentKey) localStorage.removeItem(currentKey);
+          localStorage.removeItem(LEGACY_AUTOSAVE_V1_KEY);
+          localStorage.removeItem(LEGACY_AUTOSAVE_V2_KEY);
+        }catch(e){}
+      }
       closeExternalFactorsModal();
 
       if(partnerHonorific) partnerHonorific.value = '様';
@@ -3049,8 +3299,6 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
       embedNumbersInLetter.checked = true;
       linkRates.checked = true;
       autoSaveEnabled.checked = false;
-      currentPreset = 'general';
-      if(adminPreset) adminPreset.value = 'general';
       priceBasisManuallySet = false;
       setDecisionPrecision('month');
       setPriceBasis('exclusive');
@@ -3068,9 +3316,17 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
       prefSelect.value = '東京';
       setLocal('mk_pref_key','東京');
 
+      if(modeAtReset === 'office') applyOfficePreset({ restore:false, silent:true });
+      else applyGeneralPreset({ restore:false, silent:true });
+      updateAuthModeUi();
+
       updateEffectiveDatePlaceholder();
       renderAllByPref();
-      generate();
+      if(options.generateAfter !== false) generate();
+    }
+
+    resetBtn.addEventListener('click', () => {
+      resetFormState({ clearStored:true, generateAfter:true });
     });
 
     try{
@@ -3092,15 +3348,12 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
     setDecisionPrecision('month');
     setPriceBasis('exclusive');
 
-    const savedPref = getLocal('mk_pref_key');
-    if(savedPref && PREF_LABEL[savedPref]) prefSelect.value = savedPref;
-    else prefSelect.value = '東京';
+    prefSelect.value = '東京';
 
     const savedUrl = getLocal('mk_cost_data_url');
     if(dataUrl && savedUrl) dataUrl.value = savedUrl;
 
-    const savedAudience = getLocal('mk_audience_mode');
-    setAudience(savedAudience === 'btoc' ? 'btoc' : 'btob', true);
+    setAudience('btob', true);
 
     updateEffectiveDatePlaceholder();
 
@@ -3111,13 +3364,7 @@ ${ownCompanyStr}の${ownPersonStr}でございます。
     ]).then(() => {
       renderAllByPref();
       updateDataMetaUi();
-      restoreDraft();
-      renderAllByPref();
-      getUrlParams();
-      syncHonorificInput();
       initAuthGate();
-      INITIAL_DRAFT_READY = true;
-      generate();
     });
 
   })();

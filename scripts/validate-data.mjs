@@ -247,9 +247,12 @@ for (const text of forbidden) check(!combinedText.includes(text), `古い記載�
 
 check(indexHtml.includes("const TARGET_PASSWORD = 'price2026';"), 'TARGET_PASSWORDが変更されていない');
 check(indexHtml.includes("const OFFICE_PASSWORD = 'matsu20180201';"), '松本会計専用パスワードが設定されている');
-check(indexHtml.includes("if(input === OFFICE_PASSWORD)") && indexHtml.includes("unlockApp(true, 'office')"), '専用パスワードで事務所モードとして認証する');
-check(indexHtml.includes("sessionStorage.setItem(AUTH_MODE_KEY, authMode)") && indexHtml.includes("if(storedMode === 'office') activateOfficeMode();"), '事務所モードを同一タブ内で復元する');
-check(indexHtml.includes("applyAdminPreset('matsumoto_fee', { restore:true, silent:true })"), '専用パスワードで松本会計プリセットを選択済みにする');
+check(indexHtml.includes("let currentAuthMode = 'locked';") && indexHtml.includes("currentAuthMode === 'general'") && indexHtml.includes("currentAuthMode === 'office'"), '認証モードをlocked/general/officeの単一状態で管理する');
+check(!indexHtml.includes('IS_ADMIN') && !indexHtml.includes("qs.get('admin')") && !indexHtml.includes('isAdmin'), 'URL由来の旧管理モード判定が残っていない');
+check(indexHtml.includes("url.searchParams.delete('admin')") && indexHtml.includes('history.replaceState'), 'adminパラメータだけをURLから削除する');
+check(indexHtml.includes("if(input === TARGET_PASSWORD)") && indexHtml.includes("startAuthenticatedMode('general', true)"), '一般用パスワードでgeneralモードを起動する');
+check(indexHtml.includes("if(input === OFFICE_PASSWORD)") && indexHtml.includes("startAuthenticatedMode('office', true)"), '松本会計用パスワードでofficeモードを起動する');
+check(indexHtml.includes("if(isOfficeMode()) applyOfficePreset") && indexHtml.includes("else applyGeneralPreset"), 'officeだけに松本会計専用プリセットを適用する');
 check(!indexHtml.includes('getHistoricalCpi'), '年次CPIハードコード関数を使用していない');
 check(!indexHtml.includes('DEFAULT_NATIONAL_MIN_WAGE_SERIES'), '最低賃金の内蔵全国系列を使用していない');
 check(!indexHtml.includes('document.lastModified'), 'フッター更新日にdocument.lastModifiedを使用していない');
@@ -396,26 +399,78 @@ check(!cpiFunction.includes('new Date'), '累積CPIの比較月にブラウザ�
 check(!cpiFunction.includes('cpiRate'), '累積CPIを入力欄の前年同月比で外挿していない');
 check(cpiFunction.includes('最新公表月より後であるため算出できません'), '最新公表月より後の入力を算出不可としている');
 
-check(indexHtml.includes("const APP_VERSION = 'r45';"), 'リリース番号を単一定数r45で管理する');
-check((indexHtml.match(/r45/g) || []).length === 1, 'index.html内のr45リテラルが単一定数だけである');
-check(indexHtml.includes("const AUTOSAVE_KEY = 'mk_autosave_v2';") && indexHtml.includes("const LEGACY_AUTOSAVE_KEY = 'mk_autosave_v1';"), '自動保存v2と旧v1移行元を分ける');
-check(indexHtml.includes('if(!autoSaveEnabled || !autoSaveEnabled.checked)') && indexHtml.includes('localStorage.removeItem(AUTOSAVE_KEY)'), '自動保存OFFではv2へ保存せず解除時に削除する');
+check(indexHtml.includes("const APP_VERSION = 'r46';"), 'リリース番号を単一定数r46で管理する');
+check((indexHtml.match(/r46/g) || []).length === 1, 'index.html内のr46リテラルが単一定数だけである');
+check((indexHtml.match(/data-app-version/g) || []).length >= 3 && indexHtml.includes("el.textContent = APP_VERSION"), '画面とフッターの版表示をAPP_VERSIONから反映する');
+check(indexHtml.includes('関与先向け｜価格転嫁支援モード') && indexHtml.includes('松本会計内部用｜顧問報酬改定モード'), '一般モードと松本会計内部用モードの表示がある');
+check(indexHtml.includes('.officeOnly{display:none !important;}') && indexHtml.includes("classList.toggle('officeMode', office)"), 'office専用UIをofficeモードだけで表示する');
+check(indexHtml.includes('id="adminPreset" hidden') && !indexHtml.includes("adminPreset.addEventListener('change'"), '画面内で専用プリセットを直接切り替えられない');
+
+check(indexHtml.includes("['general', 'office'].includes(storedMode)") && indexHtml.includes("setAuthMode('locked')"), '不正なsessionStorageモードを認証済みとして扱わない');
+check(indexHtml.includes("sessionStorage.setItem(AUTH_MODE_KEY, nextMode)") && indexHtml.includes("sessionStorage.setItem(AUTH_SESSION_KEY, '1')"), 'general又はofficeをsessionStorageへ保存する');
+check(indexHtml.includes('sessionStorage.removeItem(AUTH_SESSION_KEY)') && indexHtml.includes('sessionStorage.removeItem(AUTH_MODE_KEY)'), 'ログイン画面へ戻る処理で認証キーを削除する');
+check(indexHtml.includes("document.documentElement.classList.toggle('officeMode', office)") && indexHtml.includes("setAuthMode('locked')"), 'ログアウト後にoffice表示クラスを残さない');
+check(indexHtml.includes('sessionStorageは厳格な認証ではなく、同一タブ内の画面モード復元だけに使用する'), 'sessionStorageが簡易な画面状態復元であることを明示する');
+
+check(indexHtml.includes("general: 'mk_autosave_v3_general'") && indexHtml.includes("office: 'mk_autosave_v3_office'"), 'generalとofficeで別の自動保存キーを使う');
+check(indexHtml.includes('function autosaveKeyForMode(mode = currentAuthMode)') && indexHtml.includes('const currentRaw = localStorage.getItem(autosaveKey)'), '現在の認証モードの下書きだけを読み込む');
+check(indexHtml.includes('localStorage.setItem(autosaveKey, JSON.stringify(payload))') && indexHtml.includes('authMode: currentAuthMode'), '現在の認証モードのキーだけへ保存する');
+check(indexHtml.includes("draft.preset === 'matsumoto_fee'") && indexHtml.includes("draft.preset === 'general'") && indexHtml.includes('AUTOSAVE_KEYS[targetMode]'), '旧mk_autosave_v2をpresetにより適切なモードへ移行する');
+check(indexHtml.includes("authMode:'general'") && indexHtml.includes('AUTOSAVE_KEYS.general') && indexHtml.includes('LEGACY_AUTOSAVE_V1_KEY'), '旧mk_autosave_v1をgeneralへ移行する');
+check(indexHtml.includes('旧版の保存データが残っています。安全のため自動復元しませんでした。'), '判定不能な旧保存データを自動復元しない');
+check(indexHtml.includes('let currentMigration = null;') && indexHtml.includes('if(targetMode === currentAuthMode)') && indexHtml.includes('if(isGeneralMode() && !currentMigration)'), '旧v2とv1を順に整理し、現在モードの移行結果だけを復元する');
+check(indexHtml.includes('if(localStorage.getItem(targetKey))') && indexHtml.includes('if(localStorage.getItem(AUTOSAVE_KEYS.general))') && indexHtml.includes('既存のモード別下書きを優先'), '既存のv3モード別下書きを旧版データで上書きしない');
+check((indexHtml.match(/try\{ legacyV[12] = JSON\.parse/g) || []).length === 2 && indexHtml.includes('currentMigration.migrationWarning = migrationWarning') && indexHtml.includes('restored.migrationWarning ?'), '壊れた旧v1・v2 JSONで、他の移行と同時でも安全警告を表示する');
 check(indexHtml.includes("legacy.decisionDatePrecision = 'month';") && indexHtml.includes('legacy.currentPriceMonth = oldDecision;') && !indexHtml.includes('`${d.currentPriceAsOf}-01`'), '旧YYYY-MMを日付へ変換せず年月として移行する');
-check(indexHtml.includes('localStorage.removeItem(LEGACY_AUTOSAVE_KEY)'), '入力内容消去又は移行時に旧v1を削除する');
-check(indexHtml.includes('id="adminPreset"') && indexHtml.includes('松本会計・顧問報酬改定'), '管理モードに松本会計・顧問報酬改定プリセットがある');
+check(indexHtml.includes('const currentKey = autosaveKeyForMode(modeAtReset)') && indexHtml.includes('localStorage.removeItem(LEGACY_AUTOSAVE_V1_KEY)') && indexHtml.includes('localStorage.removeItem(LEGACY_AUTOSAVE_V2_KEY)'), '入力内容消去で現在モードと旧共有キーだけを削除する');
+check(!indexHtml.includes('localStorage.removeItem(AUTOSAVE_KEYS.general)') && !indexHtml.includes('localStorage.removeItem(AUTOSAVE_KEYS.office)'), '入力内容消去で別モードのv3下書きを直接削除しない');
+check(indexHtml.includes('autoSaveEnabled.checked = false'), '自動保存の初期値と入力消去後の状態をOFFにする');
+
+check(indexHtml.includes('function getExportValidationErrors(') && indexHtml.includes('function canExport()'), '外部出力可否を共通関数で一元判定する');
+for (const message of ['相手社名を入力してください','差出人担当者名を入力してください','現行顧問報酬を正しく入力してください','改定後顧問報酬は現行顧問報酬より高い金額を入力してください','適用開始時期を入力してください','契約書を確認するまで外部送付しないでください','価格改定の背景要因を選択又は入力してください']) {
+  check(indexHtml.includes(message), `松本会計専用モードの出力条件「${message}」を検証する`);
+}
+check(indexHtml.includes("ownCompany.value = '税理士法人松本会計'") && indexHtml.includes('ownCompany.readOnly = true'), 'officeモードで差出人社名を初期設定して固定する');
+check(indexHtml.includes("!['御中', '各位'].includes(honorific)") && indexHtml.includes('選択した敬称では相手担当者名が必要です'), '御中・各位だけ個人名を任意とし、それ以外は必須にする');
+check(indexHtml.includes("['〇〇株式会社', '〇〇', '＿＿', '未入力', '担当者', '（価格改定の背景要因が未入力です）']"), '案内文の仮文字を最終フェイルセーフで検出する');
+
+const copyHandler = indexHtml.slice(indexHtml.indexOf("copyBtn.addEventListener('click'"), indexHtml.indexOf("printBtn.addEventListener('click'"));
+const printHandler = indexHtml.slice(indexHtml.indexOf("printBtn.addEventListener('click'"), indexHtml.indexOf('if(wordBtn) wordBtn.addEventListener'));
+const wordHandler = indexHtml.slice(indexHtml.indexOf('if(wordBtn) wordBtn.addEventListener'), indexHtml.indexOf('[partnerCompany, partnerPerson'));
+check(copyHandler.includes('const result = canExport()') && copyHandler.includes('if(!result.ok)'), 'コピーイベントでcanExportを再確認する');
+check(printHandler.includes('const result = canExport()') && printHandler.includes('if(!result.ok)'), '印刷イベントでcanExportを再確認する');
+check(wordHandler.includes('const result = canExport()') && wordHandler.includes('if(!result.ok)'), 'WordイベントでcanExportを再確認する');
+check(indexHtml.includes('html.exportBlocked #printPack{display:none !important;}'), 'ブラウザ直接印刷でも不完全な文書を印刷しない');
+
+const recipientFunctionSource = indexHtml.match(/function buildRecipientBlock\(company, person, honorific, customHonorific\)\{[\s\S]*?\n    \}/)?.[0] || '';
+check(Boolean(recipientFunctionSource), '宛名生成関数を検出できる');
+if (recipientFunctionSource) {
+  try {
+    const buildRecipientBlock = Function('honorificRequiresPerson', `return (${recipientFunctionSource})`)((value) => !['御中', '各位'].includes(value));
+    check(buildRecipientBlock('株式会社例', '', '御中', '') === '株式会社例\n御中', '御中は個人名なしで自然な宛名になる');
+    check(buildRecipientBlock('株式会社例', '山田', '様', '') === '株式会社例\n山田様', '様は個人名と敬称を自然に連結する');
+    check(!buildRecipientBlock('株式会社例', '', '御中', '').includes('〇〇'), '御中の宛名に仮文字を補完しない');
+  } catch (error) {
+    errors.push(`宛名生成関数を実行できません: ${error.message}`);
+  }
+}
+
 check(indexHtml.includes('function buildMatsumotoOutputs()') && indexHtml.includes('税務・会計顧問サービス'), '会計事務所専用テンプレートを生成する');
 for (const term of ['法令改正への継続対応','会計・税務システムの整備','情報セキュリティの強化','職員研修及び専門知識の維持','巡回監査及び経営支援の品質維持・向上']) {
   check(indexHtml.includes(term), `会計事務所専用文面に「${term}」がある`);
 }
 check(indexHtml.includes('Math.floor(exact / unit) * unit'), 'CPI参考額を指定単位で切り下げる');
 check(indexHtml.includes('この金額を改定後価格へ反映') && indexHtml.includes('入力された改定後価格は、消費税調整後の累積CPIによる参考上限額を超えています。'), 'CPI参考額の手動反映と上限超過警告がある');
-check(indexHtml.includes('setExportAvailability(exportReasons)') && indexHtml.includes('契約書を確認するまで外部送付しないでください'), '必須項目不足と契約未確認時に外部出力を停止する');
+check(indexHtml.includes('累積CPIを算出できないため、物価調整額は個別に判断してください') && indexHtml.includes("cpiCapCard?.classList.add('hidden')"), '累積CPI算出不可時は参考上限額を隠して警告する');
+check(indexHtml.includes('const cpiAvailable = officialDataReady() && hasCpiResult(x)') && indexHtml.includes('const cpiTalk = cpiAvailable'), 'CPI算出不可時は本文と面談トークへCPIを挿入しない');
 check(!indexHtml.includes('事情変更の原則に基づき') && !indexHtml.includes('通知のみで可の可能性'), '契約条項の断定的な旧表現が残っていない');
 
 check(taxAdjustedBuilder.includes("args['accessed-date']") && taxAdjustedBuilder.includes('YYYYMM形式の年月列を確認できません'), '消費税調整済CPI生成スクリプトが必須確認日と動的年月列を検証する');
 check(taxAdjustedBuilder.includes('targetColumn') && taxAdjustedBuilder.includes('TARGET_SERIES_JA'), '消費税調整済CPI生成スクリプトが系列列を名称から特定する');
 check(validationWorkflow.includes('node-version: 22') && validationWorkflow.includes('node scripts/validate-data.mjs'), 'GitHub ActionsがNode.js 22でデータ検証を実行する');
-check(termsHtml.includes('本ツール」といいます）に固有の利用条件') && termsHtml.includes('事業上利用できます') && termsHtml.includes('自社の取引先への交付') && termsHtml.includes('商用利用である場合も許可されます'), '本ツール固有の利用条件に顧問先の業務利用と生成文書交付を許諾する');
+for (const term of ['本ツール本体','生成文書に関する追加許諾','無償、非独占かつ商用利用可能','自社名義で使用','自社の取引先への交付','自社Webサイトへの掲載','値上げ交渉ナビゲーターの名称','著作権表示','CC BY-NC-SA 4.0のライセンス表示','表示を付す必要はありません','本ツール本体の販売、有償提供、再配布','この禁止に含まれません']) {
+  check(termsHtml.includes(term), `個別利用条件に「${term}」がある`);
+}
 
 if (errors.length) {
   console.error(`データ検証: ${errors.length}件のエラー`);
