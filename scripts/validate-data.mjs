@@ -246,6 +246,10 @@ const combinedText = searchableFiles
 for (const text of forbidden) check(!combinedText.includes(text), `古い記載「${text}」が残っていない`);
 
 check(indexHtml.includes("const TARGET_PASSWORD = 'price2026';"), 'TARGET_PASSWORDが変更されていない');
+check(indexHtml.includes("const OFFICE_PASSWORD = 'matsu20180201';"), '松本会計専用パスワードが設定されている');
+check(indexHtml.includes("if(input === OFFICE_PASSWORD)") && indexHtml.includes("unlockApp(true, 'office')"), '専用パスワードで事務所モードとして認証する');
+check(indexHtml.includes("sessionStorage.setItem(AUTH_MODE_KEY, authMode)") && indexHtml.includes("if(storedMode === 'office') activateOfficeMode();"), '事務所モードを同一タブ内で復元する');
+check(indexHtml.includes("applyAdminPreset('matsumoto_fee', { restore:true, silent:true })"), '専用パスワードで松本会計プリセットを選択済みにする');
 check(!indexHtml.includes('getHistoricalCpi'), '年次CPIハードコード関数を使用していない');
 check(!indexHtml.includes('DEFAULT_NATIONAL_MIN_WAGE_SERIES'), '最低賃金の内蔵全国系列を使用していない');
 check(!indexHtml.includes('document.lastModified'), 'フッター更新日にdocument.lastModifiedを使用していない');

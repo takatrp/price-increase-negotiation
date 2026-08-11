@@ -658,10 +658,12 @@
        0) 定数・設定
        ========================= */
     const qs = new URLSearchParams(window.location.search);
-    const IS_ADMIN = (qs.get('admin') === '1');
+    let IS_ADMIN = (qs.get('admin') === '1');
     try{ document.documentElement.classList.toggle('isAdmin', !!IS_ADMIN); }catch(e){}
     const TARGET_PASSWORD = 'price2026';
+    const OFFICE_PASSWORD = 'matsu20180201';
     const AUTH_SESSION_KEY = 'mk_session_unlocked';
+    const AUTH_MODE_KEY = 'mk_session_mode';
     const APP_VERSION = 'r45';
     document.querySelectorAll('[data-app-version]').forEach(el => { el.textContent = APP_VERSION; });
 
@@ -956,7 +958,13 @@
       }
     }
 
-    function unlockApp(saveSession){
+    function activateOfficeMode(){
+      IS_ADMIN = true;
+      try{ document.documentElement.classList.add('isAdmin'); }catch(e){}
+      if(adminPreset) applyAdminPreset('matsumoto_fee', { restore:true, silent:true });
+    }
+
+    function unlockApp(saveSession, authMode = 'general'){
       if(appShell){
         appShell.style.display = '';
         requestAnimationFrame(() => appShell.classList.add('show'));
@@ -966,14 +974,22 @@
         setTimeout(() => { authShell.style.display = 'none'; }, 320);
       }
       if(saveSession){
-        try{ sessionStorage.setItem(AUTH_SESSION_KEY, '1'); }catch(e){}
+        try{
+          sessionStorage.setItem(AUTH_SESSION_KEY, '1');
+          sessionStorage.setItem(AUTH_MODE_KEY, authMode);
+        }catch(e){}
       }
     }
 
     function initAuthGate(){
       let unlocked = false;
-      try{ unlocked = sessionStorage.getItem(AUTH_SESSION_KEY) === '1'; }catch(e){}
+      let storedMode = 'general';
+      try{
+        unlocked = sessionStorage.getItem(AUTH_SESSION_KEY) === '1';
+        storedMode = sessionStorage.getItem(AUTH_MODE_KEY) || 'general';
+      }catch(e){}
       if(unlocked){
+        if(storedMode === 'office') activateOfficeMode();
         unlockApp(false);
         generate();
         return;
@@ -988,9 +1004,16 @@
 
       const attemptUnlock = () => {
         const input = (authPassword && authPassword.value || '').trim();
+        if(input === OFFICE_PASSWORD){
+          if(authError) authError.classList.remove('show');
+          activateOfficeMode();
+          unlockApp(true, 'office');
+          generate();
+          return;
+        }
         if(input === TARGET_PASSWORD){
           if(authError) authError.classList.remove('show');
-          unlockApp(true);
+          unlockApp(true, 'general');
           generate();
           return;
         }
