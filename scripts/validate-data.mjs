@@ -215,6 +215,8 @@ check(!indexHtml.includes('getHistoricalCpi'), '年次CPIハードコード関�
 check(!indexHtml.includes('DEFAULT_NATIONAL_MIN_WAGE_SERIES'), '最低賃金の内蔵全国系列を使用していない');
 check(!indexHtml.includes('document.lastModified'), 'フッター更新日にdocument.lastModifiedを使用していない');
 check(indexHtml.includes('<input type="date" id="currentPriceAsOf"'), '現行価格の決定時期が年月日入力である');
+check(indexHtml.includes('id="openCurrentPriceCalendarBtn"') && indexHtml.includes('カレンダーから選ぶ'), '現行価格の決定日に明示的なカレンダーボタンがある');
+check(indexHtml.includes("typeof currentPriceAsOf.showPicker === 'function'") && indexHtml.includes('currentPriceAsOf.focus();'), 'カレンダーボタンに対応ブラウザ判定とフォールバックがある');
 check(indexHtml.includes("if(s === '北海道') return '北海道';"), '北海道を末尾正規化の前に保持している');
 check(indexHtml.includes("renderAllByPref();\n          markImported(prefSelect);"), 'URLパラメータの都道府県適用後に表示を更新する');
 check(indexHtml.includes('id="dataLoadAlert"') && indexHtml.includes('role="alert"'), '一般画面上部にデータ読込エラー表示がある');
@@ -224,12 +226,63 @@ check(indexHtml.includes('function validateCpiDataPayload(json)'), 'CPIデータ
 check(indexHtml.includes('賃上げ率（参考）（%）'), '4.69%の画面ラベルが「賃上げ率（参考）」である');
 check(indexHtml.includes('id="actualLaborRate"'), '自社の実際の人件費上昇率が別入力欄である');
 check(!indexHtml.includes('人件費（前年比 +'), '顧客文の旧「人件費（前年比）」表現が残っていない');
-check(indexHtml.includes('連合の2026年春闘最終集計では、300人未満の組合における定昇相当込みの賃上げ率は${pct2(h)}％となっています。'), '顧客文に賃上げ率の正確な定義を使用している');
+check(indexHtml.includes('連合の2026年春闘最終集計でも、300人未満の組合における定昇相当込みの賃上げ率が${pct2(h)}％となる'), '顧客文に賃上げ率の正確な定義を自然な接続で使用している');
+check(!indexHtml.includes('連合の2026年春闘最終集計では、300人未満の組合における定昇相当込みの賃上げ率は${pct2(h)}％となっています。'), '賃上げ率を独立文として挿入する旧表現が残っていない');
 check(indexHtml.includes("isFinite(h) && wageRate.dataset.origin !== 'manual'"), '手入力の参考率を連合の公式集計として表示しない');
 check(indexHtml.includes("isFinite(p) && cpiRate.dataset.origin !== 'manual'"), '手入力の物価率を総務省の公式統計として表示しない');
 check(indexHtml.includes("cpiRate.dataset.origin = 'manual'; cpiAsOf.dataset.origin = 'manual';"), '公的統計連動OFF時に物価率を手入力扱いにする');
 check(indexHtml.includes("wageRate.dataset.origin = 'manual'; wageAsOf.dataset.origin = 'manual';"), '公的統計連動OFF時に賃上げ率を手入力扱いにする');
 check(indexHtml.includes('1970年1月～2024年12月は小数第1位、2025年1月以降は小数第3位の参考指数'), 'CPI指数の表示精度説明が正確である');
+
+const suggestedDateFunctionSource = indexHtml.match(/function suggestedEffectiveDateText\(now = new Date\(\)\)\{[\s\S]*?\n    \}/)?.[0] || '';
+check(Boolean(suggestedDateFunctionSource), '適用開始時期の動的プレースホルダー関数を検出できる');
+check(indexHtml.includes('updateEffectiveDatePlaceholder();'), '画面初期化時に適用開始時期のプレースホルダーを更新する');
+if (suggestedDateFunctionSource) {
+  try {
+    const suggestedEffectiveDateText = Function(`return (${suggestedDateFunctionSource})`)();
+    check(suggestedEffectiveDateText(new Date(2026, 7, 11)) === '2026年10月1日 ご注文分より', '2026年8月の入力例が2026年10月1日になる');
+    check(suggestedEffectiveDateText(new Date(2026, 10, 30)) === '2027年1月1日 ご注文分より', '2026年11月の入力例が2027年1月1日になる');
+    check(suggestedEffectiveDateText(new Date(2026, 11, 31)) === '2027年2月1日 ご注文分より', '2026年12月の入力例が2027年2月1日になる');
+  } catch (error) {
+    errors.push(`適用開始時期の動的プレースホルダー関数を実行できません: ${error.message}`);
+  }
+}
+
+const naturalEvidenceFunctionSource = indexHtml.match(/function buildNaturalEvidencePhrase\(\)\{[\s\S]*?function buildReferenceBlock/)?.[0]
+  ?.replace(/\s*function buildReferenceBlock$/, '') || '';
+check(Boolean(naturalEvidenceFunctionSource), '本文へ根拠を織り込む関数を検出できる');
+if (naturalEvidenceFunctionSource) {
+  try {
+    const makeNaturalEvidenceBuilder = Function(
+      'embedNumbersInLetter', 'prefSelect', 'cpiRate', 'wageRate', 'actualLaborRate',
+      'officialDataReady', 'minWageInfo', 'toNum', 'pct1', 'pct2',
+      `return (${naturalEvidenceFunctionSource})`
+    );
+    const toTestNumber = (value) => String(value ?? '').trim() === '' ? Number.NaN : Number(value);
+    const buildOfficialEvidence = makeNaturalEvidenceBuilder(
+      { checked: true }, { value: '兵庫' },
+      { value: '2.7', dataset: { origin: 'national' } },
+      { value: '4.69', dataset: { origin: 'national' } },
+      { value: '' }, () => true, () => ({ pct: 6.1 }),
+      toTestNumber, (value) => Number(value).toFixed(1), (value) => Number(value).toFixed(2)
+    );
+    const officialEvidence = buildOfficialEvidence();
+    check(officialEvidence.includes('最低賃金が前年度比 +6.1%、物価が前年同月比 +2.7%となっているほか、連合の2026年春闘最終集計でも'), '最低賃金・物価・春闘参考値が一続きの説明になる');
+    check(officialEvidence.includes('賃上げ率が4.69％となるなど、事業運営や人材確保にかかる負担は一段と高まっております。'), '春闘参考値をコスト環境の説明へ自然に接続する');
+    check(!officialEvidence.includes('\n'), '本文へ織り込む根拠文に不自然な改行がない');
+
+    const buildManualEvidence = makeNaturalEvidenceBuilder(
+      { checked: true }, { value: '兵庫' },
+      { value: '2.7', dataset: { origin: 'manual' } },
+      { value: '8.00', dataset: { origin: 'manual' } },
+      { value: '' }, () => true, () => ({ pct: 6.1 }),
+      toTestNumber, (value) => Number(value).toFixed(1), (value) => Number(value).toFixed(2)
+    );
+    check(!buildManualEvidence().includes('連合の2026年春闘最終集計'), '手入力の賃上げ率を連合の公式集計として本文へ挿入しない');
+  } catch (error) {
+    errors.push(`本文へ根拠を織り込む関数を実行できません: ${error.message}`);
+  }
+}
 
 for (const option of ['--updated', '--latest-official-yoy', '--publication-date', '--accessed-date']) {
   check(cpiBuilder.includes(option), `CPI生成スクリプトが${option}を必須入力として扱う`);

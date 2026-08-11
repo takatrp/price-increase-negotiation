@@ -27,7 +27,7 @@
     .card{background:var(--card);border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);padding:16px;margin-bottom:12px}
     .pill{display:inline-block;background:var(--soft);color:var(--brand);font-weight:900;border-radius:999px;padding:5px 9px;font-size:.82rem;margin-bottom:10px}
     label{display:block;font-size:.86rem;color:#374151;margin:12px 0 6px;font-weight:800}
-    input[type="text"],input[type="month"],textarea,select{
+    input[type="text"],input[type="month"],input[type="date"],textarea,select{
       width:100%;box-sizing:border-box;border:1px solid #e5e7eb;border-radius:10px;padding:10px;font-size:1rem;background:#fff;outline:none;
       transition: background-color .2s,border-color .2s,color .2s;
     }
@@ -47,7 +47,16 @@
     .miniActions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 
     .inputGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media (max-width:520px){.inputGrid{grid-template-columns:1fr}}
+    .datePickerRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch}
+    .datePickerBtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;border:1px solid var(--brand);border-radius:10px;padding:10px 12px;background:#eef6fa;color:#244c5a;font-size:.88rem;font-weight:900;cursor:pointer;transition:background-color .2s,box-shadow .2s}
+    .datePickerBtn:hover{background:#dcecf2}
+    .datePickerBtn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(87,136,153,.2)}
+    input[type="date"]::-webkit-calendar-picker-indicator{width:1.2rem;height:1.2rem;cursor:pointer;opacity:.85}
+    @media (max-width:520px){
+      .inputGrid{grid-template-columns:1fr}
+      .datePickerRow{grid-template-columns:1fr}
+      .datePickerBtn{width:100%}
+    }
 
     .dashboard{display:block}
     .colL,.colR{display:flex;flex-direction:column;gap:10px}
@@ -249,8 +258,11 @@
           <div class="inputGrid" style="margin-top:8px;">
             <div>
               <label for="currentPriceAsOf">現行価格の決定日（年月日）</label>
-              <input type="date" id="currentPriceAsOf" />
-              <div class="hint">この日付時点で実際に適用されていた最低賃金と、同じ月のCPIを基準に計算します。</div>
+              <div class="datePickerRow">
+                <input type="date" id="currentPriceAsOf" aria-describedby="currentPriceAsOfHint" />
+                <button class="datePickerBtn" id="openCurrentPriceCalendarBtn" type="button" aria-label="現行価格の決定日をカレンダーから選ぶ"><span aria-hidden="true">📅</span>カレンダーから選ぶ</button>
+              </div>
+              <div class="hint" id="currentPriceAsOfHint">この日付時点で実際に適用されていた最低賃金と、同じ月のCPIを基準に計算します。</div>
             </div>
             <div style="display:flex;align-items:flex-end;">
               <button class="btn emphasis" id="openExternalFactorsBtn" type="button">外部環境を確認</button>
@@ -277,7 +289,8 @@
           <div class="inputGrid" style="margin-top:8px;">
             <div>
               <label for="effectiveDate">適用開始時期</label>
-              <input type="text" id="effectiveDate" placeholder="例）2026年4月1日 ご注文分より" />
+              <input type="text" id="effectiveDate" placeholder="例）作業日の翌々月1日 ご注文分より" />
+              <div class="hint">入力例の日付は、作業日の翌々月1日に自動更新されます。</div>
             </div>
           </div>
 
@@ -688,6 +701,7 @@
     const currentPrice = $('#currentPrice');
     const newPrice = $('#newPrice');
     const currentPriceAsOf = $('#currentPriceAsOf');
+    const openCurrentPriceCalendarBtn = $('#openCurrentPriceCalendarBtn');
     const effectiveDate = $('#effectiveDate');
     const outputArea = $('#outputArea');
     const partnerCompany = $('#partnerCompany');
@@ -711,6 +725,15 @@
     const authUnlockBtn = $('#authUnlockBtn');
     const authError = $('#authError');
     const authShowPassword = $('#authShowPassword');
+
+    function suggestedEffectiveDateText(now = new Date()){
+      const suggestedDate = new Date(now.getFullYear(), now.getMonth() + 2, 1);
+      return `${suggestedDate.getFullYear()}年${suggestedDate.getMonth() + 1}月1日 ご注文分より`;
+    }
+
+    function updateEffectiveDatePlaceholder(now = new Date()){
+      if(effectiveDate) effectiveDate.placeholder = `例）${suggestedEffectiveDateText(now)}`;
+    }
 
     const prefSelect = $('#prefSelect');
     const step0Card = $('#step0Card');
@@ -1728,22 +1751,30 @@
       const sentences = [];
       if(officialDataReady()){
         const w = minWageInfo(key);
-        const mw = w ? `最低賃金（前年度比 +${pct1(w.pct)}%）` : '';
+        const mw = w ? `最低賃金が前年度比 +${pct1(w.pct)}%` : '';
         const p = toNum(cpiRate.value);
-        const price = isFinite(p) && cpiRate.dataset.origin !== 'manual' ? `物価（前年同月比 +${pct1(p)}%）` : '';
+        const price = isFinite(p) && cpiRate.dataset.origin !== 'manual' ? `物価が前年同月比 +${pct1(p)}%` : '';
         const bits = [mw, price].filter(Boolean);
-        if(bits.length) sentences.push(`背景として、${bits.join('、')}の上昇といった外部環境の変化が重なっております。`);
-
         const h = toNum(wageRate.value);
-        if(isFinite(h) && wageRate.dataset.origin !== 'manual') sentences.push(`連合の2026年春闘最終集計では、300人未満の組合における定昇相当込みの賃上げ率は${pct2(h)}％となっています。`);
+        const wageEvidence = isFinite(h) && wageRate.dataset.origin !== 'manual'
+          ? `連合の2026年春闘最終集計でも、300人未満の組合における定昇相当込みの賃上げ率が${pct2(h)}％となる`
+          : '';
+
+        if(bits.length && wageEvidence){
+          sentences.push(`外部指標を見ても、${bits.join('、')}となっているほか、${wageEvidence}など、事業運営や人材確保にかかる負担は一段と高まっております。`);
+        } else if(bits.length){
+          sentences.push(`外部指標を見ても、${bits.join('、')}となっており、事業運営を取り巻くコスト環境は厳しさを増しております。`);
+        } else if(wageEvidence){
+          sentences.push(`人件費を取り巻く環境についても、${wageEvidence}など、変化が続いております。`);
+        }
       }
 
       const actual = toNum(actualLaborRate.value);
       if(isFinite(actual)){
         const sign = actual >= 0 ? '+' : '-';
-        sentences.push(`自社の実績では、人件費が前年比${sign}${pct1(Math.abs(actual))}％変動しています。`);
+        sentences.push(`また、当社の実績では、人件費が前年比${sign}${pct1(Math.abs(actual))}％変動しております。`);
       }
-      return sentences.join('\n');
+      return sentences.join(' ');
     }
 
     function buildReferenceBlock(decidedYM){
@@ -2351,6 +2382,18 @@ A.「ご意見ありがとうございます。当店としては品質とサー
      embedNumbersInLetter, linkRates, cpiRate, wageRate, actualLaborRate, cpiAsOf, wageAsOf]
       .forEach(el => el.addEventListener('input', generate));
 
+    if(openCurrentPriceCalendarBtn) openCurrentPriceCalendarBtn.addEventListener('click', () => {
+      if(!currentPriceAsOf) return;
+      if(typeof currentPriceAsOf.showPicker === 'function'){
+        try{
+          currentPriceAsOf.showPicker();
+          return;
+        }catch(e){}
+      }
+      currentPriceAsOf.focus();
+      currentPriceAsOf.click();
+    });
+
     if(openExternalFactorsBtn) openExternalFactorsBtn.addEventListener('click', openExternalFactorsModal);
     if(openExternalFactorsBtn2) openExternalFactorsBtn2.addEventListener('click', openExternalFactorsModal);
     if(closeExternalFactorsBtn) closeExternalFactorsBtn.addEventListener('click', closeExternalFactorsModal);
@@ -2480,6 +2523,7 @@ A.「ご意見ありがとうございます。当店としては品質とサー
       prefSelect.value = '東京';
       setLocal('mk_pref_key','東京');
 
+      updateEffectiveDatePlaceholder();
       renderAllByPref();
       generate();
     });
@@ -2510,6 +2554,8 @@ A.「ご意見ありがとうございます。当店としては品質とサー
 
     const savedAudience = getLocal('mk_audience_mode');
     setAudience(savedAudience === 'btoc' ? 'btoc' : 'btob', true);
+
+    updateEffectiveDatePlaceholder();
 
     Promise.all([
       loadCostData(savedUrl || './pref_cost_data.json', true),
