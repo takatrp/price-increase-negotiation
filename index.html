@@ -47,16 +47,8 @@
     .miniActions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 
     .inputGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .datePickerRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch}
-    .datePickerBtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;border:1px solid var(--brand);border-radius:10px;padding:10px 12px;background:#eef6fa;color:#244c5a;font-size:.88rem;font-weight:900;cursor:pointer;transition:background-color .2s,box-shadow .2s}
-    .datePickerBtn:hover{background:#dcecf2}
-    .datePickerBtn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(87,136,153,.2)}
     input[type="date"]::-webkit-calendar-picker-indicator{width:1.2rem;height:1.2rem;cursor:pointer;opacity:.85}
-    @media (max-width:520px){
-      .inputGrid{grid-template-columns:1fr}
-      .datePickerRow{grid-template-columns:1fr}
-      .datePickerBtn{width:100%}
-    }
+    @media (max-width:520px){.inputGrid{grid-template-columns:1fr}}
 
     .dashboard{display:block}
     .colL,.colR{display:flex;flex-direction:column;gap:10px}
@@ -258,10 +250,7 @@
           <div class="inputGrid" style="margin-top:8px;">
             <div>
               <label for="currentPriceAsOf">現行価格の決定日（年月日）</label>
-              <div class="datePickerRow">
-                <input type="date" id="currentPriceAsOf" aria-describedby="currentPriceAsOfHint" />
-                <button class="datePickerBtn" id="openCurrentPriceCalendarBtn" type="button" aria-label="現行価格の決定日をカレンダーから選ぶ"><span aria-hidden="true">📅</span>カレンダーから選ぶ</button>
-              </div>
+              <input type="date" id="currentPriceAsOf" aria-describedby="currentPriceAsOfHint" />
               <div class="hint" id="currentPriceAsOfHint">この日付時点で実際に適用されていた最低賃金と、同じ月のCPIを基準に計算します。</div>
             </div>
             <div style="display:flex;align-items:flex-end;">
@@ -290,7 +279,6 @@
             <div>
               <label for="effectiveDate">適用開始時期</label>
               <input type="text" id="effectiveDate" placeholder="例）作業日の翌々月1日 ご注文分より" />
-              <div class="hint">入力例の日付は、作業日の翌々月1日に自動更新されます。</div>
             </div>
           </div>
 
@@ -701,7 +689,6 @@
     const currentPrice = $('#currentPrice');
     const newPrice = $('#newPrice');
     const currentPriceAsOf = $('#currentPriceAsOf');
-    const openCurrentPriceCalendarBtn = $('#openCurrentPriceCalendarBtn');
     const effectiveDate = $('#effectiveDate');
     const outputArea = $('#outputArea');
     const partnerCompany = $('#partnerCompany');
@@ -2381,18 +2368,6 @@ A.「ご意見ありがとうございます。当店としては品質とサー
      productName, currentPriceAsOf, effectiveDate, extraFactors, effortFreeText, valueFreeText,
      embedNumbersInLetter, linkRates, cpiRate, wageRate, actualLaborRate, cpiAsOf, wageAsOf]
       .forEach(el => el.addEventListener('input', generate));
-
-    if(openCurrentPriceCalendarBtn) openCurrentPriceCalendarBtn.addEventListener('click', () => {
-      if(!currentPriceAsOf) return;
-      if(typeof currentPriceAsOf.showPicker === 'function'){
-        try{
-          currentPriceAsOf.showPicker();
-          return;
-        }catch(e){}
-      }
-      currentPriceAsOf.focus();
-      currentPriceAsOf.click();
-    });
 
     if(openExternalFactorsBtn) openExternalFactorsBtn.addEventListener('click', openExternalFactorsModal);
     if(openExternalFactorsBtn2) openExternalFactorsBtn2.addEventListener('click', openExternalFactorsModal);

@@ -215,8 +215,8 @@ check(!indexHtml.includes('getHistoricalCpi'), '年次CPIハードコード関�
 check(!indexHtml.includes('DEFAULT_NATIONAL_MIN_WAGE_SERIES'), '最低賃金の内蔵全国系列を使用していない');
 check(!indexHtml.includes('document.lastModified'), 'フッター更新日にdocument.lastModifiedを使用していない');
 check(indexHtml.includes('<input type="date" id="currentPriceAsOf"'), '現行価格の決定時期が年月日入力である');
-check(indexHtml.includes('id="openCurrentPriceCalendarBtn"') && indexHtml.includes('カレンダーから選ぶ'), '現行価格の決定日に明示的なカレンダーボタンがある');
-check(indexHtml.includes("typeof currentPriceAsOf.showPicker === 'function'") && indexHtml.includes('currentPriceAsOf.focus();'), 'カレンダーボタンに対応ブラウザ判定とフォールバックがある');
+check(!indexHtml.includes('openCurrentPriceCalendarBtn') && !indexHtml.includes('カレンダーから選ぶ'), 'スマートフォンで機能しない重複カレンダーボタンがない');
+check(!indexHtml.includes('入力例の日付は、作業日の翌々月1日に自動更新されます。'), '適用開始時期の不要な説明文がない');
 check(indexHtml.includes("if(s === '北海道') return '北海道';"), '北海道を末尾正規化の前に保持している');
 check(indexHtml.includes("renderAllByPref();\n          markImported(prefSelect);"), 'URLパラメータの都道府県適用後に表示を更新する');
 check(indexHtml.includes('id="dataLoadAlert"') && indexHtml.includes('role="alert"'), '一般画面上部にデータ読込エラー表示がある');
