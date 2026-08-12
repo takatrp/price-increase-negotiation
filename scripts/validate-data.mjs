@@ -260,6 +260,8 @@ check(indexHtml.includes('<input type="date" id="currentPriceAsOf"'), '現行価
 check(indexHtml.includes('<input type="month" id="currentPriceMonth"'), '現行価格の決定時期を年月入力できる');
 check(indexHtml.includes('name="decisionDatePrecision" value="unknown"'), '現行価格の決定時期を不明として扱える');
 check(indexHtml.includes('name="priceBasis" value="exclusive"') && indexHtml.includes('name="priceBasis" value="inclusive"'), '税抜価格と税込価格を選択できる');
+check(indexHtml.includes('id="generalPriceBasisControls"') && indexHtml.includes('id="officePriceBasisFixed"'), '一般用価格区分操作とoffice用固定表示を分離する');
+check(indexHtml.includes('価格の入力区分：税抜価格（固定）'), 'officeモードで税抜価格固定と表示する');
 check(!indexHtml.includes('openCurrentPriceCalendarBtn') && !indexHtml.includes('カレンダーから選ぶ'), 'スマートフォンで機能しない重複カレンダーボタンがない');
 check(!indexHtml.includes('入力例の日付は、作業日の翌々月1日に自動更新されます。'), '適用開始時期の不要な説明文がない');
 check(indexHtml.includes("if(s === '北海道') return '北海道';"), '北海道を末尾正規化の前に保持している');
@@ -399,8 +401,140 @@ check(!cpiFunction.includes('new Date'), '累積CPIの比較月にブラウザ�
 check(!cpiFunction.includes('cpiRate'), '累積CPIを入力欄の前年同月比で外挿していない');
 check(cpiFunction.includes('最新公表月より後であるため算出できません'), '最新公表月より後の入力を算出不可としている');
 
-check(indexHtml.includes("const APP_VERSION = 'r46';"), 'リリース番号を単一定数r46で管理する');
-check((indexHtml.match(/r46/g) || []).length === 1, 'index.html内のr46リテラルが単一定数だけである');
+const calcCpiFunctionSource = cpiFunction.includes('\n\n    const hasCpiResult')
+  ? cpiFunction.slice(0, cpiFunction.indexOf('\n\n    const hasCpiResult'))
+  : '';
+const computeCpiCapFunctionSource = indexHtml.match(/function computeCpiCap\(\)\{[\s\S]*?\n    \}/)?.[0] || '';
+if (calcCpiFunctionSource && cpi && taxAdjustedCpi) {
+  try {
+    const makeCalcCpiSince = Function(
+      'basis', 'baseMonth', 'CPI_MONTHLY_DATA', 'CPI_TAX_ADJUSTED_DATA',
+      `let currentPriceBasis = basis;
+       const getDecisionContext = () => ({ month:baseMonth, value:baseMonth, display:baseMonth });
+       ${calcCpiFunctionSource}
+       return calcCpiSince;`
+    );
+    const calculate = (basis, baseMonth) => makeCalcCpiSince(basis, baseMonth, cpi, taxAdjustedCpi)();
+    const office2019 = calculate('exclusive', '2019-01');
+    const office2020 = calculate('exclusive', '2020-01');
+    const generalInclusive2019 = calculate('inclusive', '2019-01');
+    const generalInclusive2020 = calculate('inclusive', '2020-01');
+    check(office2019.method === 'tax_adjusted_bridge', 'office相当の税抜・2019年1月基準はtax_adjusted_bridgeを使用する');
+    check(office2020.method === 'normal_ratio', 'office相当の税抜・2020年1月基準はnormal_ratioを使用する');
+    check(generalInclusive2019.method === 'normal_ratio', 'general税込・2019年1月基準は通常CPIのnormal_ratioを使用する');
+    check(Math.abs(office2020.cum - generalInclusive2020.cum) < 1e-12, '2020年1月以降基準の税抜・税込の累積率が一致する');
+
+    const officeExact = 30000 * office2019.multiplier;
+    const officeSuggested = Math.floor(officeExact / 1000) * 1000;
+    const inclusiveExact = 30000 * generalInclusive2019.multiplier;
+    const inclusiveSuggested = Math.floor(inclusiveExact / 1000) * 1000;
+    check(officeExact > 33900 && officeExact < 34000, 'officeの2019年1月基準・30,000円の厳密額が33,900円台である');
+    check(officeSuggested === 33000, 'officeのCPI参考額を1,000円単位で切り下げると33,000円である');
+    check(inclusiveSuggested === 34000 && inclusiveExact > officeExact, 'officeで税込の通常CPIによる34,000円を採用しない');
+    if (computeCpiCapFunctionSource) {
+      const computeCpiCap = Function('cpiResult', `
+        const isOfficeMode = () => true;
+        let currentPriceBasis = 'inclusive';
+        const enforceOfficePriceBasis = () => { currentPriceBasis = 'exclusive'; };
+        const currentPrice = { value:'30000' };
+        const cpiCapRounding = { value:'1000' };
+        const toNum = (value) => Number(value);
+        const calcCpiSince = () => cpiResult;
+        const hasCpiResult = (value) => Boolean(value && !value.error && Number.isFinite(value.cum));
+        ${computeCpiCapFunctionSource}
+        return computeCpiCap;
+      `)(office2019);
+      const cap = computeCpiCap();
+      check(cap?.x?.method === 'tax_adjusted_bridge', 'computeCpiCapがofficeの2019年1月基準に消費税調整済CPIを使用する');
+      check(Math.abs(cap?.exact - 33921.98651933702) < 1e-8, 'computeCpiCapの厳密額が約33,921.9865円である');
+      check(cap?.suggested === 33000, 'computeCpiCapの1,000円単位切下げ提案額が33,000円である');
+    }
+  } catch (error) {
+    errors.push(`累積CPIのモード別計算を実行できません: ${error.message}`);
+  }
+}
+
+const priceBasisLabelFunctionSource = indexHtml.match(/function priceBasisLabel\(\)\{[\s\S]*?\n    \}/)?.[0] || '';
+const syncPriceBasisFunctionSource = indexHtml.match(/function syncPriceBasisUi\(\)\{[\s\S]*?\n    \}/)?.[0] || '';
+const enforceOfficePriceBasisFunctionSource = indexHtml.match(/function enforceOfficePriceBasis\(\)\{[\s\S]*?\n    \}/)?.[0] || '';
+const setPriceBasisFunctionSource = indexHtml.match(/function setPriceBasis\(value, options = \{\}\)\{[\s\S]*?\n    \}/)?.[0] || '';
+const getDraftPriceBasisFunctionSource = indexHtml.match(/function getDraftPriceBasis\(\)\{[\s\S]*?\n    \}/)?.[0] || '';
+const applyRestoredPriceBasisFunctionSource = indexHtml.match(/function applyRestoredPriceBasis\(draft\)\{[\s\S]*?\n    \}/)?.[0] || '';
+check(Boolean(enforceOfficePriceBasisFunctionSource), 'officeモードの税抜固定を共通関数化する');
+check(setPriceBasisFunctionSource.includes('if(isOfficeMode())') && setPriceBasisFunctionSource.includes('enforceOfficePriceBasis()'), 'setPriceBasisの中央ガードがofficeの税込指定を無効化する');
+check((indexHtml.match(/currentPriceBasis = 'exclusive'/g) || []).length === 2, 'currentPriceBasisの税抜直接代入を初期化と共通固定関数だけに限定する');
+check(Boolean(getDraftPriceBasisFunctionSource) && Boolean(applyRestoredPriceBasisFunctionSource), '下書きの価格区分保存・復元を共通関数化する');
+if (priceBasisLabelFunctionSource && syncPriceBasisFunctionSource && enforceOfficePriceBasisFunctionSource && setPriceBasisFunctionSource && getDraftPriceBasisFunctionSource && applyRestoredPriceBasisFunctionSource) {
+  try {
+    const makePriceBasisHarness = Function('mode', `
+      let currentAuthMode = mode;
+      const isOfficeMode = () => currentAuthMode === 'office';
+      let currentPriceBasis = 'exclusive';
+      let priceBasisManuallySet = false;
+      const makeClassList = (initial = []) => ({
+        values:new Set(initial),
+        toggle(name, force){
+          const enabled = force === undefined ? !this.values.has(name) : Boolean(force);
+          if(enabled) this.values.add(name); else this.values.delete(name);
+          return enabled;
+        },
+        contains(name){ return this.values.has(name); }
+      });
+      const makeElement = (classes = []) => ({
+        textContent:'', classList:makeClassList(classes), attributes:{},
+        setAttribute(name, value){ this.attributes[name] = value; }
+      });
+      const radios = [
+        { value:'exclusive', checked:true, disabled:false },
+        { value:'inclusive', checked:false, disabled:false }
+      ];
+      const document = { querySelectorAll:() => radios };
+      const generalPriceBasisControls = makeElement();
+      const officePriceBasisFixed = makeElement(['hidden']);
+      const currentPriceLabel = makeElement();
+      const newPriceLabel = makeElement();
+      ${priceBasisLabelFunctionSource}
+      ${syncPriceBasisFunctionSource}
+      ${enforceOfficePriceBasisFunctionSource}
+      ${setPriceBasisFunctionSource}
+      ${getDraftPriceBasisFunctionSource}
+      ${applyRestoredPriceBasisFunctionSource}
+      return {
+        setPriceBasis, getDraftPriceBasis, applyRestoredPriceBasis,
+        snapshot:() => ({
+          currentPriceBasis, priceBasisManuallySet, radios,
+          generalHidden:generalPriceBasisControls.classList.contains('hidden'),
+          officeHidden:officePriceBasisFixed.classList.contains('hidden'),
+          currentLabel:currentPriceLabel.textContent, newLabel:newPriceLabel.textContent
+        })
+      };
+    `);
+    const officeHarness = makePriceBasisHarness('office');
+    officeHarness.setPriceBasis('inclusive', { manual:true });
+    const officeState = officeHarness.snapshot();
+    check(officeState.currentPriceBasis === 'exclusive' && officeState.priceBasisManuallySet === true, 'officeでsetPriceBasis(inclusive)を呼んでも状態はexclusiveになる');
+    check(officeState.radios.every((radio) => radio.disabled) && officeState.radios[0].checked && !officeState.radios[1].checked, 'officeで価格区分ラジオを無効化し税抜だけをcheckedにする');
+    check(officeState.generalHidden && !officeState.officeHidden, 'officeで一般用ラジオを隠し税抜固定表示を出す');
+    check(officeState.currentLabel === '現行顧問報酬（税抜）' && officeState.newLabel === '改定後顧問報酬（税抜）', 'officeの価格ラベルに顧問報酬と税抜を明記する');
+    const restoredOfficeBasis = officeHarness.applyRestoredPriceBasis({ priceBasis:'inclusive', priceBasisManuallySet:false });
+    const savedOfficeBasis = officeHarness.getDraftPriceBasis();
+    check(restoredOfficeBasis === 'exclusive', 'office用下書きのpriceBasisがinclusiveでもexclusiveで復元する');
+    check(savedOfficeBasis.priceBasis === 'exclusive' && savedOfficeBasis.priceBasisManuallySet === true, 'office用下書きはexclusive・手動設定済みとして保存する');
+
+    const generalHarness = makePriceBasisHarness('general');
+    const restoredGeneralBasis = generalHarness.applyRestoredPriceBasis({ priceBasis:'inclusive', priceBasisManuallySet:true });
+    const generalState = generalHarness.snapshot();
+    const savedGeneralBasis = generalHarness.getDraftPriceBasis();
+    check(restoredGeneralBasis === 'inclusive' && generalState.currentPriceBasis === 'inclusive' && generalState.radios[1].checked, 'generalでsetPriceBasis(inclusive)の保存値を復元できる');
+    check(savedGeneralBasis.priceBasis === 'inclusive' && savedGeneralBasis.priceBasisManuallySet === true, 'general用下書きにinclusiveを保存できる');
+    check(generalState.radios.every((radio) => !radio.disabled) && !generalState.generalHidden && generalState.officeHidden, 'generalで税抜・税込ラジオを操作できる');
+  } catch (error) {
+    errors.push(`価格入力区分の中央ガードを実行できません: ${error.message}`);
+  }
+}
+
+check(indexHtml.includes("const APP_VERSION = 'r47';"), 'リリース番号を単一定数r47で管理する');
+check((indexHtml.match(/r47/g) || []).length === 1, 'index.html内のr47リテラルが単一定数だけである');
 check((indexHtml.match(/data-app-version/g) || []).length >= 3 && indexHtml.includes("el.textContent = APP_VERSION"), '画面とフッターの版表示をAPP_VERSIONから反映する');
 check(indexHtml.includes('関与先向け｜価格転嫁支援モード') && indexHtml.includes('松本会計内部用｜顧問報酬改定モード'), '一般モードと松本会計内部用モードの表示がある');
 check(indexHtml.includes('.officeOnly{display:none !important;}') && indexHtml.includes("classList.toggle('officeMode', office)"), 'office専用UIをofficeモードだけで表示する');
@@ -425,8 +559,50 @@ check(indexHtml.includes("legacy.decisionDatePrecision = 'month';") && indexHtml
 check(indexHtml.includes('const currentKey = autosaveKeyForMode(modeAtReset)') && indexHtml.includes('localStorage.removeItem(LEGACY_AUTOSAVE_V1_KEY)') && indexHtml.includes('localStorage.removeItem(LEGACY_AUTOSAVE_V2_KEY)'), '入力内容消去で現在モードと旧共有キーだけを削除する');
 check(!indexHtml.includes('localStorage.removeItem(AUTOSAVE_KEYS.general)') && !indexHtml.includes('localStorage.removeItem(AUTOSAVE_KEYS.office)'), '入力内容消去で別モードのv3下書きを直接削除しない');
 check(indexHtml.includes('autoSaveEnabled.checked = false'), '自動保存の初期値と入力消去後の状態をOFFにする');
+check(indexHtml.includes('const draftPriceBasis = getDraftPriceBasis();') && indexHtml.includes('...draftPriceBasis'), 'saveDraftがモード別に正規化した価格区分を保存する');
+check(indexHtml.includes('applyRestoredPriceBasis(d);'), 'restoreDraftがモード別の価格区分復元関数を使う');
 
 check(indexHtml.includes('function getExportValidationErrors(') && indexHtml.includes('function canExport()'), '外部出力可否を共通関数で一元判定する');
+check(indexHtml.includes("if(isOfficeMode() && currentPriceBasis !== 'exclusive') errors.push(OFFICE_PRICE_BASIS_ERROR)"), 'officeが税込状態なら外部出力を停止する');
+check(indexHtml.includes("const OFFICE_PRICE_BASIS_ERROR = '松本会計専用モードでは税抜価格を使用してください';"), 'officeの価格区分異常メッセージを共通化する');
+const getExportValidationErrorsFunctionSource = indexHtml.match(/function getExportValidationErrors\(letterText = CACHE\.letter \|\| ''\)\{[\s\S]*?\n    \}/)?.[0] || '';
+const canExportFunctionSource = indexHtml.match(/function canExport\(\)\{[\s\S]*?\n    \}/)?.[0] || '';
+if (getExportValidationErrorsFunctionSource && canExportFunctionSource) {
+  try {
+    const makeExportHarness = Function('office', 'basis', `
+      const OFFICE_PRICE_BASIS_ERROR = '松本会計専用モードでは税抜価格を使用してください';
+      const isOfficeMode = () => office;
+      let currentPriceBasis = basis;
+      const CACHE = { letter:'完成文書' };
+      const productName = { value:'税務・会計顧問サービス' };
+      const currentPrice = { value:'30000' };
+      const newPrice = { value:'33000' };
+      const extraFactors = { value:'価格改定の背景' };
+      const partnerCompany = { value:'株式会社例' };
+      const ownPerson = { value:'担当税理士' };
+      const partnerHonorific = { value:'御中' };
+      const partnerPerson = { value:'' };
+      const partnerHonorificCustom = { value:'' };
+      const effectiveDate = { value:'2026年10月1日' };
+      const currentAudience = 'btob';
+      const getSelectedValues = (selector) => selector === '#factorGroup' ? ['人件費'] : ['clause_yes'];
+      const toNum = (value) => Number(String(value).replace(/,/g, ''));
+      const honorificRequiresPerson = () => false;
+      const hasExportPlaceholder = () => false;
+      ${getExportValidationErrorsFunctionSource}
+      ${canExportFunctionSource}
+      return canExport();
+    `);
+    const blockedOfficeExport = makeExportHarness(true, 'inclusive');
+    const validOfficeExport = makeExportHarness(true, 'exclusive');
+    const validGeneralInclusiveExport = makeExportHarness(false, 'inclusive');
+    check(blockedOfficeExport.ok === false && blockedOfficeExport.errors.includes('松本会計専用モードでは税抜価格を使用してください'), 'officeでcurrentPriceBasisがinclusiveならcanExportがfalseになる');
+    check(validOfficeExport.ok === true, 'officeの税抜・必須入力済み文書は出力できる');
+    check(validGeneralInclusiveExport.ok === true, 'generalの税込文書は出力できる');
+  } catch (error) {
+    errors.push(`officeの税込状態に対する外部出力制御を実行できません: ${error.message}`);
+  }
+}
 for (const message of ['相手社名を入力してください','差出人担当者名を入力してください','現行顧問報酬を正しく入力してください','改定後顧問報酬は現行顧問報酬より高い金額を入力してください','適用開始時期を入力してください','契約書を確認するまで外部送付しないでください','価格改定の背景要因を選択又は入力してください']) {
   check(indexHtml.includes(message), `松本会計専用モードの出力条件「${message}」を検証する`);
 }
@@ -456,6 +632,10 @@ if (recipientFunctionSource) {
 }
 
 check(indexHtml.includes('function buildMatsumotoOutputs()') && indexHtml.includes('税務・会計顧問サービス'), '会計事務所専用テンプレートを生成する');
+check(indexHtml.includes('function buildMatsumotoOutputs(){\n      enforceOfficePriceBasis();'), '松本会計専用文面の生成直前に税抜固定を再保証する');
+check(indexHtml.includes("const cpStr = Number.isFinite(cp) ? `${yen(cp)}（税抜）`") && indexHtml.includes("const npStr = Number.isFinite(np) ? `${yen(np)}（税抜）`"), 'office用文面の現行・改定後報酬に税抜を明記する');
+check(indexHtml.includes('function computeCpiCap(){\n      if(!isOfficeMode()) return null;\n      enforceOfficePriceBasis();') && indexHtml.includes("if(currentPriceBasis !== 'exclusive') return null;"), 'CPI参考額の計算前にoffice・税抜を再確認する');
+check(indexHtml.includes('function generate(){\n      try {\n        if(isOfficeMode()) enforceOfficePriceBasis();'), '文面生成の冒頭でofficeの税抜固定を再保証する');
 for (const term of ['法令改正への継続対応','会計・税務システムの整備','情報セキュリティの強化','職員研修及び専門知識の維持','巡回監査及び経営支援の品質維持・向上']) {
   check(indexHtml.includes(term), `会計事務所専用文面に「${term}」がある`);
 }

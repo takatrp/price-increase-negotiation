@@ -103,6 +103,7 @@
     .choiceOption{display:flex;align-items:center;gap:7px;margin:0;padding:9px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-size:.86rem;color:#334155;cursor:pointer}
     .choiceOption:has(input:checked){border-color:var(--brand);background:#eef6fa;color:#0f172a}
     .choiceOption input{width:auto;accent-color:var(--brand)}
+    .priceBasisFixed{margin:6px 0 10px;padding:10px 12px;border:1px solid #93c5d3;border-radius:10px;background:#eef8fb;color:#164e63;font-size:.88rem;font-weight:900}
     .securityNote{margin:10px 0 0;padding:9px 11px;border-radius:9px;background:#f8fafc;border:1px solid #e2e8f0;color:#475569;font-size:.76rem;line-height:1.55}
     .presetPanel{border:1px solid rgba(87,136,153,.35);background:#f0f8fa}
     .btn:disabled{opacity:.45;cursor:not-allowed}
@@ -280,11 +281,14 @@
           <label for="prefSelect">主な提供エリア（都道府県）</label>
           <select id="prefSelect" aria-label="都道府県選択"></select>
 
-          <label>価格の入力区分</label>
-          <div class="choiceRow" id="priceBasisGroup" role="radiogroup" aria-label="価格の入力区分">
-            <label class="choiceOption"><input type="radio" name="priceBasis" value="exclusive" checked />税抜価格</label>
-            <label class="choiceOption"><input type="radio" name="priceBasis" value="inclusive" />税込価格</label>
+          <div id="generalPriceBasisControls">
+            <label>価格の入力区分</label>
+            <div class="choiceRow" id="priceBasisGroup" role="radiogroup" aria-label="価格の入力区分">
+              <label class="choiceOption"><input type="radio" name="priceBasis" value="exclusive" checked />税抜価格</label>
+              <label class="choiceOption"><input type="radio" name="priceBasis" value="inclusive" />税込価格</label>
+            </div>
           </div>
+          <div id="officePriceBasisFixed" class="officeOnly priceBasisFixed hidden" role="status">価格の入力区分：税抜価格（固定）</div>
 
           <label>現行価格を決定した時期</label>
           <div class="choiceRow" id="decisionPrecisionGroup" role="radiogroup" aria-label="現行価格を決定した時期の精度">
@@ -666,7 +670,8 @@
     const OFFICE_PASSWORD = 'matsu20180201';
     const AUTH_SESSION_KEY = 'mk_session_unlocked';
     const AUTH_MODE_KEY = 'mk_session_mode';
-    const APP_VERSION = 'r46';
+    const APP_VERSION = 'r47';
+    const OFFICE_PRICE_BASIS_ERROR = '松本会計専用モードでは税抜価格を使用してください';
     let currentAuthMode = 'locked';
     const isGeneralMode = () => currentAuthMode === 'general';
     const isOfficeMode = () => currentAuthMode === 'office';
@@ -785,6 +790,8 @@
     const decisionUnknownWrap = $('#decisionUnknownWrap');
     const currentPriceLabel = $('#currentPriceLabel');
     const newPriceLabel = $('#newPriceLabel');
+    const generalPriceBasisControls = $('#generalPriceBasisControls');
+    const officePriceBasisFixed = $('#officePriceBasisFixed');
     const autoSaveEnabled = $('#autoSaveEnabled');
     const adminPreset = $('#adminPreset');
     const cpiCapCard = $('#cpiCapCard');
@@ -898,6 +905,7 @@
     let currentPreset = 'general';
 
     function priceBasisLabel(){
+      if(isOfficeMode()) return '税抜';
       return currentPriceBasis === 'inclusive' ? '税込' : '税抜';
     }
 
@@ -906,18 +914,60 @@
     }
 
     function syncPriceBasisUi(){
+      const office = isOfficeMode();
       document.querySelectorAll('input[name="priceBasis"]').forEach(radio => {
         radio.checked = radio.value === currentPriceBasis;
+        radio.disabled = office;
       });
+      generalPriceBasisControls?.classList.toggle('hidden', office);
+      generalPriceBasisControls?.setAttribute('aria-hidden', office ? 'true' : 'false');
+      officePriceBasisFixed?.classList.toggle('hidden', !office);
       const basis = priceBasisLabel();
-      if(currentPriceLabel) currentPriceLabel.textContent = `現在の単価（${basis}）`;
-      if(newPriceLabel) newPriceLabel.textContent = `改定後単価（${basis}）`;
+      if(currentPriceLabel) currentPriceLabel.textContent = office ? '現行顧問報酬（税抜）' : `現在の単価（${basis}）`;
+      if(newPriceLabel) newPriceLabel.textContent = office ? '改定後顧問報酬（税抜）' : `改定後単価（${basis}）`;
+    }
+
+    function enforceOfficePriceBasis(){
+      if(!isOfficeMode()) return false;
+      const changed = currentPriceBasis !== 'exclusive';
+      currentPriceBasis = 'exclusive';
+      priceBasisManuallySet = true;
+      document.querySelectorAll('input[name="priceBasis"]').forEach(radio => {
+        radio.checked = radio.value === 'exclusive';
+      });
+      syncPriceBasisUi();
+      return changed;
     }
 
     function setPriceBasis(value, options = {}){
+      if(isOfficeMode()){
+        enforceOfficePriceBasis();
+        return currentPriceBasis;
+      }
       currentPriceBasis = value === 'inclusive' ? 'inclusive' : 'exclusive';
       if(options.manual) priceBasisManuallySet = true;
       syncPriceBasisUi();
+      return currentPriceBasis;
+    }
+
+    function getDraftPriceBasis(){
+      if(isOfficeMode()) enforceOfficePriceBasis();
+      return {
+        priceBasis:isOfficeMode() ? 'exclusive' : currentPriceBasis,
+        priceBasisManuallySet:isOfficeMode() ? true : priceBasisManuallySet
+      };
+    }
+
+    function applyRestoredPriceBasis(draft){
+      if(isOfficeMode()){
+        enforceOfficePriceBasis();
+      }else if(draft && typeof draft.priceBasis === 'string'){
+        setPriceBasis(draft.priceBasis);
+        priceBasisManuallySet = draft.priceBasisManuallySet !== false;
+      }else{
+        syncPriceBasisUi();
+      }
+      return currentPriceBasis;
     }
 
     function syncDecisionPrecisionUi(){
@@ -986,6 +1036,8 @@
     function updateAuthModeUi(){
       const office = isOfficeMode();
       try{ document.documentElement.classList.toggle('officeMode', office); }catch(e){}
+      if(office) enforceOfficePriceBasis();
+      else syncPriceBasisUi();
       if(authModeBadge){
         authModeBadge.textContent = office
           ? '松本会計内部用｜顧問報酬改定モード'
@@ -1212,10 +1264,12 @@
       try{
         const autosaveKey = autosaveKeyForMode();
         if(!autosaveKey) return;
+        if(isOfficeMode()) enforceOfficePriceBasis();
         if(!autoSaveEnabled || !autoSaveEnabled.checked){
           localStorage.removeItem(autosaveKey);
           return;
         }
+        const draftPriceBasis = getDraftPriceBasis();
         const payload = {
           schemaVersion: 3,
           authMode: currentAuthMode,
@@ -1232,8 +1286,7 @@
           currentPriceAsOf: currentPriceAsOf.value,
           currentPriceMonth: currentPriceMonth.value,
           decisionDatePrecision: currentDecisionPrecision,
-          priceBasis: currentPriceBasis,
-          priceBasisManuallySet,
+          ...draftPriceBasis,
           preset: isOfficeMode() ? 'matsumoto_fee' : 'general',
           effectiveDate: effectiveDate.value,
           extraFactors: extraFactors.value,
@@ -1362,10 +1415,7 @@
         if(typeof d.currentPriceAsOf === 'string') currentPriceAsOf.value = d.currentPriceAsOf;
         if(typeof d.currentPriceMonth === 'string') currentPriceMonth.value = d.currentPriceMonth;
         setDecisionPrecision(d.decisionDatePrecision);
-        if(typeof d.priceBasis === 'string'){
-          setPriceBasis(d.priceBasis);
-          priceBasisManuallySet = d.priceBasisManuallySet !== false;
-        }
+        applyRestoredPriceBasis(d);
         if(typeof d.effectiveDate === 'string') effectiveDate.value = d.effectiveDate;
         if(typeof d.extraFactors === 'string') extraFactors.value = d.extraFactors;
         if(typeof d.effortFreeText === 'string') effortFreeText.value = d.effortFreeText;
@@ -2223,6 +2273,7 @@
       const clauseType = getSelectedValues('#clauseGroup')[0] || 'clause_unknown';
       const errors = [];
 
+      if(isOfficeMode() && currentPriceBasis !== 'exclusive') errors.push(OFFICE_PRICE_BASIS_ERROR);
       if(!prod) errors.push('対象商品・サービス名を入力してください');
       if(!isFinite(cp) || cp <= 0) errors.push(isOfficeMode() ? '現行顧問報酬を正しく入力してください' : '現在価格を正しく入力してください');
       if(isOfficeMode()){
@@ -2865,6 +2916,8 @@ A.「ご意見ありがとうございます。当店としては品質とサー
 
     function computeCpiCap(){
       if(!isOfficeMode()) return null;
+      enforceOfficePriceBasis();
+      if(currentPriceBasis !== 'exclusive') return null;
       const cp = toNum(currentPrice.value);
       const x = calcCpiSince();
       if(!Number.isFinite(cp) || cp <= 0 || !hasCpiResult(x)) return null;
@@ -2890,11 +2943,14 @@ A.「ご意見ありがとうございます。当店としては品質とサー
         if(cpiCapSuggested) cpiCapSuggested.textContent = '—';
         if(applyCpiCapBtn) applyCpiCapBtn.disabled = true;
         if(cpiCapWarning){ cpiCapWarning.style.display = 'none'; cpiCapWarning.textContent = ''; }
-        const x = calcCpiSince();
-        const unavailable = Boolean(x && x.error);
+        const basisInvalid = currentPriceBasis !== 'exclusive';
+        const x = basisInvalid ? null : calcCpiSince();
+        const unavailable = basisInvalid || Boolean(x && x.error);
         if(cpiUnavailableWarning){
           cpiUnavailableWarning.style.display = unavailable ? 'block' : 'none';
-          cpiUnavailableWarning.textContent = unavailable ? '累積CPIを算出できないため、物価調整額は個別に判断してください' : '';
+          cpiUnavailableWarning.textContent = basisInvalid
+            ? `${OFFICE_PRICE_BASIS_ERROR}。`
+            : unavailable ? '累積CPIを算出できないため、物価調整額は個別に判断してください' : '';
         }
         return;
       }
@@ -2914,6 +2970,8 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     }
 
     function buildMatsumotoReferenceBlock(){
+      enforceOfficePriceBasis();
+      if(currentPriceBasis !== 'exclusive') return '';
       if(!officialDataReady()) return '';
       const x = calcCpiSince();
       if(!hasCpiResult(x)) return '';
@@ -2921,10 +2979,11 @@ A.「ご意見ありがとうございます。当店としては品質とサー
     }
 
     function buildMatsumotoOutputs(){
+      enforceOfficePriceBasis();
       const cp = toNum(currentPrice.value);
       const np = toNum(newPrice.value);
-      const cpStr = Number.isFinite(cp) ? priceText(cp) : '＿＿＿円（税抜）';
-      const npStr = Number.isFinite(np) ? priceText(np) : '＿＿＿円（税抜）';
+      const cpStr = Number.isFinite(cp) ? `${yen(cp)}（税抜）` : '＿＿＿円（税抜）';
+      const npStr = Number.isFinite(np) ? `${yen(np)}（税抜）` : '＿＿＿円（税抜）';
       const dateStr = (effectiveDate.value || '').trim() || '＿＿年＿＿月＿＿日';
       const partnerCompanyValue = (partnerCompany?.value || '').trim() || '〇〇株式会社';
       const partnerPersonName = (partnerPerson?.value || '').trim() || '〇〇';
@@ -2989,8 +3048,7 @@ ${cpiTalk}
     function applyOfficePreset(options = {}){
       currentPreset = 'matsumoto_fee';
       if(adminPreset) adminPreset.value = currentPreset;
-      priceBasisManuallySet = true;
-      setPriceBasis('exclusive');
+      enforceOfficePriceBasis();
       setAudience('btob', true);
       ownCompany.value = '税理士法人松本会計';
       ownCompany.readOnly = true;
@@ -3029,6 +3087,7 @@ ${cpiTalk}
 
     function generate(){
       try {
+        if(isOfficeMode()) enforceOfficePriceBasis();
         updateRateHint();
         validatePriceIncrease();
         updateCpiSinceView();
