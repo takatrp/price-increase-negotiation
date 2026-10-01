@@ -301,7 +301,7 @@
             <div id="decisionExactWrap" class="hidden">
               <label for="currentPriceAsOf">現行価格の決定日（年月日）</label>
               <input type="date" id="currentPriceAsOf" aria-describedby="currentPriceAsOfHint" />
-              <div class="hint" id="currentPriceAsOfHint">この日付時点で実際に適用されていた最低賃金と、同じ月のCPIを基準に計算します。</div>
+              <div class="hint" id="currentPriceAsOfHint">この日付時点の確定額又は指定日到来後の設定額と、同じ月のCPIを基準に計算します。設定額の最終公示は未確認と表示します。</div>
             </div>
             <div id="decisionMonthWrap">
               <label for="currentPriceMonth">現行価格の決定月</label>
@@ -401,7 +401,7 @@
                 <span id="cpiSinceView"><b>物価：— ／ 最低賃金：—</b></span>
                 <span class="badge warn" id="cpiSinceBadge">任意</span>
               </div>
-              <div class="small">※物価は総務省統計局の月次接続指数、最低賃金は厚生労働省の確定値を使用します。1970年1月～2024年12月は小数第1位、2025年1月以降は小数第3位の参考指数であり、価格改定額を自動決定するものではありません。</div>
+              <div class="small">※物価は総務省統計局の月次接続指数、最低賃金は確認済みの確定値と、利用者指定日が到来した設定額を使用します。設定額の最終公示は未確認です。1970年1月～2024年12月は小数第1位、2025年1月以降は小数第3位の参考指数であり、価格改定額を自動決定するものではありません。</div>
 
               <details style="border:none; padding:0; background:transparent !important; margin-top:6px;">
                 <summary style="font-size:0.8rem; font-weight:normal; color:#578899; cursor:pointer; text-decoration:underline;">計算過程を確認する</summary>
@@ -426,12 +426,12 @@
               </div>
               <label for="minWageTarget" style="margin-top:8px;">最低賃金の比較対象</label>
               <select id="minWageTarget" aria-describedby="minWageTargetNote">
-                <option value="current">本日時点で発効済み</option>
-                <option value="announced">最新確定の改定後（発効前を含む）</option>
+                <option value="current">本日時点（発効済み・指定日到来後の設定額）</option>
+                <option value="announced">改定後（確定額・指定日到来後の設定額）</option>
               </select>
               <div class="small" id="minWageTargetNote" aria-live="polite"></div>
               <a class="small" id="minWageRegionalSource" target="_blank" rel="noopener" hidden>選択地域の公式資料</a>
-              <div class="small" id="minWageNote">※確定額と発効日を確認した最低賃金だけを計算に使用します。答申段階の額は使用しません。</div>
+              <div class="small" id="minWageNote">※確定額に加え、佐賀・熊本・沖縄は指定日から設定額で計算します。この3県の最終公示は未確認であり、設定額を含む結果はその前提を明示します。</div>
             </div>
 
             <div class="divider"></div>
@@ -677,7 +677,7 @@
     const OFFICE_PASSWORD = 'matsu20180201';
     const AUTH_SESSION_KEY = 'mk_session_unlocked';
     const AUTH_MODE_KEY = 'mk_session_mode';
-    const APP_VERSION = 'r48';
+    const APP_VERSION = 'r49';
     const OFFICE_PRICE_BASIS_ERROR = '松本会計専用モードでは税抜価格を使用してください';
     let currentAuthMode = 'locked';
     const isGeneralMode = () => currentAuthMode === 'general';
@@ -765,7 +765,7 @@
     function sourceEvidence(key){
       const source = getNationalSource(key);
       if(!source) return '公表主体：未読込／資料名：未読込／公表日：未読込／対象期間：未読込／URL：未読込／データ確認日：未読込／区分：未読込';
-      const status = source.status === 'final' ? '確定値' : (source.status === 'partially_final' ? '確定確認済み分のみ計算使用（答申額は除外）' : (source.status || '未確認'));
+      const status = source.status === 'final' ? '確定値' : (source.status === 'partially_final' ? '確定確認済み分と指定日到来後の設定額を計算使用（設定額の最終公示は未確認）' : (source.status || '未確認'));
       return `公表主体：${source.publisher || '—'}／資料名：${source.title || '—'}／公表日：${source.publication_date || '—'}／対象期間：${source.target_period || '—'}／URL：${source.url || '—'}／データ確認日：${source.accessed_date || '—'}／区分：${status}`;
     }
 
@@ -1458,7 +1458,7 @@
             : `📝 旧版の自動保存データを${APP_VERSION}形式へ移行して復元しました。`;
           showImportStatus(restored.migrationWarning ? `${restored.migrationWarning} ${migratedStatus}` : migratedStatus);
         }else{
-          showImportStatus('📝 下書きを復元しました（モード別の自動保存データ）' + (!d.minWageTarget ? '。最低賃金は本日時点の発効済み額で再計算します。' : ''));
+          showImportStatus('📝 下書きを復元しました（モード別の自動保存データ）' + (!d.minWageTarget ? '。最低賃金は本日時点の比較額（指定日設定を含む）で再計算します。' : ''));
         }
         return true;
       }catch(e){
@@ -1687,7 +1687,13 @@
       }
 
       for(const [key, proposed] of Object.entries(national.min_wage_pending_by_pref || {})){
-        if(!prefKeys.includes(key) || proposed.status !== 'advisory' || proposed.used_in_calculation !== false || !hasFiniteNumber(proposed.new) || Number(proposed.new) <= 0 || !isIsoDate(proposed.eff)) throw new Error('答申段階の最低賃金データが不正です');
+        if(!prefKeys.includes(key) || proposed.status !== 'advisory' || !hasFiniteNumber(proposed.new) || Number(proposed.new) <= 0 || !isIsoDate(proposed.eff)) throw new Error('答申段階の最低賃金データが不正です');
+        const activation = proposed.activation;
+        if(activation){
+          if(activation.mode !== 'user_designated_date' || activation.date !== proposed.eff || !isIsoDate(activation.date) || !isIsoDate(activation.configured_on) || proposed.used_in_calculation !== undefined || Number(proposed.old) !== Number(currentByPref[key].new) || Number(proposed.inc) !== Number(proposed.new) - Number(proposed.old)) throw new Error(`${PREF_LABEL[key]}の指定日設定が不正です`);
+        }else if(proposed.used_in_calculation !== false){
+          throw new Error(`${PREF_LABEL[key]}の未確認額の計算区分が不正です`);
+        }
         if(Number(currentByPref[key].fiscal_year) >= Number(proposed.fiscal_year)) throw new Error(`${PREF_LABEL[key]}の確定額と答申額が重複しています`);
       }
 
@@ -1793,7 +1799,7 @@
 
       if(minWageNote){
         const source = getNationalSource('min_wage');
-        minWageNote.textContent = '※確定額と発効日を確認した最低賃金だけを計算に使用します。答申段階の額は計算未使用です。' +
+        minWageNote.textContent = '※確定額に加え、明示的に指定日を設定した地域は、その日から設定額で計算します。指定日による設定額の最終公示は未確認です。' +
           (source ? ` 出典：${source.publisher}「${source.title}」／確認日：${source.accessed_date}` : '');
       }
     }
@@ -1944,16 +1950,33 @@
       if(minWageTarget) minWageTarget.value = draft.minWageTarget === 'announced' ? 'announced' : 'current';
     }
 
-    function getMinWageComparison(prefKey, asOf = todayInJapan(), target = getMinWageTarget()){
+    function getMinWageScheduledEvent(prefKey){
+      const proposed = COST_DATA?.national?.min_wage_pending_by_pref?.[prefKey];
+      const activation = proposed?.activation;
+      if(!proposed || proposed.status !== 'advisory' || activation?.mode !== 'user_designated_date' || !isIsoDate(activation.date) || activation.date !== proposed.eff) return null;
+      if(getMinWageEffectiveHistory(prefKey).some(event => event.fiscalYear >= Number(proposed.fiscal_year))) return null;
+      return { fiscalYear:Number(proposed.fiscal_year), amount:Number(proposed.new), effectiveDate:activation.date, status:'user_scheduled', sourceStatus:'advisory' };
+    }
+
+    function getMinWageCalculationHistory(prefKey, asOf = todayInJapan()){
       const history = getMinWageEffectiveHistory(prefKey);
+      const scheduled = getMinWageScheduledEvent(prefKey);
+      // A user-designated amount is never used early, including the announced comparison.
+      if(scheduled && scheduled.effectiveDate <= asOf) history.push(scheduled);
+      return history.sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate));
+    }
+
+    function getMinWageComparison(prefKey, asOf = todayInJapan(), target = getMinWageTarget()){
+      const history = getMinWageCalculationHistory(prefKey, asOf);
       const eligible = target === 'announced' ? history : history.filter(event => event.effectiveDate <= asOf);
       const event = eligible.at(-1);
       if(!event) return null;
       const previous = history[history.indexOf(event) - 1];
       const pending = event.effectiveDate > asOf;
+      const scheduled = event.status === 'user_scheduled';
       return {
-        event, previous, asOf, target, pending,
-        label: pending ? `${fmtYMD(event.effectiveDate)}発効予定の確定額` : `${asOf}時点の発効済み額`
+        event, previous, asOf, target, pending, scheduled,
+        label: scheduled ? `${event.effectiveDate}指定日による設定額・最終公示未確認（${asOf}時点）` : pending ? `${fmtYMD(event.effectiveDate)}発効予定の確定額` : `${asOf}時点の発効済み額`
       };
     }
 
@@ -1973,10 +1996,13 @@
 
     function renderMinWagePanel(){
       const key = prefSelect.value;
-      const revision = getMinWageFromJson(key);
-      const history = getMinWageEffectiveHistory(key);
-      const latest = history.at(-1);
       const asOf = todayInJapan();
+      const history = getMinWageCalculationHistory(key, asOf);
+      const latest = history.at(-1);
+      const scheduledActive = latest?.status === 'user_scheduled';
+      const revision = scheduledActive
+        ? parseMinWageRecord(COST_DATA.national.min_wage_pending_by_pref[key])
+        : getMinWageFromJson(key);
       const comparison = getMinWageComparison(key, asOf);
       const proposed = COST_DATA?.national?.min_wage_pending_by_pref?.[key];
       const regionalSource = proposed?.source_url || COST_DATA?.national?.min_wage_by_pref?.[key]?.source_url;
@@ -1986,14 +2012,17 @@
       }
       if(revision && latest){
         const pending = revision.eff > asOf;
-        minWageView.textContent = `${PREF_LABEL[key] || key}：${Math.round(revision.o).toLocaleString('ja-JP')}円 → ${Math.round(revision.n).toLocaleString('ja-JP')}円（+${Math.round(revision.inc)}円、前年度比 +${pct1(revision.pct)}%）／${pending ? '発効予定' : '発効'}：${fmtYMD(revision.eff)}`;
-        minWageBadge.textContent = `${fiscalYearLabel(latest.fiscalYear)}確定・${pending ? '発効前' : '発効済み'}`;
-        minWageBadge.className = pending ? 'badge warn' : 'badge ok';
+        minWageView.textContent = `${PREF_LABEL[key] || key}：${Math.round(revision.o).toLocaleString('ja-JP')}円 → ${Math.round(revision.n).toLocaleString('ja-JP')}円（+${Math.round(revision.inc)}円、前年度比 +${pct1(revision.pct)}%）／${scheduledActive ? '指定日' : pending ? '発効予定' : '発効'}：${fmtYMD(revision.eff)}`;
+        minWageBadge.textContent = scheduledActive ? `${fiscalYearLabel(latest.fiscalYear)}指定日設定・最終公示未確認` : `${fiscalYearLabel(latest.fiscalYear)}確定・${pending ? '発効前' : '発効済み'}`;
+        minWageBadge.className = pending || scheduledActive ? 'badge warn' : 'badge ok';
         minWageTargetNote.textContent = comparison
           ? `計算に使用：${Math.round(comparison.event.amount).toLocaleString('ja-JP')}円（${comparison.label}、判定日：${asOf} 日本時間）`
-          : '本日時点の発効済み額を確認できないため計算できません。';
+          : '本日時点の比較額を確認できないため計算できません。';
         if(proposed){
-          minWageTargetNote.textContent += `／${fiscalYearLabel(proposed.fiscal_year)}答申：${Number(proposed.new).toLocaleString('ja-JP')}円、発効予定：${proposed.eff}（答申・計算未使用。確認日：${proposed.accessed_date}）`;
+          const activation = proposed.activation;
+          minWageTargetNote.textContent += activation
+            ? `／${fiscalYearLabel(proposed.fiscal_year)}答申額：${Number(proposed.new).toLocaleString('ja-JP')}円（最終公示未確認）。利用者指定日：${activation.date}。${scheduledActive ? '指定日到来により設定額を計算使用中' : '指定日から自動反映・それまでは計算未使用'}。資料確認日：${proposed.accessed_date}`
+            : `／${fiscalYearLabel(proposed.fiscal_year)}答申：${Number(proposed.new).toLocaleString('ja-JP')}円、発効予定：${proposed.eff}（答申・計算未使用。確認日：${proposed.accessed_date}）`;
         }
       }else{
         minWageView.textContent = '—';
@@ -2001,6 +2030,35 @@
         minWageBadge.className = 'badge err';
         minWageTargetNote.textContent = '都道府県と最低賃金データを確認してください。';
       }
+    }
+
+    let minWageDisplayDate = todayInJapan();
+    let minWageDateTimer = null;
+
+    function refreshMinWageForDateChange(){
+      const date = todayInJapan();
+      if(date === minWageDisplayDate) return false;
+      minWageDisplayDate = date;
+      renderMinWagePanel();
+      if(currentAuthMode !== 'locked'){
+        const untouchedOutput = outputArea.value === (CACHE[currentOutputMode] || '');
+        if(untouchedOutput) generate();
+        else{
+          updateCpiSinceView();
+          showImportStatus('最低賃金の判定日を更新しました。編集済みの文面は保持しています。出力前に参考数値を確認してください。');
+        }
+      }
+      return true;
+    }
+
+    function scheduleMinWageDateRefresh(now = new Date()){
+      if(minWageDateTimer !== null) clearTimeout(minWageDateTimer);
+      const day = 24 * 60 * 60 * 1000;
+      const elapsedInJapan = ((now.getTime() + 9 * 60 * 60 * 1000) % day + day) % day;
+      minWageDateTimer = setTimeout(() => {
+        refreshMinWageForDateChange();
+        scheduleMinWageDateRefresh();
+      }, day - elapsedInJapan + 25);
     }
 
     function resolveRate(prefKey, kind){
@@ -2195,7 +2253,7 @@
       const prefKey = prefSelect.value;
       if(decision.error) return { error:decision.error, decision, prefKey };
 
-      const history = getMinWageEffectiveHistory(prefKey);
+      const history = getMinWageCalculationHistory(prefKey);
       if(!history.length) return { error: '発効日付きの最低賃金履歴を読み込めないため算出できません。' };
       const applicableAt = date => history.filter(event => event.effectiveDate <= date).at(-1) || null;
       const firstEvent = applicableAt(decision.firstDate);
@@ -2227,6 +2285,8 @@
         latestEffectiveDate: latestEvent.effectiveDate,
         baseFiscalYear: baseEvent.fiscalYear,
         latestFiscalYear: latestEvent.fiscalYear,
+        baseScheduled: baseEvent.status === 'user_scheduled',
+        hasScheduledRate: baseEvent.status === 'user_scheduled' || comparison.scheduled,
         comparison,
         decision,
         decisionInput:decision.value,
@@ -2299,8 +2359,8 @@
           `<b>【累積最低賃金上昇率の計算式】</b><br>` +
           `対象エリア：${mwX.prefKey}<br>` +
           `入力精度：${decisionPrecisionLabel()}／実際の入力：${mwX.decisionInput}<br>` +
-          `最低賃金計算：可能／使用した発効日：${fmtYMD(mwX.baseEffectiveDate)}<br>` +
-          `決定時点の適用最低賃金：${Math.round(mwX.baseMw)}円（発効：${fmtYMD(mwX.baseEffectiveDate)}）<br>` +
+          `最低賃金計算：可能／使用した${mwX.baseScheduled ? '指定日' : '発効日'}：${fmtYMD(mwX.baseEffectiveDate)}<br>` +
+          `決定時点の基準額：${Math.round(mwX.baseMw)}円（${mwX.baseScheduled ? '指定日による設定額・最終公示未確認' : '発効済み額'}：${fmtYMD(mwX.baseEffectiveDate)}）<br>` +
           `比較対象の最低賃金：${Math.round(mwX.nowMw)}円（${mwX.comparison.label}、判定日：${mwX.comparison.asOf} 日本時間）<br>` +
           `⇒ (${Math.round(mwX.nowMw)} ÷ ${Math.round(mwX.baseMw)} - 1) × 100 = <b>${mwX.cum.toFixed(2)}%</b>`
         );
@@ -2446,7 +2506,8 @@
       const sentences = [];
       if(officialDataReady()){
         const w = minWageInfo(key);
-        const mw = w && !w.comparison.pending ? `最低賃金が前年度比 +${pct1(w.pct)}%` : '';
+        const mw = w && !w.comparison.pending && !w.comparison.scheduled ? `最低賃金が前年度比 +${pct1(w.pct)}%` : '';
+        if(w && w.comparison.scheduled) sentences.push(`最低賃金の試算では、利用者指定日${fmtYMD(w.eff)}から${Math.round(w.n).toLocaleString('ja-JP')}円を設定額として使用しており、従前の確定額${Math.round(w.o).toLocaleString('ja-JP')}円との比較で +${pct1(w.pct)}%となります（最終公示未確認）。`);
         if(w && w.comparison.pending) sentences.push(`最低賃金は${fmtYMD(w.eff)}に${Math.round(w.o).toLocaleString('ja-JP')}円から${Math.round(w.n).toLocaleString('ja-JP')}円へ引き上げられることが確定しており、前年度比 +${pct1(w.pct)}%となる予定です。`);
         const p = toNum(cpiRate.value);
         const price = isFinite(p) && cpiRate.dataset.origin !== 'manual' ? `物価が前年同月比 +${pct1(p)}%` : '';
@@ -2481,6 +2542,9 @@
       const baseMw = Math.round(mwSince.baseMw).toLocaleString('ja-JP');
       const nowMw = Math.round(mwSince.nowMw).toLocaleString('ja-JP');
       const comparison = mwSince.comparison;
+      if(mwSince.hasScheduledRate){
+        return `また、最低賃金の試算では、現行価格決定時の基準額${baseMw}円と${comparison.asOf}時点の比較額${nowMw}円の差は累積で約${pct1(mwSince.cum)}%です（利用者指定日による設定額を含み、その最終公示は未確認です）。`;
+      }
       if(comparison.pending){
         return `また、最低賃金についても、現行価格の決定時点の${baseMw}円から${comparison.event.effectiveDate}発効予定の${nowMw}円まで、累積で約${pct1(mwSince.cum)}%の上昇となる予定です（${comparison.asOf}時点の確定額）。`;
       }
@@ -2495,7 +2559,7 @@
 
       if(embedNumbersInLetter.checked && officialDataReady()) {
         const w = minWageInfo(key);
-        if (w) lines.push(`・最低賃金（${prefLabel}）：${Math.round(w.o)}円 → ${Math.round(w.n)}円（前年度比 +${pct1(w.pct)}%、${w.comparison.label}、発効日：${fmtYMD(w.eff)}、判定日：${w.comparison.asOf} 日本時間、出典：${sourceShort('min_wage')}）`);
+        if (w) lines.push(`・最低賃金（${prefLabel}）：${Math.round(w.o)}円 → ${Math.round(w.n)}円（前年度比 +${pct1(w.pct)}%、${w.comparison.label}、${w.comparison.scheduled ? '指定日' : '発効日'}：${fmtYMD(w.eff)}、判定日：${w.comparison.asOf} 日本時間、出典：${sourceShort('min_wage')}）`);
 
         const p = toNum(cpiRate.value);
         const pAsOf = (cpiAsOf.value||'').trim();
@@ -2513,8 +2577,10 @@
 
       const mwSince = calcMwSince();
       if (officialDataReady() && decidedYM && hasMwResult(mwSince) && mwSince.cum > 0) {
-        lines.push(`・最低賃金の累積上昇率（${prefLabel}）：+${pct1(mwSince.cum)}%（現行価格を決定した${decidedYM}時点：${Math.round(mwSince.baseMw).toLocaleString('ja-JP')}円 → 比較対象：${Math.round(mwSince.nowMw).toLocaleString('ja-JP')}円（${mwSince.comparison.label}）、判定日：${mwSince.comparison.asOf} 日本時間、発効日ベース、出典：${sourceShort('min_wage')}）`);
+        lines.push(`・最低賃金の累積上昇率（${prefLabel}）：+${pct1(mwSince.cum)}%（現行価格を決定した${decidedYM}時点：${Math.round(mwSince.baseMw).toLocaleString('ja-JP')}円 → 比較対象：${Math.round(mwSince.nowMw).toLocaleString('ja-JP')}円（${mwSince.comparison.label}）、判定日：${mwSince.comparison.asOf} 日本時間、${mwSince.hasScheduledRate ? '発効日・利用者指定日ベース' : '発効日ベース'}、出典：${sourceShort('min_wage')}）`);
       }
+
+      if(hasMwResult(mwSince) && mwSince.hasScheduledRate) lines.push('・最低賃金の前提：利用者指定日による設定額を含む試算です。設定額の最終公示は未確認です。');
 
       const actual = toNum(actualLaborRate.value);
       if(embedNumbersInLetter.checked && isFinite(actual)) lines.push(`・自社の実際の人件費上昇率：${actual >= 0 ? '+' : '-'}${pct1(Math.abs(actual))}%（手入力）`);
@@ -2555,7 +2621,7 @@
 
       const w = minWageInfo(key);
       const mwLine = w
-        ? `最低賃金（${prefLabel}）：${Math.round(w.o)}円 → ${Math.round(w.n)}円（+${Math.round(w.inc)}円、前年度比 +${pct1(w.pct)}%）／発効：${fmtYMD(w.eff)}／${fiscalYearLabel(w.fiscalYear)}確定値／${w.comparison.label}／判定日：${w.comparison.asOf} 日本時間`
+        ? `最低賃金（${prefLabel}）：${Math.round(w.o)}円 → ${Math.round(w.n)}円（+${Math.round(w.inc)}円、前年度比 +${pct1(w.pct)}%）／${w.comparison.scheduled ? '指定日' : '発効'}：${fmtYMD(w.eff)}／${fiscalYearLabel(w.fiscalYear)}${w.comparison.scheduled ? '指定日設定額（最終公示未確認）' : '確定値'}／${w.comparison.label}／判定日：${w.comparison.asOf} 日本時間`
         : `最低賃金（${prefLabel}）：外部データ未読込`;
 
       const p = toNum(cpiRate.value);
@@ -2584,7 +2650,7 @@
 
       const mwX = calcMwSince();
       const mwSinceLine = (decidedYM && hasMwResult(mwX))
-        ? `累積最低賃金上昇率：入力精度=${decisionPrecisionLabel()}（入力=${mwX.decisionInput}）／計算可能／現行価格=${decidedYM}決定時 ${Math.round(mwX.baseMw)}円（使用した発効日=${fmtYMD(mwX.baseEffectiveDate)}）→ 比較対象 ${Math.round(mwX.nowMw)}円（${mwX.comparison.label}、判定日=${mwX.comparison.asOf} 日本時間） ${pct1(mwX.cum)}%（${prefLabel}）`
+        ? `累積最低賃金上昇率：入力精度=${decisionPrecisionLabel()}（入力=${mwX.decisionInput}）／計算可能／現行価格=${decidedYM}決定時 ${Math.round(mwX.baseMw)}円（使用した${mwX.baseScheduled ? '指定日' : '発効日'}=${fmtYMD(mwX.baseEffectiveDate)}）→ 比較対象 ${Math.round(mwX.nowMw)}円（${mwX.comparison.label}、判定日=${mwX.comparison.asOf} 日本時間） ${pct1(mwX.cum)}%（${prefLabel}）${mwX.hasScheduledRate ? '／利用者指定日の設定額を含む試算・最終公示未確認' : ''}`
         : `累積最低賃金上昇率：${mwX && mwX.error ? mwX.error : '算出不可'}`;
 
       let cpiSinceHow = '算出式：—';
@@ -3516,7 +3582,12 @@ ${cpiTalk}
       renderAllByPref();
       updateDataMetaUi();
       initAuthGate();
+      scheduleMinWageDateRefresh();
     });
+    document.addEventListener('visibilitychange', () => {
+      if(document.visibilityState === 'visible') refreshMinWageForDateChange();
+    });
+    window.addEventListener('focus', refreshMinWageForDateChange);
 
   })();
   </script>

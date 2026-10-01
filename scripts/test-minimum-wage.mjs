@@ -16,10 +16,11 @@ function source(name) {
 }
 function harness(cost = data, instant = '2026-10-01T08:00:00Z') {
   const RealDate = Date;
-  class FixedDate extends RealDate { constructor(...args) { super(...(args.length ? args : [instant])); } }
+  const clock = { instant };
+  class FixedDate extends RealDate { constructor(...args) { super(...(args.length ? args : [clock.instant])); } }
   const element = (value = '') => ({ value, dataset:{}, checked:false, textContent:'', className:'', style:{}, classList:{ add(){},remove(){},toggle(){} } });
   const context = {
-    Date:FixedDate, Intl, COST_DATA:structuredClone(cost), PREF_LABEL:Object.fromEntries(Object.keys(data.prefs).map(key => [key,key])),
+    Date:FixedDate, Intl, setInstant:value=>clock.instant=value, COST_DATA:structuredClone(cost), PREF_LABEL:Object.fromEntries(Object.keys(data.prefs).map(key => [key,key])),
     prefSelect:element('兵庫'), minWageTarget:element('current'), minWageTargetNote:element(), minWageView:element(), minWageBadge:element(), minWageRegionalSource:element(),
     currentPriceAsOf:element('2025-01-01'), currentPriceMonth:element('2025-01'), currentDecisionPrecision:'exact',
     cpiScopeBadge:element(), wageScopeBadge:element(), cpiRate:element('1.6'), wageRate:element('4.69'), cpiAsOf:element('2026年6月'), wageAsOf:element('2026年春闘'), actualLaborRate:element(),
@@ -31,21 +32,28 @@ function harness(cost = data, instant = '2026-10-01T08:00:00Z') {
     hasMwResult:value=>Boolean(value && !value.error && Number.isFinite(value.cum)),
     calcCpiSince:()=>({error:'unavailable for wage test'}), hasCpiResult:()=>false,
     sourceShort:()=> '厚生労働省', priceBasisLabel:()=> '税抜',
+    outputArea:element('generated'), CACHE:{letter:'generated'}, currentOutputMode:'letter',
+    minWageDisplayDate:'2026-10-01', minWageDateTimer:null,
   };
   for (const id of ['autoSaveEnabled','partnerCompany','partnerPerson','partnerHonorific','partnerHonorificCustom','ownCompany','ownPerson','productName','currentPrice','newPrice','effectiveDate','extraFactors','effortFreeText','valueFreeText']) context[id]=element();
   context.autoSaveEnabled.checked=true;
   Object.assign(context, {
-    currentAuthMode:'general', currentAudience:'btob', APP_VERSION:'r48',
+    currentAuthMode:'general', currentAudience:'btob', APP_VERSION:'r49',
     isOfficeMode:()=>false, getDraftPriceBasis:()=>({priceBasis:'exclusive'}),
     autosaveKeyForMode:()=> 'test-draft', getChipState:()=>[], setDecisionPrecision:value=>context.currentDecisionPrecision=value,
     applyRestoredPriceBasis:()=>{}, applyChipState:()=>{}, setAudience:()=>{}, showImportStatus:message=>context.restoreMessage=message,
     setScopeBadge:()=>{}, clearLinkedOfficialRates:()=>{}, getPrefData:key=>context.COST_DATA.prefs[key],
   });
+  context.generateCalls=0;context.detailCalls=0;
+  context.generate=()=>{context.generateCalls++;context.outputArea.value=context.CACHE[context.currentOutputMode];};
+  context.updateCpiSinceView=()=>context.detailCalls++;
+  context.setTimeout=(callback,delay)=>{context.timer={callback,delay};return 123;};
+  context.clearTimeout=()=>context.timerCleared=true;
   const storage = new Map();
   context.localStorage={setItem:(key,value)=>storage.set(key,value),getItem:key=>storage.get(key),removeItem:key=>storage.delete(key)};
   context.readDraftForRestore=()=>({data:JSON.parse(storage.get('test-draft')),migrated:false});
   vm.createContext(context);
-  const names=['isIsoDate','hasFiniteNumber','validateCostDataPayload','normalizePrefKey','parseMinWageRecord','getMinWageFromJson','getMinWageEffectiveHistory','todayInJapan','fiscalYearLabel','getMinWageTarget','restoreMinWageTarget','getMinWageComparison','minWageInfo','renderMinWagePanel','getDecisionContext','calcMwSince','buildNaturalEvidencePhrase','buildMwCumulativeEvidenceSentence','buildReferenceBlock','resolveRate','applyLinkedRates','saveDraft','restoreDraft'];
+  const names=['isIsoDate','hasFiniteNumber','validateCostDataPayload','normalizePrefKey','parseMinWageRecord','getMinWageFromJson','getMinWageEffectiveHistory','todayInJapan','fiscalYearLabel','getMinWageTarget','restoreMinWageTarget','getMinWageScheduledEvent','getMinWageCalculationHistory','getMinWageComparison','refreshMinWageForDateChange','scheduleMinWageDateRefresh','minWageInfo','renderMinWagePanel','getDecisionContext','calcMwSince','buildNaturalEvidencePhrase','buildMwCumulativeEvidenceSentence','buildReferenceBlock','resolveRate','applyLinkedRates','saveDraft','restoreDraft'];
   vm.runInContext(names.map(source).join('\n'),context);
   return context;
 }
@@ -80,7 +88,11 @@ for(const row of evidence.rows){
   h.prefSelect.value=row.prefecture;h.renderMinWagePanel();
   check(!h.minWageRegionalSource.hidden,`${row.prefecture}: final/advisory official source link is visible`);
   check(h.minWageRegionalSource.href===row.source_url,`${row.prefecture}: official source link points to correct Gazette/bureau evidence`);
-  if(row.status==='advisory') check(h.getMinWageComparison(row.prefecture,'2027-12-31','announced').event.fiscalYear===2025,`${row.prefecture}: merely passing proposed date never makes advisory final`);
+  if(row.status==='advisory'){
+    const after=h.getMinWageComparison(row.prefecture,'2027-12-31','announced');
+    check(after.event.status==='user_scheduled' && after.event.sourceStatus==='advisory',`${row.prefecture}: scheduled amount never becomes official final`);
+    check(JSON.stringify(actual.activation)===JSON.stringify(row.activation),`${row.prefecture}: explicit activation setting matches audit record`);
+  }
 }
 check(h.getMinWageComparison('兵庫','2026-09-30','current').event.amount===1116 && h.getMinWageComparison('兵庫','2026-10-01','current').event.amount===1172,'Hyogo October1 boundary matches official revision');
 check(h.getMinWageComparison('鳥取','2026-10-01','current').event.amount===1030 && h.getMinWageComparison('鳥取','2026-10-03','current').event.amount===1090,'Tottori is not prematurely revised on October1');
@@ -121,7 +133,7 @@ check(base.calcMwSince().cum===0,'effective-day baseline produces zero cumulativ
 for(const [pref,proposed] of Object.entries(data.national.min_wage_pending_by_pref || {})){
   base.prefSelect.value=pref;base.minWageTarget.value='announced';base.renderMinWagePanel();
   check(base.getMinWageComparison(pref).event.fiscalYear<proposed.fiscal_year,`${pref}: advisory excluded from announced calculation`);
-  check(base.minWageTargetNote.textContent.includes('答申・計算未使用'),`${pref}: advisory disclosure visible`);
+  check(base.minWageTargetNote.textContent.includes('それまでは計算未使用') && base.minWageTargetNote.textContent.includes('最終公示未確認'),`${pref}: advisory disclosure visible`);
   check(!base.minWageRegionalSource.hidden,`${pref}: official regional source link visible`);
 }
 const corrupt=structuredClone(data);corrupt.national.min_wage_history_by_pref_effective['兵庫'].at(-1).status='advisory';
@@ -137,8 +149,69 @@ check(saved.minWageTarget.value==='announced','comparison target survives save/r
 saved.applyLinkedRates();check(saved.cpiRate.value==='8.8' && saved.wageRate.value==='9.9' && saved.actualLaborRate.value==='12.3','manual rates preserved when official linking is off');
 check(saved.cpiRate.dataset.origin==='manual','restored manual values remain marked manual');
 const legacy=JSON.parse(saved.localStorage.getItem('test-draft'));delete legacy.minWageTarget;saved.localStorage.setItem('test-draft',JSON.stringify(legacy));
-saved.restoreDraft();check(saved.minWageTarget.value==='current' && saved.restoreMessage.includes('本日時点の発効済み額で再計算'),'old saved draft transparently defaults to effective rate');
+saved.restoreDraft();check(saved.minWageTarget.value==='current' && saved.restoreMessage.includes('本日時点の比較額（指定日設定を含む）で再計算'),'old saved draft transparently defaults to effective rate');
 check(saved.cpiRate.value==='8.8' && saved.wageRate.value==='9.9','old draft manual amounts remain unchanged');
+// User-designated date gating is distinct from official finality.
+const schedules={佐賀:{old:1030,new:1095,date:'2026-11-15'},熊本:{old:1034,new:1092,date:'2026-12-01'},沖縄:{old:1023,new:1086,date:'2026-12-02'}};
+for(const [pref,expected] of Object.entries(schedules)){
+  const midnight=Date.parse(`${expected.date}T00:00:00+09:00`);
+  for(const [offset,label,amount] of [[-86400000,'day before',expected.old],[-1,'1ms before',expected.old],[0,'midnight',expected.new],[1,'1ms after',expected.new],[86400000,'day after',expected.new]]){
+    const instant=new Date(midnight+offset).toISOString();
+    const run=harness(data,instant);run.prefSelect.value=pref;run.currentPriceAsOf.value='2026-10-01';
+    for(const mode of ['current','announced']){
+      run.minWageTarget.value=mode;
+      const comparison=run.getMinWageComparison(pref);const calc=run.calcMwSince();run.renderMinWagePanel();
+      check(comparison.event.amount===amount,`${pref}/${mode}/${label}: expected amount exactly at JST boundary`);
+      check(calc.baseMw===expected.old && calc.nowMw===amount,`${pref}/${mode}/${label}: pre-schedule historical baseline remains old`);
+      check(Math.abs(calc.cum-(amount/expected.old-1)*100)<1e-10,`${pref}/${mode}/${label}: correct increase percentage`);
+      if(offset>=0){
+        check(comparison.scheduled && comparison.event.sourceStatus==='advisory',`${pref}/${mode}/${label}: provenance retained`);
+        check(comparison.label.includes('最終公示未確認') && comparison.label.includes('指定日'),`${pref}/${mode}/${label}: comparison discloses assumption`);
+        check(run.minWageBadge.textContent.includes('指定日設定・最終公示未確認'),`${pref}/${mode}/${label}: panel badge remains warning`);
+        check(!run.minWageBadge.textContent.includes('確定・'),`${pref}/${mode}/${label}: no false final label`);
+        const natural=run.buildNaturalEvidencePhrase();const cumulative=run.buildMwCumulativeEvidenceSentence();const reference=run.buildReferenceBlock('2026年10月');
+        check(natural.includes(amount.toLocaleString('ja-JP')) && natural.includes('最終公示未確認') && !natural.includes('引き上げられることが確定'),`${pref}/${mode}/${label}: natural evidence discloses configured amount`);
+        check(cumulative.includes('利用者指定日による設定額') && cumulative.includes('最終公示は未確認'),`${pref}/${mode}/${label}: cumulative evidence is qualified`);
+        check(reference.includes('最終公示未確認') && reference.includes(`指定日：${expected.date}`),`${pref}/${mode}/${label}: shared print/Word reference preserves assumption`);
+        check(run.COST_DATA.national.min_wage_pending_by_pref[pref].status==='advisory' && run.getMinWageEffectiveHistory(pref).at(-1).fiscalYear===2025,`${pref}/${mode}/${label}: official source/history never mutated`);
+      }else{
+        check(!comparison.scheduled,`${pref}/${mode}/${label}: no early activation in either mode`);
+      }
+    }
+  }
+  const after=harness(data,new Date(midnight+86400000).toISOString());after.prefSelect.value=pref;after.currentPriceAsOf.value=expected.date;
+  const same=after.calcMwSince();
+  check(same.baseMw===expected.new && same.nowMw===expected.new && same.cum===0 && same.baseScheduled,`${pref}: historical baseline on scheduled day uses same qualified rate`);
+  check(after.buildReferenceBlock(expected.date).includes('設定額の最終公示は未確認'),`${pref}: zero increase still has assumption in output`);
+  after.currentDecisionPrecision='month';after.currentPriceMonth.value=expected.date.slice(0,7);after.setInstant('2027-01-02T00:00:00Z');
+  const monthResult=after.calcMwSince();
+  check(expected.date.endsWith('-01') ? !monthResult.error : Boolean(monthResult.error),`${pref}: day1 is unambiguous; midmonth configured revision requires exact date`);
+
+  const noSchedule=structuredClone(data);delete noSchedule.national.min_wage_pending_by_pref[pref].activation;noSchedule.national.min_wage_pending_by_pref[pref].used_in_calculation=false;
+  const noRun=harness(noSchedule,'2027-01-02T00:00:00Z');
+  check(noRun.getMinWageComparison(pref).event.amount===expected.old,`${pref}: date alone cannot activate an unconfigured advisory`);
+  const invalidSchedule=structuredClone(data);invalidSchedule.national.min_wage_pending_by_pref[pref].activation.date='2026-01-01';
+  assert.throws(()=>h.validateCostDataPayload(invalidSchedule));checks++;
+}
+// Page left open across midnight: only derived data changes; manual values/text survive.
+const rollover=harness(data,'2026-11-14T14:59:59.999Z');rollover.prefSelect.value='佐賀';rollover.minWageDisplayDate='2026-11-14';
+rollover.cpiRate.value='8.8';rollover.wageRate.value='9.9';rollover.actualLaborRate.value='12.3';rollover.partnerCompany.value='手入力の顧客名';
+rollover.currentPrice.value='12345';rollover.newPrice.value='13000';
+check(!rollover.refreshMinWageForDateChange(),'same-day refresh is a no-op');
+rollover.scheduleMinWageDateRefresh();check(rollover.timer.delay===26,'midnight timer uses JST and fires immediately after boundary');
+rollover.setInstant('2026-11-14T15:00:00Z');rollover.timer.callback();
+check(rollover.generateCalls===1 && rollover.minWageView.textContent.includes('1,095'),'midnight refresh activates rate and rebuilds untouched generated output');
+check(rollover.cpiRate.value==='8.8' && rollover.wageRate.value==='9.9' && rollover.actualLaborRate.value==='12.3' && rollover.partnerCompany.value==='手入力の顧客名' && rollover.currentPrice.value==='12345' && rollover.newPrice.value==='13000','midnight does not reset or replace manual inputs');
+check(!rollover.refreshMinWageForDateChange() && rollover.generateCalls===1,'repeated focus/visibility events do not regenerate twice');
+const edited=harness(data,'2026-11-14T15:00:00Z');edited.prefSelect.value='佐賀';edited.minWageDisplayDate='2026-11-14';edited.outputArea.value='利用者が編集した交渉文';
+edited.refreshMinWageForDateChange();
+check(edited.outputArea.value==='利用者が編集した交渉文' && edited.generateCalls===0 && edited.detailCalls===1,'midnight refresh preserves manually edited negotiation text');
+check(edited.restoreMessage.includes('編集済みの文面は保持'),'manual-text preservation is communicated');
+const resumed=harness(data,'2026-12-02T01:00:00Z');resumed.prefSelect.value='沖縄';resumed.minWageDisplayDate='2026-11-30';resumed.refreshMinWageForDateChange();
+check(resumed.getMinWageComparison('沖縄').event.amount===1086,'waking from background after multiple days catches up');
+check(html.includes("document.addEventListener('visibilitychange'") && html.includes("window.addEventListener('focus', refreshMinWageForDateChange)"),'focus and visibility recovery hooks are registered');
+check(html.includes("w.comparison.scheduled ? '指定日設定額（最終公示未確認）' : '確定値'"),'internal memo retains scheduled-source qualification');
+
 const formatSource=html.match(/const fmtYMD = s => \{[\s\S]*?\n    \};/)[0];
 const format=Function('z2',`${formatSource};return fmtYMD;`)(value=>String(value).padStart(2,'0'));
 check(format('2026-10-01')==='2026-10-01','date-only effective values do not shift in negative UTC timezones');

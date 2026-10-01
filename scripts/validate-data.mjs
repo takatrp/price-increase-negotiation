@@ -293,7 +293,7 @@ if (decisionFormatterSource) {
     errors.push(`文案用の現行価格決定時期フォーマッターを実行できません: ${error.message}`);
   }
 }
-check(indexHtml.includes('・最低賃金の累積上昇率（${prefLabel}）') && indexHtml.includes('発効日ベース、出典：${sourceShort(\'min_wage\')}'), '参考データに発効日ベースの最低賃金累積上昇率を表示する');
+check(indexHtml.includes('・最低賃金の累積上昇率（${prefLabel}）') && indexHtml.includes('発効日・利用者指定日ベース'), '参考データに発効日ベースの最低賃金累積上昇率を表示する');
 check(indexHtml.includes('officialDataReady() && decidedYM && hasMwResult(mwSince) && mwSince.cum > 0'), '最低賃金累積上昇率は正の値を正常に算出できた場合だけ参考データへ表示する');
 
 const suggestedDateFunctionSource = indexHtml.match(/function suggestedEffectiveDateText\(now = new Date\(\)\)\{[\s\S]*?\n    \}/)?.[0] || '';
@@ -533,8 +533,8 @@ if (priceBasisLabelFunctionSource && syncPriceBasisFunctionSource && enforceOffi
   }
 }
 
-check(indexHtml.includes("const APP_VERSION = 'r48';"), 'リリース番号を単一定数r48で管理する');
-check((indexHtml.match(/r48/g) || []).length === 1, 'index.html内のr48リテラルが単一定数だけである');
+check(indexHtml.includes("const APP_VERSION = 'r49';"), 'リリース番号を単一定数r49で管理する');
+check((indexHtml.match(/r49/g) || []).length === 1, 'index.html内のr49リテラルが単一定数だけである');
 check((indexHtml.match(/data-app-version/g) || []).length >= 3 && indexHtml.includes("el.textContent = APP_VERSION"), '画面とフッターの版表示をAPP_VERSIONから反映する');
 check(indexHtml.includes('関与先向け｜価格転嫁支援モード') && indexHtml.includes('松本会計内部用｜顧問報酬改定モード'), '一般モードと松本会計内部用モードの表示がある');
 check(indexHtml.includes('.officeOnly{display:none !important;}') && indexHtml.includes("classList.toggle('officeMode', office)"), 'office専用UIをofficeモードだけで表示する');

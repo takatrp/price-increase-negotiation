@@ -7,7 +7,7 @@
     "熊本",
     "沖縄"
   ],
-  "note": "全国表は答申額を含むため、計算用の確定区分は個別の官報公示で照合。公示一覧の項目と全国表・Excelの額・発効日を突合。全国加重平均1,177円は答申集計の参考値で計算未使用。",
+  "note": "確定公示の確認状況は44都道府県のまま。佐賀・熊本・沖縄は答申区分を保持し、利用者指定日から設定額として計算する。これは最終公示の確認を意味しない。全国加重平均1,177円は答申集計の参考値で計算未使用。",
   "preserved_history_note": "2026年度Excelには前年度発効年の食い違いが6県（秋田・福島・群馬・徳島・熊本・大分）にあるため、検証済みの2002～2025年度履歴は変更せず2026年度確定行だけ追加。",
   "rows": [
     {
@@ -619,13 +619,17 @@
       "fiscal_year": 2026,
       "accessed_date": "2026-10-01",
       "status": "advisory",
-      "used_in_calculation": false,
       "source_url": "https://jsite.mhlw.go.jp/saga-roudoukyoku/content/contents/002802129.pdf",
       "publication_date": "2026-09-01",
-      "note": "答申額を確認。2026-10-01時点で改定の最終公示は未確認のため、計算には使用しない。",
+      "note": "利用者指定日から設定額として自動反映する。資料の区分は答申のまま保持し、計算・出力に最終公示未確認と明示する。",
       "table_source_url": "https://www.mhlw.go.jp/content/11200000/001753404.pdf",
       "history_source_url": "https://www.mhlw.go.jp/content/11200000/001753407.xlsx",
-      "checker_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
+      "checker_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php",
+      "activation": {
+        "mode": "user_designated_date",
+        "date": "2026-11-15",
+        "configured_on": "2026-10-01"
+      }
     },
     {
       "prefecture": "長崎",
@@ -651,14 +655,18 @@
       "fiscal_year": 2026,
       "accessed_date": "2026-10-01",
       "status": "advisory",
-      "used_in_calculation": false,
       "source_url": "https://jsite.mhlw.go.jp/kumamoto-roudoukyoku/content/contents/002838723.pdf",
       "publication_date": "2026-09-28",
-      "note": "答申額を確認。2026-10-01時点で改定の最終公示は未確認のため、計算には使用しない。",
+      "note": "利用者指定日から設定額として自動反映する。資料の区分は答申のまま保持し、計算・出力に最終公示未確認と明示する。",
       "planned_publication_date": "2026-10-05",
       "table_source_url": "https://www.mhlw.go.jp/content/11200000/001753404.pdf",
       "history_source_url": "https://www.mhlw.go.jp/content/11200000/001753407.xlsx",
-      "checker_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
+      "checker_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php",
+      "activation": {
+        "mode": "user_designated_date",
+        "date": "2026-12-01",
+        "configured_on": "2026-10-01"
+      }
     },
     {
       "prefecture": "大分",
@@ -714,13 +722,17 @@
       "fiscal_year": 2026,
       "accessed_date": "2026-10-01",
       "status": "advisory",
-      "used_in_calculation": false,
       "source_url": "https://jsite.mhlw.go.jp/okinawa-roudoukyoku/content/contents/002806175.pdf",
       "publication_date": "2026-09-03",
-      "note": "答申額を確認。2026-10-01時点で改定の最終公示は未確認のため、計算には使用しない。",
+      "note": "利用者指定日から設定額として自動反映する。資料の区分は答申のまま保持し、計算・出力に最終公示未確認と明示する。",
       "table_source_url": "https://www.mhlw.go.jp/content/11200000/001753404.pdf",
       "history_source_url": "https://www.mhlw.go.jp/content/11200000/001753407.xlsx",
-      "checker_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
+      "checker_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php",
+      "activation": {
+        "mode": "user_designated_date",
+        "date": "2026-12-02",
+        "configured_on": "2026-10-01"
+      }
     }
   ]
 }

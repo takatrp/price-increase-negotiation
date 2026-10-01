@@ -2,7 +2,7 @@
   "schema_version": 1,
   "meta": {
     "updated": "2026-10-01",
-    "note": "最低賃金の2026年度改定を更新。官報公示を確認した44都道府県の確定額・発効日を採用し、佐賀・熊本・沖縄の答申額は別記して計算未使用。CPI・春闘賃上げ率の数値・対象期間・確認日は2026-08-08版から変更していない。",
+    "note": "2026年度最低賃金は公示確認済み44都道府県に加え、佐賀・熊本・沖縄の答申額を利用者指定日の日本時間0時から設定額として自動反映する。指定日設定額の最終公示は未確認。CPI・春闘賃上げ率は変更なし。",
     "sources": {
       "min_wage": {
         "publisher": "厚生労働省・官報",
@@ -7673,10 +7673,14 @@
         "fiscal_year": 2026,
         "accessed_date": "2026-10-01",
         "status": "advisory",
-        "used_in_calculation": false,
         "source_url": "https://jsite.mhlw.go.jp/saga-roudoukyoku/content/contents/002802129.pdf",
         "publication_date": "2026-09-01",
-        "note": "答申額を確認。2026-10-01時点で改定の最終公示は未確認のため、計算には使用しない。"
+        "note": "利用者指定日から設定額として自動反映する。資料の区分は答申のまま保持し、計算・出力に最終公示未確認と明示する。",
+        "activation": {
+          "mode": "user_designated_date",
+          "date": "2026-11-15",
+          "configured_on": "2026-10-01"
+        }
       },
       "熊本": {
         "new": 1092,
@@ -7686,11 +7690,15 @@
         "fiscal_year": 2026,
         "accessed_date": "2026-10-01",
         "status": "advisory",
-        "used_in_calculation": false,
         "source_url": "https://jsite.mhlw.go.jp/kumamoto-roudoukyoku/content/contents/002838723.pdf",
         "publication_date": "2026-09-28",
-        "note": "答申額を確認。2026-10-01時点で改定の最終公示は未確認のため、計算には使用しない。",
-        "planned_publication_date": "2026-10-05"
+        "note": "利用者指定日から設定額として自動反映する。資料の区分は答申のまま保持し、計算・出力に最終公示未確認と明示する。",
+        "planned_publication_date": "2026-10-05",
+        "activation": {
+          "mode": "user_designated_date",
+          "date": "2026-12-01",
+          "configured_on": "2026-10-01"
+        }
       },
       "沖縄": {
         "new": 1086,
@@ -7700,10 +7708,14 @@
         "fiscal_year": 2026,
         "accessed_date": "2026-10-01",
         "status": "advisory",
-        "used_in_calculation": false,
         "source_url": "https://jsite.mhlw.go.jp/okinawa-roudoukyoku/content/contents/002806175.pdf",
         "publication_date": "2026-09-03",
-        "note": "答申額を確認。2026-10-01時点で改定の最終公示は未確認のため、計算には使用しない。"
+        "note": "利用者指定日から設定額として自動反映する。資料の区分は答申のまま保持し、計算・出力に最終公示未確認と明示する。",
+        "activation": {
+          "mode": "user_designated_date",
+          "date": "2026-12-02",
+          "configured_on": "2026-10-01"
+        }
       }
     },
     "min_wage_revision": {
@@ -7723,7 +7735,7 @@
         "used_in_calculation": false,
         "source_url": "https://www.mhlw.go.jp/content/11200000/001753404.pdf"
       },
-      "note": "2026年度は確定公示を確認した44都道府県を採用。佐賀・熊本・沖縄は答申額のみ別記し、最終公示確認まで計算未使用。全国加重平均1,177円は47都道府県答申集計の参考値。"
+      "note": "2026年度の公示確認済み44都道府県を採用。佐賀・熊本・沖縄は答申区分を保持し、利用者指定日から設定額として計算する。全国加重平均1,177円は答申集計の参考値として計算未使用。"
     }
   },
   "prefs": {
