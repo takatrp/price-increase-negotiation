@@ -20,4 +20,8 @@ jobs:
           node-version: 22
 
       - name: Validate data
-        run: node scripts/validate-data.mjs
+        run: |
+          node scripts/validate-data.mjs
+          TZ=UTC node scripts/test-minimum-wage.mjs
+          TZ=America/Los_Angeles node scripts/test-minimum-wage.mjs
+          TZ=Asia/Tokyo node scripts/test-minimum-wage.mjs

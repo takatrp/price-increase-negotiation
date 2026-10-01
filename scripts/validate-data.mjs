@@ -98,18 +98,18 @@ if (cost) {
     const current = byPref[prefecture];
     check(Number(latest?.amount) === Number(current?.new), `${prefecture}: 発効日付き履歴の最新額がmin_wage_by_pref.newと一致`);
     check(String(latest?.effective_date) === String(current?.eff), `${prefecture}: 発効日付き履歴の最新発効日がmin_wage_by_pref.effと一致`);
-    const prior = (events || []).find((event) => Number(event.fiscal_year) === 2024);
-    check(Number(prior?.amount) === Number(current?.old), `${prefecture}: 2024年度額がmin_wage_by_pref.oldと一致`);
+    const prior = (events || []).find((event) => Number(event.fiscal_year) === Number(latest?.fiscal_year) - 1);
+    check(Number(prior?.amount) === Number(current?.old), `${prefecture}: 前年度確定額がmin_wage_by_pref.oldと一致`);
   }
 
   const hyogoEvents = effectiveByPref['兵庫'] || [];
-  const hyogoLatest = hyogoEvents.at(-1);
+  const hyogoLatest = hyogoEvents.find(event => Number(event.fiscal_year) === 2025);
   const hyogoJanuary = applicableMinimumWage(hyogoEvents, '2025-01-01');
   const hyogoNovember = applicableMinimumWage(hyogoEvents, '2025-11-01');
   const hyogoOctoberFirst = applicableMinimumWage(hyogoEvents, '2025-10-01');
   const hyogoOctoberLast = applicableMinimumWage(hyogoEvents, '2025-10-31');
   check(Number(hyogoJanuary?.amount) === 1052, '兵庫県2025年1月1日の基準最低賃金が1,052円である');
-  check(Number(hyogoLatest?.amount) === 1116, '兵庫県の最新最低賃金が1,116円である');
+  check(Number(hyogoLatest?.amount) === 1116, '兵庫県の2025年度最低賃金が1,116円である');
   check(Math.abs(((Number(hyogoLatest?.amount) / Number(hyogoJanuary?.amount) - 1) * 100) - 6.083650190114065) < 1e-10, '兵庫県2025年1月1日基準の累積上昇率が約6.1%である');
   check(Number(hyogoNovember?.amount) === 1116, '兵庫県2025年11月1日の基準最低賃金が1,116円である');
   check(((Number(hyogoLatest?.amount) / Number(hyogoNovember?.amount) - 1) * 100) === 0, '兵庫県2025年11月1日基準の累積上昇率が0.0%である');
@@ -325,7 +325,7 @@ if (naturalEvidenceFunctionSource) {
       { checked: true }, { value: '兵庫' },
       { value: '2.7', dataset: { origin: 'national' } },
       { value: '4.69', dataset: { origin: 'national' } },
-      { value: '' }, () => true, () => ({ pct: 6.1 }),
+      { value: '' }, () => true, () => ({ pct: 6.1, comparison:{pending:false} }),
       toTestNumber, (value) => Number(value).toFixed(1), (value) => Number(value).toFixed(2)
     );
     const officialEvidence = buildOfficialEvidence();
@@ -338,7 +338,7 @@ if (naturalEvidenceFunctionSource) {
       { checked: true }, { value: '兵庫' },
       { value: '2.7', dataset: { origin: 'manual' } },
       { value: '8.00', dataset: { origin: 'manual' } },
-      { value: '' }, () => true, () => ({ pct: 6.1 }),
+      { value: '' }, () => true, () => ({ pct: 6.1, comparison:{pending:false} }),
       toTestNumber, (value) => Number(value).toFixed(1), (value) => Number(value).toFixed(2)
     );
     check(!buildManualEvidence().includes('連合の2026年春闘最終集計'), '手入力の賃上げ率を連合の公式集計として本文へ挿入しない');
@@ -358,10 +358,10 @@ if (mwCumulativeEvidenceFunctionSource) {
     );
     const hasMwResultForTest = (value) => Boolean(value && !value.error && Number.isFinite(value.cum));
     const buildMwIncreaseEvidence = makeMwCumulativeEvidenceBuilder(
-      () => true, () => ({ baseMw: 1052, nowMw: 1116, cum: 6.083650190114065 }),
+      () => true, () => ({ baseMw: 1052, nowMw: 1116, cum: 6.083650190114065, comparison:{pending:false,asOf:'2026-10-01'} }),
       hasMwResultForTest, (value) => Number(value).toFixed(1)
     );
-    check(buildMwIncreaseEvidence() === 'また、最低賃金についても、現行価格の決定時点に適用されていた1,052円から最新の1,116円まで、累積で約6.1%上昇しております。', '後半で累積物価上昇率に続く最低賃金累積上昇率を生成する');
+    check(buildMwIncreaseEvidence() === 'また、最低賃金についても、現行価格の決定時点に適用されていた1,052円から2026-10-01時点の1,116円まで、累積で約6.1%上昇しております。', '後半で累積物価上昇率に続く最低賃金累積上昇率を生成する');
     check(buildMwIncreaseEvidence(true).endsWith('上昇しています。'), '面談トークでは最低賃金累積上昇率を話し言葉で生成する');
 
     const buildMwZeroEvidence = makeMwCumulativeEvidenceBuilder(
@@ -533,8 +533,8 @@ if (priceBasisLabelFunctionSource && syncPriceBasisFunctionSource && enforceOffi
   }
 }
 
-check(indexHtml.includes("const APP_VERSION = 'r47';"), 'リリース番号を単一定数r47で管理する');
-check((indexHtml.match(/r47/g) || []).length === 1, 'index.html内のr47リテラルが単一定数だけである');
+check(indexHtml.includes("const APP_VERSION = 'r48';"), 'リリース番号を単一定数r48で管理する');
+check((indexHtml.match(/r48/g) || []).length === 1, 'index.html内のr48リテラルが単一定数だけである');
 check((indexHtml.match(/data-app-version/g) || []).length >= 3 && indexHtml.includes("el.textContent = APP_VERSION"), '画面とフッターの版表示をAPP_VERSIONから反映する');
 check(indexHtml.includes('関与先向け｜価格転嫁支援モード') && indexHtml.includes('松本会計内部用｜顧問報酬改定モード'), '一般モードと松本会計内部用モードの表示がある');
 check(indexHtml.includes('.officeOnly{display:none !important;}') && indexHtml.includes("classList.toggle('officeMode', office)"), 'office専用UIをofficeモードだけで表示する');
