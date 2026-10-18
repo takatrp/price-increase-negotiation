@@ -230,6 +230,7 @@ if (cpi) {
 }
 
 const forbidden = [
+  'https://www.stat.go.jp/data/cpi/historic.html',
   '2024年12月確定値（2025年以降は推計）',
   '2026年1月（前年同月比）',
   '2025年春闘（中小）',
