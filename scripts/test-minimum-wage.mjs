@@ -78,10 +78,15 @@ for(const [pref,record] of Object.entries(data.national.min_wage_by_pref)){
 
 const evidence=JSON.parse(fs.readFileSync(path.join(root,'docs/minimum-wage-2026-sources.json'),'utf8'));
 check(evidence.rows.length===47 && new Set(evidence.rows.map(row=>row.prefecture)).size===47,'47 unique official-source records');
-check(evidence.rows.filter(row=>row.status==='final').length===44,'44 final source records');
-check(JSON.stringify(Object.keys(data.national.min_wage_pending_by_pref))===JSON.stringify(['佐賀','熊本','沖縄']),'three final-unconfirmed prefectures retained separately');
-check(data.national.min_wage_avg.fiscal_year===2025 && data.national.min_wage_avg.new===1121,'last fully final national average is explicitly FY2025');
-check(data.national.min_wage_revision.weighted_average_reference.new===1177 && data.national.min_wage_revision.weighted_average_reference.used_in_calculation===false,'1177 is advisory aggregate, unused');
+check(evidence.rows.filter(row=>row.status==='final').length===47,'47 final source records');
+check(Object.keys(data.national.min_wage_pending_by_pref).length===0,'confirmed prefectures no longer retain advisory activation');
+check(data.national.min_wage_avg.fiscal_year===2026 && data.national.min_wage_avg.new===1177,'FY2026 revised national weighted average is 1177');
+check(data.national.min_wage_revision.weighted_average_reference.status==='final_aggregate' && data.national.min_wage_revision.weighted_average_reference.used_in_calculation===false,'reference aggregate does not replace current regional rates');
+const snapshot=JSON.parse(fs.readFileSync(path.join(root,'docs/data-update-2026-10-19.json'),'utf8'));
+for(const row of snapshot.minimum_wage){
+  check(h.getMinWageComparison(row.prefecture,'2026-10-19','current').event.amount===row.current_amount,`${row.prefecture}: current rate matches official checker at review date`);
+  check(h.getMinWageComparison(row.prefecture,'2026-10-19','announced').event.amount===row.announced_amount,`${row.prefecture}: announced rate matches official checker`);
+}
 for(const row of evidence.rows){
   const actual=row.status==='final' ? data.national.min_wage_by_pref[row.prefecture] : data.national.min_wage_pending_by_pref[row.prefecture];
   for(const key of ['new','old','inc','eff','fiscal_year','status','source_url','publication_date','accessed_date']) check(actual[key]===row[key],`${row.prefecture}: ${key} agrees with independently verified source record`);
@@ -151,13 +156,22 @@ check(saved.cpiRate.dataset.origin==='manual','restored manual values remain mar
 const legacy=JSON.parse(saved.localStorage.getItem('test-draft'));delete legacy.minWageTarget;saved.localStorage.setItem('test-draft',JSON.stringify(legacy));
 saved.restoreDraft();check(saved.minWageTarget.value==='current' && saved.restoreMessage.includes('本日時点の比較額（指定日設定を含む）で再計算'),'old saved draft transparently defaults to effective rate');
 check(saved.cpiRate.value==='8.8' && saved.wageRate.value==='9.9','old draft manual amounts remain unchanged');
-// User-designated date gating is distinct from official finality.
+// Retain regression coverage for custom/legacy r49 advisory data independently of shipping final records.
 const schedules={佐賀:{old:1030,new:1095,date:'2026-11-15'},熊本:{old:1034,new:1092,date:'2026-12-01'},沖縄:{old:1023,new:1086,date:'2026-12-02'}};
+const advisoryFixture=structuredClone(data);
+for(const [pref,expected] of Object.entries(schedules)){
+  const records=advisoryFixture.national.min_wage_history_by_pref_effective[pref];
+  records.pop();
+  const prior=records.at(-1),previous=records.at(-2);
+  advisoryFixture.national.min_wage_by_pref[pref]={new:prior.amount,old:previous.amount,inc:prior.amount-previous.amount,eff:prior.effective_date,fiscal_year:2025,status:'final'};
+  delete advisoryFixture.national.min_wage_history_by_pref[pref]['2026'];
+  advisoryFixture.national.min_wage_pending_by_pref[pref]={new:expected.new,old:expected.old,inc:expected.new-expected.old,eff:expected.date,fiscal_year:2026,status:'advisory',accessed_date:'2026-10-01',activation:{mode:'user_designated_date',date:expected.date,configured_on:'2026-10-01'}};
+}
 for(const [pref,expected] of Object.entries(schedules)){
   const midnight=Date.parse(`${expected.date}T00:00:00+09:00`);
   for(const [offset,label,amount] of [[-86400000,'day before',expected.old],[-1,'1ms before',expected.old],[0,'midnight',expected.new],[1,'1ms after',expected.new],[86400000,'day after',expected.new]]){
     const instant=new Date(midnight+offset).toISOString();
-    const run=harness(data,instant);run.prefSelect.value=pref;run.currentPriceAsOf.value='2026-10-01';
+    const run=harness(advisoryFixture,instant);run.prefSelect.value=pref;run.currentPriceAsOf.value='2026-10-01';
     for(const mode of ['current','announced']){
       run.minWageTarget.value=mode;
       const comparison=run.getMinWageComparison(pref);const calc=run.calcMwSince();run.renderMinWagePanel();
@@ -179,7 +193,7 @@ for(const [pref,expected] of Object.entries(schedules)){
       }
     }
   }
-  const after=harness(data,new Date(midnight+86400000).toISOString());after.prefSelect.value=pref;after.currentPriceAsOf.value=expected.date;
+  const after=harness(advisoryFixture,new Date(midnight+86400000).toISOString());after.prefSelect.value=pref;after.currentPriceAsOf.value=expected.date;
   const same=after.calcMwSince();
   check(same.baseMw===expected.new && same.nowMw===expected.new && same.cum===0 && same.baseScheduled,`${pref}: historical baseline on scheduled day uses same qualified rate`);
   check(after.buildReferenceBlock(expected.date).includes('設定額の最終公示は未確認'),`${pref}: zero increase still has assumption in output`);
@@ -187,10 +201,10 @@ for(const [pref,expected] of Object.entries(schedules)){
   const monthResult=after.calcMwSince();
   check(expected.date.endsWith('-01') ? !monthResult.error : Boolean(monthResult.error),`${pref}: day1 is unambiguous; midmonth configured revision requires exact date`);
 
-  const noSchedule=structuredClone(data);delete noSchedule.national.min_wage_pending_by_pref[pref].activation;noSchedule.national.min_wage_pending_by_pref[pref].used_in_calculation=false;
+  const noSchedule=structuredClone(advisoryFixture);delete noSchedule.national.min_wage_pending_by_pref[pref].activation;noSchedule.national.min_wage_pending_by_pref[pref].used_in_calculation=false;
   const noRun=harness(noSchedule,'2027-01-02T00:00:00Z');
   check(noRun.getMinWageComparison(pref).event.amount===expected.old,`${pref}: date alone cannot activate an unconfigured advisory`);
-  const invalidSchedule=structuredClone(data);invalidSchedule.national.min_wage_pending_by_pref[pref].activation.date='2026-01-01';
+  const invalidSchedule=structuredClone(advisoryFixture);invalidSchedule.national.min_wage_pending_by_pref[pref].activation.date='2026-01-01';
   assert.throws(()=>h.validateCostDataPayload(invalidSchedule));checks++;
 }
 // Page left open across midnight: only derived data changes; manual values/text survive.

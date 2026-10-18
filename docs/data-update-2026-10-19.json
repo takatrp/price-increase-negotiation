@@ -1,0 +1,304 @@
+{
+  "accessed_date": "2026-10-19",
+  "timezone": "Asia/Tokyo",
+  "minimum_wage_checker_source": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php",
+  "minimum_wage_current_count": 32,
+  "minimum_wage_future_count": 15,
+  "minimum_wage": [
+    {
+      "prefecture": "北海道",
+      "current_amount": 1131,
+      "announced_amount": 1131,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "青森",
+      "current_amount": 1029,
+      "announced_amount": 1090,
+      "effective_date": "2026-10-29"
+    },
+    {
+      "prefecture": "岩手",
+      "current_amount": 1031,
+      "announced_amount": 1090,
+      "effective_date": "2026-12-01"
+    },
+    {
+      "prefecture": "宮城",
+      "current_amount": 1098,
+      "announced_amount": 1098,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "秋田",
+      "current_amount": 1090,
+      "announced_amount": 1090,
+      "effective_date": "2026-10-14"
+    },
+    {
+      "prefecture": "山形",
+      "current_amount": 1032,
+      "announced_amount": 1092,
+      "effective_date": "2026-10-30"
+    },
+    {
+      "prefecture": "福島",
+      "current_amount": 1094,
+      "announced_amount": 1094,
+      "effective_date": "2026-10-16"
+    },
+    {
+      "prefecture": "東京",
+      "current_amount": 1280,
+      "announced_amount": 1280,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "茨城",
+      "current_amount": 1136,
+      "announced_amount": 1136,
+      "effective_date": "2026-10-18"
+    },
+    {
+      "prefecture": "栃木",
+      "current_amount": 1125,
+      "announced_amount": 1125,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "群馬",
+      "current_amount": 1120,
+      "announced_amount": 1120,
+      "effective_date": "2026-10-03"
+    },
+    {
+      "prefecture": "埼玉",
+      "current_amount": 1196,
+      "announced_amount": 1196,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "千葉",
+      "current_amount": 1195,
+      "announced_amount": 1195,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "神奈川",
+      "current_amount": 1279,
+      "announced_amount": 1279,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "新潟",
+      "current_amount": 1108,
+      "announced_amount": 1108,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "富山",
+      "current_amount": 1119,
+      "announced_amount": 1119,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "石川",
+      "current_amount": 1113,
+      "announced_amount": 1113,
+      "effective_date": "2026-10-03"
+    },
+    {
+      "prefecture": "福井",
+      "current_amount": 1112,
+      "announced_amount": 1112,
+      "effective_date": "2026-10-04"
+    },
+    {
+      "prefecture": "山梨",
+      "current_amount": 1052,
+      "announced_amount": 1113,
+      "effective_date": "2026-11-01"
+    },
+    {
+      "prefecture": "長野",
+      "current_amount": 1117,
+      "announced_amount": 1117,
+      "effective_date": "2026-10-02"
+    },
+    {
+      "prefecture": "岐阜",
+      "current_amount": 1121,
+      "announced_amount": 1121,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "静岡",
+      "current_amount": 1154,
+      "announced_amount": 1154,
+      "effective_date": "2026-10-15"
+    },
+    {
+      "prefecture": "愛知",
+      "current_amount": 1195,
+      "announced_amount": 1195,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "京都",
+      "current_amount": 1122,
+      "announced_amount": 1180,
+      "effective_date": "2026-11-16"
+    },
+    {
+      "prefecture": "大阪",
+      "current_amount": 1231,
+      "announced_amount": 1231,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "三重",
+      "current_amount": 1143,
+      "announced_amount": 1143,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "滋賀",
+      "current_amount": 1136,
+      "announced_amount": 1136,
+      "effective_date": "2026-10-03"
+    },
+    {
+      "prefecture": "兵庫",
+      "current_amount": 1172,
+      "announced_amount": 1172,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "奈良",
+      "current_amount": 1107,
+      "announced_amount": 1107,
+      "effective_date": "2026-10-04"
+    },
+    {
+      "prefecture": "和歌山",
+      "current_amount": 1101,
+      "announced_amount": 1101,
+      "effective_date": "2026-10-03"
+    },
+    {
+      "prefecture": "鳥取",
+      "current_amount": 1090,
+      "announced_amount": 1090,
+      "effective_date": "2026-10-03"
+    },
+    {
+      "prefecture": "島根",
+      "current_amount": 1092,
+      "announced_amount": 1092,
+      "effective_date": "2026-10-10"
+    },
+    {
+      "prefecture": "岡山",
+      "current_amount": 1104,
+      "announced_amount": 1104,
+      "effective_date": "2026-10-02"
+    },
+    {
+      "prefecture": "広島",
+      "current_amount": 1141,
+      "announced_amount": 1141,
+      "effective_date": "2026-10-11"
+    },
+    {
+      "prefecture": "山口",
+      "current_amount": 1101,
+      "announced_amount": 1101,
+      "effective_date": "2026-10-08"
+    },
+    {
+      "prefecture": "徳島",
+      "current_amount": 1046,
+      "announced_amount": 1103,
+      "effective_date": "2026-11-01"
+    },
+    {
+      "prefecture": "香川",
+      "current_amount": 1092,
+      "announced_amount": 1092,
+      "effective_date": "2026-10-01"
+    },
+    {
+      "prefecture": "愛媛",
+      "current_amount": 1033,
+      "announced_amount": 1093,
+      "effective_date": "2026-11-01"
+    },
+    {
+      "prefecture": "高知",
+      "current_amount": 1023,
+      "announced_amount": 1086,
+      "effective_date": "2026-10-29"
+    },
+    {
+      "prefecture": "福岡",
+      "current_amount": 1114,
+      "announced_amount": 1114,
+      "effective_date": "2026-10-04"
+    },
+    {
+      "prefecture": "佐賀",
+      "current_amount": 1030,
+      "announced_amount": 1095,
+      "effective_date": "2026-11-15"
+    },
+    {
+      "prefecture": "長崎",
+      "current_amount": 1031,
+      "announced_amount": 1087,
+      "effective_date": "2026-11-02"
+    },
+    {
+      "prefecture": "大分",
+      "current_amount": 1035,
+      "announced_amount": 1096,
+      "effective_date": "2026-11-01"
+    },
+    {
+      "prefecture": "熊本",
+      "current_amount": 1034,
+      "announced_amount": 1092,
+      "effective_date": "2026-12-01"
+    },
+    {
+      "prefecture": "宮崎",
+      "current_amount": 1023,
+      "announced_amount": 1085,
+      "effective_date": "2026-10-24"
+    },
+    {
+      "prefecture": "鹿児島",
+      "current_amount": 1026,
+      "announced_amount": 1090,
+      "effective_date": "2026-10-25"
+    },
+    {
+      "prefecture": "沖縄",
+      "current_amount": 1023,
+      "announced_amount": 1086,
+      "effective_date": "2026-12-02"
+    }
+  ],
+  "cpi": {
+    "latest_month": "2026-08",
+    "official_yoy": 1.7,
+    "publication_date": "2026-09-18",
+    "july_reference_index": 102.108,
+    "august_reference_index": 102.047
+  },
+  "wage": {
+    "value": 4.69,
+    "amount": 12866,
+    "status": "unchanged_final",
+    "publication_date": "2026-07-03"
+  }
+}

@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
   "meta": {
-    "updated": "2026-10-01",
-    "note": "2026年度最低賃金は公示確認済み44都道府県に加え、佐賀・熊本・沖縄の答申額を利用者指定日の日本時間0時から設定額として自動反映する。指定日設定額の最終公示は未確認。CPI・春闘賃上げ率は変更なし。",
+    "updated": "2026-10-19",
+    "note": "2026年10月19日日本時間確認。CPIは2026年8月まで、消費税調整済CPIは2025年基準。2026年度最低賃金は47都道府県の確定額と各発効日を収録し、現行額と発効前の確定額を区別する。春闘は2026年最終回答4.69％を維持。",
     "sources": {
       "min_wage": {
-        "publisher": "厚生労働省・官報",
-        "title": "地域別最低賃金の全国一覧・都道府県別改正公示（令和8年度は確定確認済み分）",
+        "publisher": "厚生労働省・各労働局・官報",
+        "title": "地域別最低賃金の全国一覧・都道府県別改正公示（令和8年度・全47都道府県）",
         "publication_date": null,
         "publication_date_basis": "公示日は各都道府県レコードのpublication_dateを参照",
-        "target_period": "2002年度～2026年度（2026年度は確定公示を確認した44都道府県）",
-        "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/index.html",
-        "status": "partially_final",
-        "accessed_date": "2026-10-01"
+        "target_period": "2002年度～2026年度（2026年度は全47都道府県の確定公示確認済み）",
+        "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/",
+        "status": "final",
+        "accessed_date": "2026-10-19"
       },
       "min_wage_history_excel": {
         "publisher": "厚生労働省",
@@ -37,29 +37,30 @@
     }
   },
   "national": {
-    "cpi_yoy": 1.6,
-    "cpi_asof": "2026年6月（前年同月比・生鮮食品を除く総合、2025年基準）",
+    "cpi_yoy": 1.7,
+    "cpi_asof": "2026年8月（前年同月比・生鮮食品を除く総合、2025年基準）",
     "wage_yoy": 4.69,
     "wage_amount": 12866,
     "wage_asof": "2026年春季生活闘争（連合 第7回〔最終〕回答集計：300人未満の中小組合・加重平均、定昇相当込み）",
     "sources": {
       "cpi": {
         "publisher": "総務省統計局",
-        "title": "消費者物価指数 2025年基準改定による遡及結果について",
-        "publication_date": "2026-08-07",
-        "target_period": "2026年6月",
-        "url": "https://www.stat.go.jp/data/cpi/2025/pdf/def2025-2020.pdf",
+        "title": "2025年基準 消費者物価指数 全国 2026年8月分",
+        "publication_date": "2026-09-18",
+        "target_period": "2026年8月",
+        "url": "https://www.e-stat.go.jp/stat-search/files?layout=datalist&lid=000001490251&page=1",
         "status": "final",
-        "accessed_date": "2026-08-08"
+        "accessed_date": "2026-10-19"
       },
       "cpi_monthly": {
         "publisher": "総務省統計局・政府統計の総合窓口 e-Stat",
         "title": "2025年基準消費者物価指数 長期時系列データ 中分類指数（全国・月次）",
-        "publication_date": "2026-08-07",
-        "target_period": "1970年1月～2026年6月",
-        "url": "https://www.e-stat.go.jp/stat-search/files?layout=datalist&lid=000001488144&page=1",
+        "publication_date": "2026-09-18",
+        "target_period": "1970年1月～2026年8月",
+        "url": "https://www.e-stat.go.jp/stat-search/files?stat_infid=000040482943",
         "status": "final",
-        "accessed_date": "2026-08-08"
+        "accessed_date": "2026-10-19",
+        "download_url": "https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040482943&fileKind=1"
       },
       "wage": {
         "publisher": "日本労働組合総連合会（連合）",
@@ -68,17 +69,17 @@
         "target_period": "2026年春季生活闘争（2026年7月1日集計）",
         "url": "https://www.jtuc-rengo.or.jp/activity/roudou/shuntou/2026/yokyu_kaito/kaito/press_no7.pdf",
         "status": "final",
-        "accessed_date": "2026-08-08"
+        "accessed_date": "2026-10-19"
       },
       "min_wage": {
-        "publisher": "厚生労働省・官報",
-        "title": "地域別最低賃金の全国一覧・都道府県別改正公示（令和8年度は確定確認済み分）",
+        "publisher": "厚生労働省・各労働局・官報",
+        "title": "地域別最低賃金の全国一覧・都道府県別改正公示（令和8年度・全47都道府県）",
         "publication_date": null,
         "publication_date_basis": "公示日は各都道府県レコードのpublication_dateを参照",
-        "target_period": "2002年度～2026年度（2026年度は確定公示を確認した44都道府県）",
-        "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/index.html",
-        "status": "partially_final",
-        "accessed_date": "2026-10-01"
+        "target_period": "2002年度～2026年度（2026年度は全47都道府県の確定公示確認済み）",
+        "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/",
+        "status": "final",
+        "accessed_date": "2026-10-19"
       }
     },
     "min_wage_guideline_2026": {
@@ -97,12 +98,13 @@
       "note": "当初目安の履歴メタデータ。最新の確認状況はmin_wage_revisionを参照。計算未使用。"
     },
     "min_wage_avg": {
-      "new": 1121,
-      "old": 1055,
-      "inc": 66,
+      "new": 1177,
+      "old": 1121,
+      "inc": 56,
       "eff": null,
-      "fiscal_year": 2025,
-      "status": "final"
+      "fiscal_year": 2026,
+      "status": "final",
+      "note": "2026年度改定後の公表全国加重平均。全地域の同日発効や本日時点の適用平均を意味しない。"
     },
     "min_wage_history_avg": {
       "2002": 663,
@@ -128,7 +130,8 @@
       "2022": 961,
       "2023": 1004,
       "2024": 1055,
-      "2025": 1121
+      "2025": 1121,
+      "2026": 1177
     },
     "min_wage_by_pref": {
       "北海道": {
@@ -137,10 +140,11 @@
         "inc": 56,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "青森": {
         "new": 1090,
@@ -148,10 +152,11 @@
         "inc": 61,
         "eff": "2026-10-29",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260929/20260929h01797/20260929h017970007f.html",
-        "publication_date": "2026-09-29"
+        "publication_date": "2026-09-29",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "岩手": {
         "new": 1090,
@@ -159,10 +164,11 @@
         "inc": 59,
         "eff": "2026-12-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260930/20260930h01798/20260930h017980008f.html",
-        "publication_date": "2026-09-30"
+        "publication_date": "2026-09-30",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "宮城": {
         "new": 1098,
@@ -170,10 +176,11 @@
         "inc": 60,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "秋田": {
         "new": 1090,
@@ -181,10 +188,11 @@
         "inc": 59,
         "eff": "2026-10-14",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260914/20260914h01789/20260914h017890000f.html",
-        "publication_date": "2026-09-14"
+        "publication_date": "2026-09-14",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "山形": {
         "new": 1092,
@@ -192,10 +200,11 @@
         "inc": 60,
         "eff": "2026-10-30",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260930/20260930h01798/20260930h017980008f.html",
-        "publication_date": "2026-09-30"
+        "publication_date": "2026-09-30",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "福島": {
         "new": 1094,
@@ -203,10 +212,11 @@
         "inc": 61,
         "eff": "2026-10-16",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260916/20260916h01791/20260916h017910000f.html",
-        "publication_date": "2026-09-16"
+        "publication_date": "2026-09-16",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "茨城": {
         "new": 1136,
@@ -214,10 +224,11 @@
         "inc": 62,
         "eff": "2026-10-18",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260918/20260918h01793/20260918h017930000f.html",
-        "publication_date": "2026-09-18"
+        "publication_date": "2026-09-18",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "栃木": {
         "new": 1125,
@@ -225,10 +236,11 @@
         "inc": 57,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "群馬": {
         "new": 1120,
@@ -236,10 +248,11 @@
         "inc": 57,
         "eff": "2026-10-03",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260903/20260903h01782/20260903h017820000f.html",
-        "publication_date": "2026-09-03"
+        "publication_date": "2026-09-03",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "埼玉": {
         "new": 1196,
@@ -247,10 +260,11 @@
         "inc": 55,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "千葉": {
         "new": 1195,
@@ -258,10 +272,11 @@
         "inc": 55,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "東京": {
         "new": 1280,
@@ -269,10 +284,11 @@
         "inc": 54,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "神奈川": {
         "new": 1279,
@@ -280,10 +296,11 @@
         "inc": 54,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260831/20260831h01779/20260831h017790000f.html",
-        "publication_date": "2026-08-31"
+        "publication_date": "2026-08-31",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "新潟": {
         "new": 1108,
@@ -291,10 +308,11 @@
         "inc": 58,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "富山": {
         "new": 1119,
@@ -302,10 +320,11 @@
         "inc": 57,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "石川": {
         "new": 1113,
@@ -313,10 +332,11 @@
         "inc": 59,
         "eff": "2026-10-03",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260903/20260903h01782/20260903h017820000f.html",
-        "publication_date": "2026-09-03"
+        "publication_date": "2026-09-03",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "福井": {
         "new": 1112,
@@ -324,10 +344,11 @@
         "inc": 59,
         "eff": "2026-10-04",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260904/20260904h01783/20260904h017830000f.html",
-        "publication_date": "2026-09-04"
+        "publication_date": "2026-09-04",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "山梨": {
         "new": 1113,
@@ -335,10 +356,11 @@
         "inc": 61,
         "eff": "2026-11-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260929/20260929h01797/20260929h017970007f.html",
-        "publication_date": "2026-09-29"
+        "publication_date": "2026-09-29",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "長野": {
         "new": 1117,
@@ -346,10 +368,11 @@
         "inc": 56,
         "eff": "2026-10-02",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260902/20260902h01781/20260902h017810000f.html",
-        "publication_date": "2026-09-02"
+        "publication_date": "2026-09-02",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "岐阜": {
         "new": 1121,
@@ -357,10 +380,11 @@
         "inc": 56,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "静岡": {
         "new": 1154,
@@ -368,10 +392,11 @@
         "inc": 57,
         "eff": "2026-10-15",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260915/20260915h01790/20260915h017900000f.html",
-        "publication_date": "2026-09-15"
+        "publication_date": "2026-09-15",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "愛知": {
         "new": 1195,
@@ -379,10 +404,11 @@
         "inc": 55,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "三重": {
         "new": 1143,
@@ -390,10 +416,11 @@
         "inc": 56,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "滋賀": {
         "new": 1136,
@@ -401,10 +428,11 @@
         "inc": 56,
         "eff": "2026-10-03",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260903/20260903h01782/20260903h017820000f.html",
-        "publication_date": "2026-09-03"
+        "publication_date": "2026-09-03",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "京都": {
         "new": 1180,
@@ -412,10 +440,11 @@
         "inc": 58,
         "eff": "2026-11-16",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260918/20260918h01793/20260918h017930000f.html",
-        "publication_date": "2026-09-18"
+        "publication_date": "2026-09-18",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "大阪": {
         "new": 1231,
@@ -423,10 +452,11 @@
         "inc": 54,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "兵庫": {
         "new": 1172,
@@ -434,10 +464,11 @@
         "inc": 56,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "奈良": {
         "new": 1107,
@@ -445,10 +476,11 @@
         "inc": 56,
         "eff": "2026-10-04",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260904/20260904h01783/20260904h017830000f.html",
-        "publication_date": "2026-09-04"
+        "publication_date": "2026-09-04",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "和歌山": {
         "new": 1101,
@@ -456,10 +488,11 @@
         "inc": 56,
         "eff": "2026-10-03",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260903/20260903h01782/20260903h017820000f.html",
-        "publication_date": "2026-09-03"
+        "publication_date": "2026-09-03",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "鳥取": {
         "new": 1090,
@@ -467,10 +500,11 @@
         "inc": 60,
         "eff": "2026-10-03",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260903/20260903h01782/20260903h017820000f.html",
-        "publication_date": "2026-09-03"
+        "publication_date": "2026-09-03",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "島根": {
         "new": 1092,
@@ -478,10 +512,11 @@
         "inc": 59,
         "eff": "2026-10-10",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260910/20260910h01787/20260910h017870000f.html",
-        "publication_date": "2026-09-10"
+        "publication_date": "2026-09-10",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "岡山": {
         "new": 1104,
@@ -489,10 +524,11 @@
         "inc": 57,
         "eff": "2026-10-02",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260902/20260902h01781/20260902h017810000f.html",
-        "publication_date": "2026-09-02"
+        "publication_date": "2026-09-02",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "広島": {
         "new": 1141,
@@ -500,10 +536,11 @@
         "inc": 56,
         "eff": "2026-10-11",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260911/20260911h01788/20260911h017880000f.html",
-        "publication_date": "2026-09-11"
+        "publication_date": "2026-09-11",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "山口": {
         "new": 1101,
@@ -511,10 +548,11 @@
         "inc": 58,
         "eff": "2026-10-08",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260908/20260908h01785/20260908h017850000f.html",
-        "publication_date": "2026-09-08"
+        "publication_date": "2026-09-08",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "徳島": {
         "new": 1103,
@@ -522,10 +560,11 @@
         "inc": 57,
         "eff": "2026-11-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260918/20260918h01793/20260918h017930000f.html",
-        "publication_date": "2026-09-18"
+        "publication_date": "2026-09-18",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "香川": {
         "new": 1092,
@@ -533,10 +572,11 @@
         "inc": 56,
         "eff": "2026-10-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260901/20260901h01780/20260901h017800000f.html",
-        "publication_date": "2026-09-01"
+        "publication_date": "2026-09-01",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "愛媛": {
         "new": 1093,
@@ -544,10 +584,11 @@
         "inc": 60,
         "eff": "2026-11-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260917/20260917h01792/20260917h017920000f.html",
-        "publication_date": "2026-09-17"
+        "publication_date": "2026-09-17",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "高知": {
         "new": 1086,
@@ -555,10 +596,11 @@
         "inc": 63,
         "eff": "2026-10-29",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260929/20260929h01797/20260929h017970007f.html",
-        "publication_date": "2026-09-29"
+        "publication_date": "2026-09-29",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "福岡": {
         "new": 1114,
@@ -566,18 +608,24 @@
         "inc": 57,
         "eff": "2026-10-04",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260904/20260904h01783/20260904h017830000f.html",
-        "publication_date": "2026-09-04"
+        "publication_date": "2026-09-04",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "佐賀": {
-        "new": 1030,
-        "old": 956,
-        "inc": 74,
-        "eff": "2025-11-21",
-        "fiscal_year": 2025,
-        "status": "final"
+        "new": 1095,
+        "old": 1030,
+        "inc": 65,
+        "eff": "2026-11-15",
+        "fiscal_year": 2026,
+        "accessed_date": "2026-10-19",
+        "status": "final",
+        "source_url": "https://jsite.mhlw.go.jp/saga-roudoukyoku/content/contents/002839608.pdf",
+        "publication_date": "2026-10-02",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php",
+        "decision_date": "2026-09-18"
       },
       "長崎": {
         "new": 1087,
@@ -585,18 +633,23 @@
         "inc": 56,
         "eff": "2026-11-02",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260929/20260929h01797/20260929h017970007f.html",
-        "publication_date": "2026-09-29"
+        "publication_date": "2026-09-29",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "熊本": {
-        "new": 1034,
-        "old": 952,
-        "inc": 82,
-        "eff": "2026-01-01",
-        "fiscal_year": 2025,
-        "status": "final"
+        "new": 1092,
+        "old": 1034,
+        "inc": 58,
+        "eff": "2026-12-01",
+        "fiscal_year": 2026,
+        "accessed_date": "2026-10-19",
+        "status": "final",
+        "source_url": "https://jsite.mhlw.go.jp/kumamoto-roudoukyoku/content/contents/002838514.pdf",
+        "publication_date": "2026-10-05",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "大分": {
         "new": 1096,
@@ -604,10 +657,11 @@
         "inc": 61,
         "eff": "2026-11-01",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260929/20260929h01797/20260929h017970007f.html",
-        "publication_date": "2026-09-29"
+        "publication_date": "2026-09-29",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "宮崎": {
         "new": 1085,
@@ -615,10 +669,11 @@
         "inc": 62,
         "eff": "2026-10-24",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260924/20260924h01794/20260924h017940000f.html",
-        "publication_date": "2026-09-24"
+        "publication_date": "2026-09-24",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "鹿児島": {
         "new": 1090,
@@ -626,18 +681,24 @@
         "inc": 64,
         "eff": "2026-10-25",
         "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
+        "accessed_date": "2026-10-19",
         "status": "final",
         "source_url": "https://www.kanpo.go.jp/20260925/20260925h01795/20260925h017950000f.html",
-        "publication_date": "2026-09-25"
+        "publication_date": "2026-09-25",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php"
       },
       "沖縄": {
-        "new": 1023,
-        "old": 952,
-        "inc": 71,
-        "eff": "2025-12-01",
-        "fiscal_year": 2025,
-        "status": "final"
+        "new": 1086,
+        "old": 1023,
+        "inc": 63,
+        "eff": "2026-12-02",
+        "fiscal_year": 2026,
+        "accessed_date": "2026-10-19",
+        "status": "final",
+        "source_url": "https://jsite.mhlw.go.jp/okinawa-roudoukyoku/content/contents/002840324.pdf",
+        "publication_date": "2026-10-05",
+        "verification_source_url": "https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php",
+        "decision_date": "2026-09-24"
       }
     },
     "min_wage_history_by_pref": {
@@ -719,7 +780,8 @@
         "2022": 853,
         "2023": 900,
         "2024": 956,
-        "2025": 1030
+        "2025": 1030,
+        "2026": 1095
       },
       "兵庫": {
         "2002": 675,
@@ -1420,7 +1482,8 @@
         "2022": 853,
         "2023": 896,
         "2024": 952,
-        "2025": 1023
+        "2025": 1023,
+        "2026": 1086
       },
       "滋賀": {
         "2002": 651,
@@ -1473,7 +1536,8 @@
         "2022": 853,
         "2023": 898,
         "2024": 952,
-        "2025": 1034
+        "2025": 1034,
+        "2026": 1092
       },
       "石川": {
         "2002": 645,
@@ -6930,6 +6994,12 @@
           "fiscal_year": 2025,
           "amount": 1030,
           "effective_date": "2025-11-21"
+        },
+        {
+          "fiscal_year": 2026,
+          "amount": 1095,
+          "effective_date": "2026-11-15",
+          "status": "final"
         }
       ],
       "長崎": [
@@ -7170,6 +7240,12 @@
           "fiscal_year": 2025,
           "amount": 1034,
           "effective_date": "2026-01-01"
+        },
+        {
+          "fiscal_year": 2026,
+          "amount": 1092,
+          "effective_date": "2026-12-01",
+          "status": "final"
         }
       ],
       "大分": [
@@ -7661,81 +7737,31 @@
           "fiscal_year": 2025,
           "amount": 1023,
           "effective_date": "2025-12-01"
+        },
+        {
+          "fiscal_year": 2026,
+          "amount": 1086,
+          "effective_date": "2026-12-02",
+          "status": "final"
         }
       ]
     },
-    "min_wage_pending_by_pref": {
-      "佐賀": {
-        "new": 1095,
-        "old": 1030,
-        "inc": 65,
-        "eff": "2026-11-15",
-        "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
-        "status": "advisory",
-        "source_url": "https://jsite.mhlw.go.jp/saga-roudoukyoku/content/contents/002802129.pdf",
-        "publication_date": "2026-09-01",
-        "note": "利用者指定日から設定額として自動反映する。資料の区分は答申のまま保持し、計算・出力に最終公示未確認と明示する。",
-        "activation": {
-          "mode": "user_designated_date",
-          "date": "2026-11-15",
-          "configured_on": "2026-10-01"
-        }
-      },
-      "熊本": {
-        "new": 1092,
-        "old": 1034,
-        "inc": 58,
-        "eff": "2026-12-01",
-        "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
-        "status": "advisory",
-        "source_url": "https://jsite.mhlw.go.jp/kumamoto-roudoukyoku/content/contents/002838723.pdf",
-        "publication_date": "2026-09-28",
-        "note": "利用者指定日から設定額として自動反映する。資料の区分は答申のまま保持し、計算・出力に最終公示未確認と明示する。",
-        "planned_publication_date": "2026-10-05",
-        "activation": {
-          "mode": "user_designated_date",
-          "date": "2026-12-01",
-          "configured_on": "2026-10-01"
-        }
-      },
-      "沖縄": {
-        "new": 1086,
-        "old": 1023,
-        "inc": 63,
-        "eff": "2026-12-02",
-        "fiscal_year": 2026,
-        "accessed_date": "2026-10-01",
-        "status": "advisory",
-        "source_url": "https://jsite.mhlw.go.jp/okinawa-roudoukyoku/content/contents/002806175.pdf",
-        "publication_date": "2026-09-03",
-        "note": "利用者指定日から設定額として自動反映する。資料の区分は答申のまま保持し、計算・出力に最終公示未確認と明示する。",
-        "activation": {
-          "mode": "user_designated_date",
-          "date": "2026-12-02",
-          "configured_on": "2026-10-01"
-        }
-      }
-    },
+    "min_wage_pending_by_pref": {},
     "min_wage_revision": {
       "fiscal_year": 2026,
-      "accessed_date": "2026-10-01",
-      "confirmed_prefecture_count": 44,
-      "pending_prefectures": [
-        "佐賀",
-        "熊本",
-        "沖縄"
-      ],
+      "accessed_date": "2026-10-19",
+      "confirmed_prefecture_count": 47,
+      "pending_prefectures": [],
       "weighted_average_reference": {
         "new": 1177,
         "old": 1121,
         "inc": 56,
-        "status": "advisory_aggregate",
+        "status": "final_aggregate",
         "used_in_calculation": false,
-        "source_url": "https://www.mhlw.go.jp/content/11200000/001753404.pdf"
+        "source_url": "https://www.mhlw.go.jp/content/11200000/001753404.pdf",
+        "note": "2026年度改定後の全国加重平均。各地域の発効日は異なる。"
       },
-      "note": "2026年度の公示確認済み44都道府県を採用。佐賀・熊本・沖縄は答申区分を保持し、利用者指定日から設定額として計算する。全国加重平均1,177円は答申集計の参考値として計算未使用。"
+      "note": "全47都道府県の確定公示を確認。全国加重平均1,177円は2026年度改定後の公表値であり、10月19日時点の発効済み額の全国平均ではない。"
     }
   },
   "prefs": {

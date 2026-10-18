@@ -1,19 +1,20 @@
 {
   "schema_version": 1,
   "meta": {
-    "updated": "2026-08-08",
+    "updated": "2026-10-19",
     "publisher": "総務省統計局",
     "series_name": "全国・生鮮食品を除く総合",
     "base": "2025年=100",
     "series_type": "2025年基準接続指数",
     "precision": "1970年1月～2024年12月はe-Statの公表指数（小数第1位）、2025年1月以降は小数第3位までの参考指数",
-    "latest_month": "2026-06",
-    "latest_official_yoy": 1.6,
+    "latest_month": "2026-08",
+    "latest_official_yoy": 1.7,
     "source_title": "2025年基準消費者物価指数 長期時系列データ 中分類指数（全国・月次）／（参考値）小数第3位までの指数（全国）",
-    "publication_date": "2026-08-07",
-    "source_url": "https://www.e-stat.go.jp/stat-search/files?layout=datalist&lid=000001488144&page=1",
+    "publication_date": "2026-09-18",
+    "source_url": "https://www.e-stat.go.jp/stat-search/files?stat_infid=000040482943",
+    "download_url": "https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040482943&fileKind=1",
     "reference_precision_source_url": "https://www.stat.go.jp/data/cpi/2025/csv/zmi2025aa.csv",
-    "accessed_date": "2026-08-08",
+    "accessed_date": "2026-10-19",
     "note": "累積上昇率は各月の接続指数の比で計算。小数第3位の指数は計算用の参考値であり、公式の変化率を再計算して上書きしない。"
   },
   "values": {
@@ -694,6 +695,8 @@
     "2026-03": 100.736,
     "2026-04": 101.123,
     "2026-05": 101.563,
-    "2026-06": 101.721
+    "2026-06": 101.721,
+    "2026-07": 102.108,
+    "2026-08": 102.047
   }
 }

@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { inflateRawSync } from 'node:zlib';
 
-const SOURCE_URL = 'https://www.stat.go.jp/data/cpi/2020/zuhyou/2020taxadj.xlsx';
+const SOURCE_URL = 'https://www.stat.go.jp/data/cpi/2025/zuhyou/2025taxadj.xlsx';
 const METHODOLOGY_URL = 'https://www.stat.go.jp/data/cpi/2015/pdf/2015taxadj.pdf';
 const START_MONTH = '1990-01';
 const END_MONTH = '2019-12';
@@ -43,7 +43,7 @@ function usage() {
     '',
     '使用例:',
     '  node scripts/build-cpi-tax-adjusted.mjs --accessed-date 2026-08-11',
-    '  node scripts/build-cpi-tax-adjusted.mjs --input path/to/2020taxadj.xlsx --accessed-date 2026-08-11',
+    '  node scripts/build-cpi-tax-adjusted.mjs --input path/to/2025taxadj.xlsx --accessed-date YYYY-MM-DD',
     '',
     '引数:',
     '  --input <path>          取得済み公式Excel（省略時は統計局URLから取得）',
@@ -359,11 +359,11 @@ async function main() {
     meta: {
       publisher: '総務省統計局',
       series_name: '全国・生鮮食品を除く総合・消費税調整済指数',
-      base: '2020年=100',
+      base: '2025年=100',
       official_start_month: START_MONTH,
       official_end_month: END_MONTH,
       bridge_month: END_MONTH,
-      source_title: '2020年基準 消費税調整済指数（全国）',
+      source_title: '2025年基準 消費税調整済指数（全国）',
       source_url: SOURCE_URL,
       methodology_url: METHODOLOGY_URL,
       accessed_date: args['accessed-date'],

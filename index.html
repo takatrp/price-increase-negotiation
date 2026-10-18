@@ -301,7 +301,7 @@
             <div id="decisionExactWrap" class="hidden">
               <label for="currentPriceAsOf">現行価格の決定日（年月日）</label>
               <input type="date" id="currentPriceAsOf" aria-describedby="currentPriceAsOfHint" />
-              <div class="hint" id="currentPriceAsOfHint">この日付時点の確定額又は指定日到来後の設定額と、同じ月のCPIを基準に計算します。設定額の最終公示は未確認と表示します。</div>
+              <div class="hint" id="currentPriceAsOfHint">この日付時点で発効済みの最低賃金と、同じ月のCPIを基準に計算します。</div>
             </div>
             <div id="decisionMonthWrap">
               <label for="currentPriceMonth">現行価格の決定月</label>
@@ -401,7 +401,7 @@
                 <span id="cpiSinceView"><b>物価：— ／ 最低賃金：—</b></span>
                 <span class="badge warn" id="cpiSinceBadge">任意</span>
               </div>
-              <div class="small">※物価は総務省統計局の月次接続指数、最低賃金は確認済みの確定値と、利用者指定日が到来した設定額を使用します。設定額の最終公示は未確認です。1970年1月～2024年12月は小数第1位、2025年1月以降は小数第3位の参考指数であり、価格改定額を自動決定するものではありません。</div>
+              <div class="small">※物価は総務省統計局の月次接続指数、最低賃金は都道府県ごとの確定額と発効日を使用します。発効前の額は「改定後」で選択した場合に限り、発効予定と明示して比較します。1970年1月～2024年12月は小数第1位、2025年1月以降は小数第3位の参考指数であり、価格改定額を自動決定するものではありません。</div>
 
               <details style="border:none; padding:0; background:transparent !important; margin-top:6px;">
                 <summary style="font-size:0.8rem; font-weight:normal; color:#578899; cursor:pointer; text-decoration:underline;">計算過程を確認する</summary>
@@ -426,12 +426,12 @@
               </div>
               <label for="minWageTarget" style="margin-top:8px;">最低賃金の比較対象</label>
               <select id="minWageTarget" aria-describedby="minWageTargetNote">
-                <option value="current">本日時点（発効済み・指定日到来後の設定額）</option>
-                <option value="announced">改定後（確定額・指定日到来後の設定額）</option>
+                <option value="current">本日時点（発効済み額）</option>
+                <option value="announced">改定後（確定額・発効前を含む）</option>
               </select>
               <div class="small" id="minWageTargetNote" aria-live="polite"></div>
               <a class="small" id="minWageRegionalSource" target="_blank" rel="noopener" hidden>選択地域の公式資料</a>
-              <div class="small" id="minWageNote">※確定額に加え、佐賀・熊本・沖縄は指定日から設定額で計算します。この3県の最終公示は未確認であり、設定額を含む結果はその前提を明示します。</div>
+              <div class="small" id="minWageNote">※2026年度は全47都道府県の確定公示を確認済みです。発効前は従前額を使用します。</div>
             </div>
 
             <div class="divider"></div>
@@ -450,7 +450,7 @@
             <div class="inputGrid" style="margin-top:12px;">
               <div>
                 <label for="cpiAsOf" style="margin-top:0;">物価データの対象</label>
-                <input type="text" id="cpiAsOf" placeholder="例）2026年6月（生鮮食品を除く総合・2025年基準）" />
+                <input type="text" id="cpiAsOf" placeholder="例）2026年8月（生鮮食品を除く総合・2025年基準）" />
               </div>
               <div>
                 <label for="wageAsOf" style="margin-top:0;">賃上げ率データの対象</label>
@@ -677,7 +677,7 @@
     const OFFICE_PASSWORD = 'matsu20180201';
     const AUTH_SESSION_KEY = 'mk_session_unlocked';
     const AUTH_MODE_KEY = 'mk_session_mode';
-    const APP_VERSION = 'r49';
+    const APP_VERSION = 'r50';
     const OFFICE_PRICE_BASIS_ERROR = '松本会計専用モードでは税抜価格を使用してください';
     let currentAuthMode = 'locked';
     const isGeneralMode = () => currentAuthMode === 'general';
@@ -1799,7 +1799,10 @@
 
       if(minWageNote){
         const source = getNationalSource('min_wage');
-        minWageNote.textContent = '※確定額に加え、明示的に指定日を設定した地域は、その日から設定額で計算します。指定日による設定額の最終公示は未確認です。' +
+        const hasPending = Object.keys(COST_DATA?.national?.min_wage_pending_by_pref || {}).length > 0;
+        minWageNote.textContent = (hasPending
+          ? '※確定額に加え、明示的に指定日を設定した地域は、その日から設定額で計算します。指定日による設定額の最終公示は未確認です。'
+          : '※各都道府県の確定額と発効日を使用します。本日時点では発効済み額、改定後では発効前の確定額も発効予定と明示して比較します。') +
           (source ? ` 出典：${source.publisher}「${source.title}」／確認日：${source.accessed_date}` : '');
       }
     }

@@ -162,7 +162,8 @@ const output = {
     latest_official_yoy: metadata.latestOfficialYoy,
     source_title: '2025\u5e74\u57fa\u6e96\u6d88\u8cbb\u8005\u7269\u4fa1\u6307\u6570 \u9577\u671f\u6642\u7cfb\u5217\u30c7\u30fc\u30bf \u4e2d\u5206\u985e\u6307\u6570\uff08\u5168\u56fd\u30fb\u6708\u6b21\uff09\uff0f\uff08\u53c2\u8003\u5024\uff09\u5c0f\u6570\u7b2c3\u4f4d\u307e\u3067\u306e\u6307\u6570\uff08\u5168\u56fd\uff09',
     publication_date: metadata.publicationDate,
-    source_url: 'https://www.e-stat.go.jp/stat-search/files?layout=datalist&lid=000001488144&page=1',
+    source_url: 'https://www.e-stat.go.jp/stat-search/files?stat_infid=000040482943',
+    download_url: 'https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040482943&fileKind=1',
     reference_precision_source_url: 'https://www.stat.go.jp/data/cpi/2025/csv/zmi2025aa.csv',
     accessed_date: metadata.accessedDate,
     note: '\u7d2f\u7a4d\u4e0a\u6607\u7387\u306f\u5404\u6708\u306e\u63a5\u7d9a\u6307\u6570\u306e\u6bd4\u3067\u8a08\u7b97\u3002\u5c0f\u6570\u7b2c3\u4f4d\u306e\u6307\u6570\u306f\u8a08\u7b97\u7528\u306e\u53c2\u8003\u5024\u3067\u3042\u308a\u3001\u516c\u5f0f\u306e\u5909\u5316\u7387\u3092\u518d\u8a08\u7b97\u3057\u3066\u4e0a\u66f8\u304d\u3057\u306a\u3044\u3002'

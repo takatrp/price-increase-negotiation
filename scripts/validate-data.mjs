@@ -39,7 +39,7 @@ const OFFICIAL_MIN_WAGE_AVERAGE = {
   2002: 663, 2003: 664, 2004: 665, 2005: 668, 2006: 673, 2007: 687,
   2008: 703, 2009: 713, 2010: 730, 2011: 737, 2012: 749, 2013: 764,
   2014: 780, 2015: 798, 2016: 823, 2017: 848, 2018: 874, 2019: 901,
-  2020: 902, 2021: 930, 2022: 961, 2023: 1004, 2024: 1055, 2025: 1121
+  2020: 902, 2021: 930, 2022: 961, 2023: 1004, 2024: 1055, 2025: 1121, 2026: 1177
 };
 
 function applicableMinimumWage(events, date) {
@@ -50,7 +50,8 @@ function applicableMinimumWage(events, date) {
 const cost = readJson('pref_cost_data.json');
 const cpi = readJson('cpi_monthly_2025base.json');
 const taxAdjustedCpi = readJson('cpi_monthly_tax_adjusted.json');
-const indexHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+// Source checks must work for both Windows CRLF checkouts and the LF files used in CI.
+const indexHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8').replace(/\r\n/g, '\n');
 const cpiBuilder = fs.readFileSync(path.join(root, 'scripts', 'build-cpi-monthly.mjs'), 'utf8');
 const taxAdjustedBuilder = fs.readFileSync(path.join(root, 'scripts', 'build-cpi-tax-adjusted.mjs'), 'utf8');
 const termsHtml = fs.readFileSync(path.join(root, 'terms.html'), 'utf8');
@@ -118,7 +119,7 @@ if (cost) {
   const averageHistory = cost.national?.min_wage_history_avg || {};
   check(
     JSON.stringify(Object.keys(averageHistory).sort()) === JSON.stringify(Object.keys(OFFICIAL_MIN_WAGE_AVERAGE).sort()),
-    '全国加重平均の年度キーが厚生労働省公式系列（2002～2025年度）と一致する'
+    '全国加重平均の年度キーが厚生労働省公式系列（2002～2026年度）と一致する'
   );
   for (const [year, officialValue] of Object.entries(OFFICIAL_MIN_WAGE_AVERAGE)) {
     check(Number(averageHistory[year]) === officialValue, `全国加重平均${year}年度が厚生労働省公表値${officialValue}円と一致する`);
@@ -171,7 +172,7 @@ if (taxAdjustedCpi) {
   check(taxAdjustedCpi.schema_version === 1, '消費税調整済CPIのschema_versionが1である');
   check(meta.publisher === '総務省統計局', '消費税調整済CPIの公表主体が総務省統計局である');
   check(meta.series_name?.includes('全国・生鮮食品を除く総合・消費税調整済指数'), '消費税調整済CPIの対象系列が正しい');
-  check(meta.base === '2020年=100', '消費税調整済CPIの基準が2020年=100である');
+  check(meta.base === '2025年=100', '消費税調整済CPIの基準が2025年=100である');
   check(meta.official_start_month === '1990-01' && meta.official_end_month === '2019-12', '消費税調整済CPIの公式期間が1990年1月～2019年12月である');
   check(meta.bridge_month === '2019-12', '消費税調整済CPIの接続月が2019年12月である');
   check(meta.status === 'official_reference_index' && meta.note?.includes('参考指数'), '消費税調整済CPIを公式の参考指数として明示する');
@@ -179,7 +180,7 @@ if (taxAdjustedCpi) {
   check(validDate(meta.accessed_date), '消費税調整済CPIのデータ確認日が有効である');
   check(entries.length === 360, '消費税調整済CPIが360か月である');
   check(entries[0]?.[0] === '1990-01' && entries.at(-1)?.[0] === '2019-12', '消費税調整済CPIの端点月が正しい');
-  check(Number(entries[0]?.[1]) === 91.9 && Number(entries.at(-1)?.[1]) === 100.6, '消費税調整済CPIの端点指数が公式Excelと一致する');
+  check(Number(entries[0]?.[1]) === 82.6 && Number(entries.at(-1)?.[1]) === 90.5, '消費税調整済CPIの端点指数が公式2025年基準Excelと一致する');
   for (let index = 0; index < entries.length; index += 1) {
     const [month, value] = entries[index];
     check(Number.isFinite(value) && value > 0, `${month}: 消費税調整済CPI指数が正の数値である`);
@@ -223,8 +224,8 @@ if (cpi) {
     check(calculatedRounded === Number(cpi.meta?.latest_official_yoy), '最新月の指数比（小数第1位丸め）が公式前年同月比と矛盾しない');
   }
   check(Number(cpi.meta?.latest_official_yoy) === Number(cost?.national?.cpi_yoy), 'CPI月次メタデータとpref_cost_data.jsonの公式前年同月比が一致する');
-  if (latestMonth === '2026-06') {
-    check(Number(cost?.national?.cpi_yoy) === 1.6, '2026年6月が最新の場合、cpi_yoyが1.6%である');
+  if (latestMonth === '2026-08') {
+    check(Number(cost?.national?.cpi_yoy) === 1.7, '2026年8月が最新の場合、cpi_yoyが1.7%である');
   }
 }
 
@@ -428,9 +429,9 @@ if (calcCpiFunctionSource && cpi && taxAdjustedCpi) {
     const officeSuggested = Math.floor(officeExact / 1000) * 1000;
     const inclusiveExact = 30000 * generalInclusive2019.multiplier;
     const inclusiveSuggested = Math.floor(inclusiveExact / 1000) * 1000;
-    check(officeExact > 33900 && officeExact < 34000, 'officeの2019年1月基準・30,000円の厳密額が33,900円台である');
-    check(officeSuggested === 33000, 'officeのCPI参考額を1,000円単位で切り下げると33,000円である');
-    check(inclusiveSuggested === 34000 && inclusiveExact > officeExact, 'officeで税込の通常CPIによる34,000円を採用しない');
+    check(Math.abs(officeExact - 34053.50389321468) < 1e-8, '公式2025年基準・2026年8月までの税抜参考額が約34,053.5039円である');
+    check(officeSuggested === 34000, 'officeのCPI参考額を1,000円単位で切り下げると34,000円である');
+    check(inclusiveSuggested === 34000 && inclusiveExact > officeExact, '税抜の厳密額は税込の通常CPIで算出した額より低い（今回の千円単位切下げ額は一致）');
     if (computeCpiCapFunctionSource) {
       const computeCpiCap = Function('cpiResult', `
         const isOfficeMode = () => true;
@@ -446,8 +447,8 @@ if (calcCpiFunctionSource && cpi && taxAdjustedCpi) {
       `)(office2019);
       const cap = computeCpiCap();
       check(cap?.x?.method === 'tax_adjusted_bridge', 'computeCpiCapがofficeの2019年1月基準に消費税調整済CPIを使用する');
-      check(Math.abs(cap?.exact - 33921.98651933702) < 1e-8, 'computeCpiCapの厳密額が約33,921.9865円である');
-      check(cap?.suggested === 33000, 'computeCpiCapの1,000円単位切下げ提案額が33,000円である');
+      check(Math.abs(cap?.exact - 34053.50389321468) < 1e-8, 'computeCpiCapの厳密額が約34,053.5039円である');
+      check(cap?.suggested === 34000, 'computeCpiCapの1,000円単位切下げ提案額が34,000円である');
     }
   } catch (error) {
     errors.push(`累積CPIのモード別計算を実行できません: ${error.message}`);
@@ -533,8 +534,8 @@ if (priceBasisLabelFunctionSource && syncPriceBasisFunctionSource && enforceOffi
   }
 }
 
-check(indexHtml.includes("const APP_VERSION = 'r49';"), 'リリース番号を単一定数r49で管理する');
-check((indexHtml.match(/r49/g) || []).length === 1, 'index.html内のr49リテラルが単一定数だけである');
+check(indexHtml.includes("const APP_VERSION = 'r50';"), 'リリース番号を単一定数r50で管理する');
+check((indexHtml.match(/r50/g) || []).length === 1, 'index.html内のr50リテラルが単一定数だけである');
 check((indexHtml.match(/data-app-version/g) || []).length >= 3 && indexHtml.includes("el.textContent = APP_VERSION"), '画面とフッターの版表示をAPP_VERSIONから反映する');
 check(indexHtml.includes('関与先向け｜価格転嫁支援モード') && indexHtml.includes('松本会計内部用｜顧問報酬改定モード'), '一般モードと松本会計内部用モードの表示がある');
 check(indexHtml.includes('.officeOnly{display:none !important;}') && indexHtml.includes("classList.toggle('officeMode', office)"), 'office専用UIをofficeモードだけで表示する');
