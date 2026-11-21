@@ -623,11 +623,13 @@ check(indexHtml.includes("ownCompany.value = '税理士法人松本会計'") && 
 check(indexHtml.includes("!['御中', '各位'].includes(honorific)") && indexHtml.includes('選択した敬称では相手担当者名が必要です'), '御中・各位だけ個人名を任意とし、それ以外は必須にする');
 check(indexHtml.includes("['〇〇株式会社', '〇〇', '＿＿', '未入力', '担当者', '（価格改定の背景要因が未入力です）']"), '案内文の仮文字を最終フェイルセーフで検出する');
 
-const copyHandler = indexHtml.slice(indexHtml.indexOf("copyBtn.addEventListener('click'"), indexHtml.indexOf("printBtn.addEventListener('click'"));
-const printHandler = indexHtml.slice(indexHtml.indexOf("printBtn.addEventListener('click'"), indexHtml.indexOf('if(wordBtn) wordBtn.addEventListener'));
+const copyHandler = indexHtml.slice(indexHtml.indexOf("copyBtn.addEventListener('click'"), indexHtml.indexOf('function clearInternalPrint()'));
+const printHandler = indexHtml.match(/function printOutput\(includeInternal\)\{[\s\S]*?\n    \}/)?.[0] || '';
 const wordHandler = indexHtml.slice(indexHtml.indexOf('if(wordBtn) wordBtn.addEventListener'), indexHtml.indexOf('[partnerCompany, partnerPerson'));
 check(copyHandler.includes('const result = canExport()') && copyHandler.includes('if(!result.ok)'), 'コピーイベントでcanExportを再確認する');
 check(printHandler.includes('const result = canExport()') && printHandler.includes('if(!result.ok)'), '印刷イベントでcanExportを再確認する');
+check(indexHtml.includes("customerPrintBtn.addEventListener('click', () => printOutput(false))") && indexHtml.includes("printBtn.addEventListener('click', () => printOutput(true))"), '顧客向けPDFと社内用PDFの両方が検証付き印刷処理を使用する');
+check(printHandler.includes('clearInternalPrint();') && printHandler.includes('if(includeInternal)'), '顧客向け印刷に社内メモを入れない');
 check(wordHandler.includes('const result = canExport()') && wordHandler.includes('if(!result.ok)'), 'WordイベントでcanExportを再確認する');
 check(indexHtml.includes('html.exportBlocked #printPack{display:none !important;}'), 'ブラウザ直接印刷でも不完全な文書を印刷しない');
 

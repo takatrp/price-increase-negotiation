@@ -25,3 +25,7 @@ jobs:
           TZ=UTC node scripts/test-minimum-wage.mjs
           TZ=America/Los_Angeles node scripts/test-minimum-wage.mjs
           TZ=Asia/Tokyo node scripts/test-minimum-wage.mjs
+          TZ=UTC node scripts/test-cumulative-trends.mjs
+          TZ=America/Los_Angeles node scripts/test-cumulative-trends.mjs
+          TZ=Asia/Tokyo node scripts/test-cumulative-trends.mjs
+          TZ=Asia/Tokyo node scripts/test-customer-pdf.mjs

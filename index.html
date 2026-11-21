@@ -170,6 +170,10 @@
     .trendTable th:first-child,.trendTable td:first-child{text-align:left}
     .trendDetails{margin-top:8px;font-size:.78rem}
     .trendDetails summary{cursor:pointer}
+    .letterCpiOption{margin-top:10px}
+    .letterCpiOption label{display:inline-flex}
+    .letterCpiFigure .trendSvg{max-width:520px;margin:6px auto 0}
+    .letterCpiFigure h3,.letterCpiFigure .trendPeriod,.letterCpiFigure .trendNote{overflow-wrap:anywhere}
 
     .sourceLink a{color:#0f172a;text-decoration:underline}
     .sourceLink .badge{padding:2px 6px}
@@ -186,7 +190,7 @@
 
     @media print{
       body{background:#fff}
-      .wrap, footer, .note, .mk-nav{display:none !important;}
+      .wrap, footer, .note, .mk-nav, #authShell{display:none !important;}
       #printPack{display:block !important; padding:0; margin:0;}
       .printMeta{display:block !important;}
       .printSection{border:none;border-radius:0;padding:0;margin:0}
@@ -194,6 +198,11 @@
       .printH1{font-size:1.1rem}
       a{color:#000;text-decoration:underline}
       html.exportBlocked #printPack{display:none !important;}
+      #printInternalPack{display:none !important;}
+      html.printWithInternal #printInternalPack{display:block !important;}
+      html.printWithInternal #printLetterCpiChart{display:none !important;}
+      #printLetterCpiChart{break-inside:avoid;page-break-inside:avoid;background:#fff;margin-top:12px}
+      #printLetterCpiChart .trendSvg{max-width:132mm}
     }
   </style>
 </head>
@@ -655,14 +664,20 @@
           </div>
 
           <textarea id="outputArea" class="docArea" readonly></textarea>
+          <div class="letterCpiOption" id="letterCpiChartOption">
+            <label class="choiceOption"><input id="includeLetterCpiChart" type="checkbox" aria-describedby="letterCpiChartHint" />参考グラフを付ける</label>
+            <div class="hint" id="letterCpiChartHint" aria-live="polite">案内文のプレビューとお客様向けPDFの末尾に、累積CPIのグラフを追加します。</div>
+          </div>
+          <section class="trendPanel letterCpiFigure" id="letterCpiChartPreview" aria-label="参考：現行価格を決めてからの累積CPI" hidden></section>
 
           <div class="miniActions">
             <button class="btn" id="copyBtn" type="button">現在の表示をコピー</button>
-            <button class="btn alt" id="printBtn" type="button">印刷/PDF（案内文＆面談トーク・根拠メモ）</button>
+            <button class="btn alt" id="customerPrintBtn" type="button">お客様向けPDF（案内文のみ）</button>
+            <button class="btn ghost" id="printBtn" type="button">社内用 印刷/PDF（案内文＋面談トーク・根拠メモ）</button>
             <button class="btn ghost" id="wordBtn" type="button">Word（.docx）出力</button>
           </div>
           <div id="exportBlockReason" class="warningBox" style="display:none;"></div>
-          <div class="hint" style="margin-top:8px;">※印刷/PDFは「案内文」と「面談トーク・根拠メモ（社内用）」を出力します。</div>
+          <div class="hint" style="margin-top:8px;">※お客様向けPDFには、面談トークと社内用の根拠メモは含まれません。</div>
           <div class="hint">本ツールは価格改定額の自動決定や、法務・税務・契約上の判断を代替するものではありません。最終判断は利用者が行ってください。</div>
         </div>
       </div>
@@ -675,14 +690,16 @@
       <div class="printH1">【案内文】</div>
       <div class="printSub">※お客さまにお渡しする文面</div>
       <div class="printText" id="printLetter"></div>
+      <section class="trendPanel letterCpiFigure" id="printLetterCpiChart" aria-label="参考：現行価格を決めてからの累積CPI" hidden></section>
     </div>
 
-    <div class="printDivider"></div>
-
-    <div class="printSection">
-      <div class="printH1">【面談トーク・根拠メモ】</div>
-      <div class="printSub">※社内用。面談時の説明台本と根拠整理。</div>
-      <div class="printText" id="printTalkMemo"></div>
+    <div id="printInternalPack">
+      <div class="printDivider"></div>
+      <div class="printSection">
+        <div class="printH1">【面談トーク・根拠メモ】</div>
+        <div class="printSub">※社内用。面談時の説明台本と根拠整理。</div>
+        <div class="printText" id="printTalkMemo"></div>
+      </div>
     </div>
   </div>
 
@@ -706,7 +723,7 @@
     const OFFICE_PASSWORD = 'matsu20180201';
     const AUTH_SESSION_KEY = 'mk_session_unlocked';
     const AUTH_MODE_KEY = 'mk_session_mode';
-    const APP_VERSION = 'r51';
+    const APP_VERSION = 'r52';
     const OFFICE_PRICE_BASIS_ERROR = '松本会計専用モードでは税抜価格を使用してください';
     let currentAuthMode = 'locked';
     const isGeneralMode = () => currentAuthMode === 'general';
@@ -851,6 +868,8 @@
     const ownPerson = $('#ownPerson');
     const copyBtn = $('#copyBtn');
     const printBtn = $('#printBtn');
+    const customerPrintBtn = $('#customerPrintBtn');
+    const includeLetterCpiChart = $('#includeLetterCpiChart');
     const wordBtn = $('#wordBtn');
     const copyStatus = $('#copyStatus');
     const resetBtn = $('#resetBtn');
@@ -1063,7 +1082,7 @@
     function setExportAvailability(reasons){
       const unique = [...new Set((reasons || []).filter(Boolean))];
       const blocked = unique.length > 0;
-      for(const button of [copyBtn, printBtn, wordBtn]) if(button) button.disabled = blocked;
+      for(const button of [copyBtn, printBtn, customerPrintBtn, wordBtn]) if(button) button.disabled = blocked;
       document.documentElement.classList.toggle('exportBlocked', blocked);
       if(exportBlockReason){
         exportBlockReason.style.display = blocked ? 'block' : 'none';
@@ -1139,6 +1158,8 @@
 
     function startAuthenticatedMode(mode, saveSession){
       INITIAL_DRAFT_READY = false;
+      includeLetterCpiChart.checked = false;
+      clearInternalPrint();
       setAuthMode(mode, { saveSession, restore:true });
       restoreDraft();
       renderAllByPref();
@@ -2427,7 +2448,9 @@
         const label = duration < 180 * day ? date.slice(5).replace('-', '/') : date.slice(0,7).replace('-', '/');
         grid.push(`<text x="${rounded(x(date))}" y="${bottom+23}" text-anchor="middle">${label}</text>`);
       }
-      return `<svg class="trendSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="現行価格決定時からの累積CPIと最低賃金の推移。各点の数値はグラフの数値から確認できます。"><g font-size="15" font-family="system-ui,sans-serif" fill="#475569">${grid.join('')}</g>${plot(points.cpi,'#17627c',false)}${plot(points.wage,'#9a461c',true)}</svg>`;
+      const label = points.cpiOnly ? '現行価格決定時からの累積CPIの推移。'
+        : '現行価格決定時からの累積CPIと最低賃金の推移。各点の数値はグラフの数値から確認できます。';
+      return `<svg class="trendSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${label}"><g font-size="15" font-family="system-ui,sans-serif" fill="#475569">${grid.join('')}</g>${plot(points.cpi,'#17627c',false)}${plot(points.wage,'#9a461c',true)}</svg>`;
     }
 
     let cumulativeTrendKey = null;
@@ -3432,10 +3455,70 @@ ${cpiTalk}
 
     let CACHE = { letter:'', talk:'', memo:'' };
 
+    function renderLetterCpiChart(){
+      const option = $('#letterCpiChartOption');
+      const hint = $('#letterCpiChartHint');
+      const preview = $('#letterCpiChartPreview');
+      const print = $('#printLetterCpiChart');
+      const inLetterTab = currentOutputMode === 'letter';
+      option.hidden = !inLetterTab;
+      const points = lastCumulativeTrend;
+      const cpi = officialDataReady() ? calcCpiSince() : null;
+      const series = points?.cpi || [];
+      const end = series.at(-1);
+      const available = hasCpiResult(cpi) && series.length > 1 && series[0].month === cpi.baseMonth &&
+        end.month === cpi.latestMonth && Math.abs(end.rate - cpi.cum) < 1e-7;
+      includeLetterCpiChart.disabled = !available;
+      const message = available
+        ? '案内文のプレビューとお客様向けPDFに追加します。コピー・Word出力には含まれません。'
+        : 'グラフの追加には、最新公表月より前の現行価格の決定時期と公的データが必要です。';
+      if(hint.textContent !== message) hint.textContent = message;
+      preview.hidden = !inLetterTab || !available || !includeLetterCpiChart.checked;
+      print.hidden = !available || !includeLetterCpiChart.checked;
+      preview.replaceChildren();
+      print.replaceChildren();
+      if(print.hidden) return;
+
+      const bridge = cpi.method === 'tax_adjusted_bridge';
+      const element = (tag, className, value) => {
+        const el = document.createElement(tag);
+        if(className) el.className = className;
+        if(value) el.textContent = value;
+        return el;
+      };
+      const fragment = document.createDocumentFragment();
+      fragment.append(
+        element('h3', '', '参考：現行価格を決めてからの物価の推移'),
+        element('p', 'trendPeriod', `${fmtYM(cpi.baseMonth)}～${fmtYM(cpi.latestMonth)}（決定月を0％とした累積：${pct1(cpi.cum)}％）`),
+        element('p', 'trendPeriod', `消費者物価指数（CPI）：全国・生鮮食品を除く総合 ／ ${bridge ? '消費税調整済指数と通常指数を2019年12月で接続' : '通常指数'}`)
+      );
+      const graph = element('div');
+      graph.innerHTML = cumulativeTrendSvg({ start:series[0].date, end:end.date, cpi:series, wage:[], cpiOnly:true });
+      fragment.append(graph);
+      const source = element('p', 'trendNote', '出典：総務省統計局「消費者物価指数」');
+      const link = (linkText, url) => {
+        const a = element('a', '', linkText);
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        return a;
+      };
+      source.append(
+        '（', link('2025年基準・全国月次接続指数', 'https://www.e-stat.go.jp/stat-search/files?stat_infid=000040482943'),
+        '／', link('参考指数（小数第3位）', 'https://www.stat.go.jp/data/cpi/2025/csv/zmi2025aa.csv')
+      );
+      if(bridge) source.append('／', link('消費税調整済指数', 'https://www.stat.go.jp/data/cpi/2025/zuhyou/2025taxadj.xlsx'));
+      source.append('）');
+      fragment.append(source, element('p','trendNote','公表物価の推移を示す参考資料であり、今回の価格改定率そのものを示すものではありません。'));
+      if(!preview.hidden) preview.append(fragment.cloneNode(true));
+      print.append(fragment);
+    }
+
     function renderOutput(){
       if(currentOutputMode === 'letter') outputArea.value = CACHE.letter || '';
       else if(currentOutputMode === 'talk') outputArea.value = CACHE.talk || '';
       else outputArea.value = CACHE.memo || '';
+      renderLetterCpiChart();
     }
 
     function generate(){
@@ -3468,12 +3551,19 @@ ${cpiTalk}
         renderOutput();
 
         if(printLetter) printLetter.textContent = CACHE.letter || '';
-        if(printTalkMemo) printTalkMemo.textContent = `${CACHE.talk || ''}\n\n----------------------------------------\n\n${CACHE.memo || ''}`;
         validateBasic();
         if(INITIAL_DRAFT_READY) saveDraft();
+        return true;
       } catch (err) {
         console.error(err);
         if(outputArea) outputArea.value = '※文面生成中にエラーが発生しました。\n' + err.message;
+        if(printLetter) printLetter.textContent = '';
+        for(const id of ['#letterCpiChartPreview', '#printLetterCpiChart']){
+          const el = $(id);
+          el.hidden = true;
+          el.replaceChildren();
+        }
+        return false;
       }
     }
 
@@ -3532,8 +3622,17 @@ ${cpiTalk}
       if(ok) showCopied();
     });
 
-    printBtn.addEventListener('click', () => {
-      generate();
+    function clearInternalPrint(){
+      document.documentElement.classList.remove('printWithInternal');
+      if(printTalkMemo) printTalkMemo.textContent = '';
+    }
+
+    function printOutput(includeInternal){
+      clearInternalPrint();
+      if(!generate()){
+        showImportStatus('案内文の生成に失敗したため印刷できません。');
+        return;
+      }
       const result = canExport();
       if(!result.ok){
         setExportAvailability(result.errors);
@@ -3541,15 +3640,25 @@ ${cpiTalk}
         return;
       }
       try{
-        if(printDate){
-          const d = new Date();
-          const y = d.getFullYear();
-          const m = String(d.getMonth()+1).padStart(2,'0');
-          const day = String(d.getDate()).padStart(2,'0');
-          printDate.textContent = `${y}-${m}-${day}`;
+        if(printDate) printDate.textContent = todayInJapan();
+        // The only path that populates or reveals the internal appendix.
+        if(includeInternal){
+          if(printTalkMemo) printTalkMemo.textContent = `${CACHE.talk || ''}\n\n----------------------------------------\n\n${CACHE.memo || ''}`;
+          document.documentElement.classList.add('printWithInternal');
         }
         window.print();
-      }catch(e){}
+      }catch(e){
+        clearInternalPrint();
+        showImportStatus('印刷画面を開けませんでした。');
+      }
+    }
+
+    customerPrintBtn.addEventListener('click', () => printOutput(false));
+    printBtn.addEventListener('click', () => printOutput(true));
+    includeLetterCpiChart.addEventListener('change', renderLetterCpiChart);
+    window.addEventListener('afterprint', clearInternalPrint);
+    window.matchMedia?.('print')?.addEventListener?.('change', event => {
+      if(!event.matches) clearInternalPrint();
     });
 
     if(wordBtn) wordBtn.addEventListener('click', async () => {
@@ -3695,6 +3804,8 @@ ${cpiTalk}
 
     function resetFormState(options = {}){
       const modeAtReset = currentAuthMode;
+      includeLetterCpiChart.checked = false;
+      clearInternalPrint();
       [partnerCompany,partnerPerson,partnerHonorificCustom,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,currentPriceMonth,effectiveDate,extraFactors,effortFreeText,valueFreeText,actualLaborRate].forEach(el=>{
         el.value='';
         el.classList.remove('imported-value');
