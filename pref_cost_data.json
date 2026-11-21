@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "meta": {
-    "updated": "2026-10-19",
-    "note": "2026年10月19日日本時間確認。CPIは2026年8月まで、消費税調整済CPIは2025年基準。2026年度最低賃金は47都道府県の確定額と各発効日を収録し、現行額と発効前の確定額を区別する。春闘は2026年最終回答4.69％を維持。",
+    "updated": "2026-11-21",
+    "note": "2026年11月21日日本時間確認。全国コアCPIは2026年10月まで、消費税調整済CPIは2025年基準。2026年度最低賃金は47都道府県の確定額・個別発効日を厚生労働省全国一覧と再照合し、現行額と発効前の確定額を区別する。春闘は2026年最終回答4.69％を維持。",
     "sources": {
       "min_wage": {
         "publisher": "厚生労働省・各労働局・官報",
@@ -12,7 +12,7 @@
         "target_period": "2002年度～2026年度（2026年度は全47都道府県の確定公示確認済み）",
         "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/",
         "status": "final",
-        "accessed_date": "2026-10-19"
+        "accessed_date": "2026-11-21"
       },
       "min_wage_history_excel": {
         "publisher": "厚生労働省",
@@ -37,29 +37,29 @@
     }
   },
   "national": {
-    "cpi_yoy": 1.7,
-    "cpi_asof": "2026年8月（前年同月比・生鮮食品を除く総合、2025年基準）",
+    "cpi_yoy": 2.2,
+    "cpi_asof": "2026年10月（前年同月比・生鮮食品を除く総合、2025年基準）",
     "wage_yoy": 4.69,
     "wage_amount": 12866,
     "wage_asof": "2026年春季生活闘争（連合 第7回〔最終〕回答集計：300人未満の中小組合・加重平均、定昇相当込み）",
     "sources": {
       "cpi": {
         "publisher": "総務省統計局",
-        "title": "2025年基準 消費者物価指数 全国 2026年8月分",
-        "publication_date": "2026-09-18",
-        "target_period": "2026年8月",
-        "url": "https://www.e-stat.go.jp/stat-search/files?layout=datalist&lid=000001490251&page=1",
+        "title": "2025年基準 消費者物価指数 全国 2026年10月分",
+        "publication_date": "2026-11-20",
+        "target_period": "2026年10月",
+        "url": "https://www.e-stat.go.jp/stat-search/file-download?fileKind=2&statInfId=000040525997",
         "status": "final",
-        "accessed_date": "2026-10-19"
+        "accessed_date": "2026-11-21"
       },
       "cpi_monthly": {
         "publisher": "総務省統計局・政府統計の総合窓口 e-Stat",
         "title": "2025年基準消費者物価指数 長期時系列データ 中分類指数（全国・月次）",
-        "publication_date": "2026-09-18",
-        "target_period": "1970年1月～2026年8月",
+        "publication_date": "2026-11-20",
+        "target_period": "1970年1月～2026年10月",
         "url": "https://www.e-stat.go.jp/stat-search/files?stat_infid=000040482943",
         "status": "final",
-        "accessed_date": "2026-10-19",
+        "accessed_date": "2026-11-21",
         "download_url": "https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040482943&fileKind=1"
       },
       "wage": {
@@ -69,7 +69,7 @@
         "target_period": "2026年春季生活闘争（2026年7月1日集計）",
         "url": "https://www.jtuc-rengo.or.jp/activity/roudou/shuntou/2026/yokyu_kaito/kaito/press_no7.pdf",
         "status": "final",
-        "accessed_date": "2026-10-19"
+        "accessed_date": "2026-11-21"
       },
       "min_wage": {
         "publisher": "厚生労働省・各労働局・官報",
@@ -79,7 +79,7 @@
         "target_period": "2002年度～2026年度（2026年度は全47都道府県の確定公示確認済み）",
         "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/",
         "status": "final",
-        "accessed_date": "2026-10-19"
+        "accessed_date": "2026-11-21"
       }
     },
     "min_wage_guideline_2026": {
@@ -7749,7 +7749,7 @@
     "min_wage_pending_by_pref": {},
     "min_wage_revision": {
       "fiscal_year": 2026,
-      "accessed_date": "2026-10-19",
+      "accessed_date": "2026-11-21",
       "confirmed_prefecture_count": 47,
       "pending_prefectures": [],
       "weighted_average_reference": {
@@ -7761,7 +7761,7 @@
         "source_url": "https://www.mhlw.go.jp/content/11200000/001753404.pdf",
         "note": "2026年度改定後の全国加重平均。各地域の発効日は異なる。"
       },
-      "note": "全47都道府県の確定公示を確認。全国加重平均1,177円は2026年度改定後の公表値であり、10月19日時点の発効済み額の全国平均ではない。"
+      "note": "全47都道府県の確定額・個別発効日に変更なし（厚生労働省の全国一覧と2026年11月21日再照合）。全国加重平均1,177円は2026年度改定後の公表値であり、発効済み額の全国平均ではない。"
     }
   },
   "prefs": {

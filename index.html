@@ -155,6 +155,22 @@
 
     /* STEP1：累積物価上昇リンク */
     .sourceLink{display:inline-flex;gap:6px;align-items:center;font-size:.78rem;margin-top:6px;flex-wrap:wrap;}
+    /* Price decision trend (same baseline as the cumulative reference figures) */
+    .trendPanel{margin-top:16px;padding:12px;background:#f8fafc;border:1px solid #dbe5eb;border-radius:12px}
+    .trendPanel h3{font-size:.94rem;margin:0;color:#0f172a}
+    .trendPeriod,.trendNote{font-size:.76rem;color:#475569;margin:6px 0 0;line-height:1.55}
+    .trendLegend{display:flex;gap:6px 16px;flex-wrap:wrap;margin-top:7px;font-size:.8rem;color:#334155}
+    .trendLegend div{display:flex;align-items:center;gap:6px}
+    .trendLegend span{width:18px;border-top:3px solid #17627c;flex:none}
+    .trendLegend .wageKey{border-top:3px dashed #9a461c}
+    .trendSvg{width:100%;height:auto;display:block;margin-top:8px;background:#fff;border-radius:8px}
+    .trendTable{max-height:15rem;overflow:auto;margin-top:6px}
+    .trendTable table{width:100%;border-collapse:collapse;font-size:.78rem}
+    .trendTable th,.trendTable td{text-align:right;border-bottom:1px solid #e2e8f0;padding:5px}
+    .trendTable th:first-child,.trendTable td:first-child{text-align:left}
+    .trendDetails{margin-top:8px;font-size:.78rem}
+    .trendDetails summary{cursor:pointer}
+
     .sourceLink a{color:#0f172a;text-decoration:underline}
     .sourceLink .badge{padding:2px 6px}
 
@@ -316,6 +332,19 @@
             </div>
           </div>
 
+
+          <section class="trendPanel" aria-labelledby="cumulativeTrendHeading">
+            <h3 id="cumulativeTrendHeading">現行価格を決めてからの累積上昇率</h3>
+            <p id="cumulativeTrendPeriod" class="trendPeriod" aria-live="polite">現行価格を決定した時期を入力してください。</p>
+            <div id="cumulativeTrendLegend" class="trendLegend"></div>
+            <div id="cumulativeTrendChart"></div>
+            <p id="cumulativeTrendNote" class="trendNote"></p>
+            <details id="cumulativeTrendDetails" class="trendDetails" hidden>
+              <summary>グラフの数値を見る</summary>
+              <div id="cumulativeTrendTable" class="trendTable" tabindex="0" aria-label="グラフの時点別データ"></div>
+            </details>
+          </section>
+
           <label for="productName">対象商品・サービス名 <span class="badge err">必須</span></label>
           <input type="text" id="productName" placeholder="例）保守費用、〇〇部品" />
 
@@ -450,7 +479,7 @@
             <div class="inputGrid" style="margin-top:12px;">
               <div>
                 <label for="cpiAsOf" style="margin-top:0;">物価データの対象</label>
-                <input type="text" id="cpiAsOf" placeholder="例）2026年8月（生鮮食品を除く総合・2025年基準）" />
+                <input type="text" id="cpiAsOf" placeholder="例）2026年10月（生鮮食品を除く総合・2025年基準）" />
               </div>
               <div>
                 <label for="wageAsOf" style="margin-top:0;">賃上げ率データの対象</label>
@@ -677,7 +706,7 @@
     const OFFICE_PASSWORD = 'matsu20180201';
     const AUTH_SESSION_KEY = 'mk_session_unlocked';
     const AUTH_MODE_KEY = 'mk_session_mode';
-    const APP_VERSION = 'r50';
+    const APP_VERSION = 'r51';
     const OFFICE_PRICE_BASIS_ERROR = '松本会計専用モードでは税抜価格を使用してください';
     let currentAuthMode = 'locked';
     const isGeneralMode = () => currentAuthMode === 'general';
@@ -2251,12 +2280,12 @@
         .sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate));
     }
 
-    function calcMwSince(){
+    function calcMwSince({ officialToday = false, asOf = todayInJapan() } = {}){
       const decision = getDecisionContext();
       const prefKey = prefSelect.value;
       if(decision.error) return { error:decision.error, decision, prefKey };
 
-      const history = getMinWageCalculationHistory(prefKey);
+      const history = officialToday ? getMinWageEffectiveHistory(prefKey) : getMinWageCalculationHistory(prefKey, asOf);
       if(!history.length) return { error: '発効日付きの最低賃金履歴を読み込めないため算出できません。' };
       const applicableAt = date => history.filter(event => event.effectiveDate <= date).at(-1) || null;
       const firstEvent = applicableAt(decision.firstDate);
@@ -2273,7 +2302,10 @@
       }
 
       const baseEvent = firstEvent;
-      const comparison = getMinWageComparison(prefKey);
+      const currentEvent = officialToday ? applicableAt(asOf) : null;
+      const comparison = officialToday
+        ? (currentEvent ? { event:currentEvent, asOf } : null)
+        : getMinWageComparison(prefKey, asOf);
       if(!comparison) return { error:'比較対象の最低賃金を確認できないため算出できません。', decision, prefKey };
       if(decision.firstDate > comparison.asOf || (decision.precision === 'month' && decision.lastDate > comparison.asOf)){
         return { error:'現行価格の決定時期が本日より後、又はまだ終了していない月のため算出できません。正確な日付を入力してください。', decision, prefKey };
@@ -2300,9 +2332,173 @@
 
     const hasMwResult = x => Boolean(x && !x.error && Number.isFinite(x.cum));
 
+    function cumulativeTrendData(cpi, decision, prefKey, asOf){
+      if(decision.error) return { error:decision.error };
+      if(!isIsoDate(decision.firstDate)) return { error:'現行価格を決めた時期を確認してください。' };
+      if(decision.firstDate > asOf) return { error:'現行価格を決めた時期が本日より後のため表示できません。' };
+
+      const points = { start:decision.firstDate, end:asOf, cpi:[], wage:[], notes:[] };
+      if(decision.precision === 'month') points.notes.push('年月入力時は、横軸の起点を決定月の初日に置きます。');
+
+      if(hasCpiResult(cpi)){
+        const normal = CPI_MONTHLY_DATA.values;
+        const adjusted = CPI_TAX_ADJUSTED_DATA?.values ?? {};
+        const bridge = cpi.method === 'tax_adjusted_bridge';
+        const months = [...new Set([...Object.keys(normal), ...(bridge ? Object.keys(adjusted) : [])])]
+          .sort().filter(month => /^\d{4}-(0[1-9]|1[0-2])$/.test(month) && month >= cpi.baseMonth && month <= cpi.latestMonth && month <= asOf.slice(0,7));
+        for(const month of months){
+          const adjustedSegment = bridge && month <= cpi.bridgeMonth;
+          const value = Number(adjustedSegment ? adjusted[month] : normal[month]);
+          if(!Number.isFinite(value) || value <= 0) continue;
+          const ratio = adjustedSegment ? value / cpi.adjustedBase
+            : bridge ? cpi.segmentA * (value / cpi.normalBridge)
+            : value / cpi.baseCpi;
+          const endOfMonth = lastDayOfMonth(month);
+          const date = month === cpi.baseMonth ? points.start : endOfMonth < asOf ? endOfMonth : asOf;
+          points.cpi.push({ date, month, rate:(ratio - 1) * 100 });
+        }
+        points.cpiLabel = bridge ? 'CPI（消費税調整済・接続）' : 'CPI（通常）';
+      }else if(cpi?.error){
+        points.notes.push('物価：' + cpi.error);
+      }
+
+      // This graph intentionally uses the actual official history, never a selected future
+      // revision or a manually designated amount, even if the reference panel includes one.
+      const wage = calcMwSince({ officialToday:true, asOf });
+      if(hasMwResult(wage)){
+        const history = getMinWageEffectiveHistory(prefKey);
+        points.wage.push({ date:points.start, rate:0 });
+        for(const event of history){
+          if(event.effectiveDate <= points.start || event.effectiveDate > asOf) continue;
+          points.wage.push({ date:event.effectiveDate, rate:(event.amount / wage.baseMw - 1) * 100 });
+        }
+        if(points.wage.at(-1).date < asOf) points.wage.push({ date:asOf, rate:wage.cum });
+      }else if(wage?.error){
+        points.notes.push('最低賃金：' + wage.error);
+      }
+      points.wageLabel = '最低賃金（' + (PREF_LABEL[prefKey] || prefKey) + '）';
+      return points;
+    }
+
+    function cumulativeTrendSvg(points){
+      const width = 408, height = 238, left = 52, right = 380, top = 24, bottom = 202;
+      const millis = date => Date.parse(date + 'T00:00:00Z');
+      const start = millis(points.start), end = millis(points.end), duration = end - start;
+      const x = date => duration ? left + (millis(date) - start) * (right - left) / duration : (left + right) / 2;
+      const rates = [0, ...points.cpi.map(p => p.rate), ...points.wage.map(p => p.rate)];
+      const range = Math.max(1, Math.max(...rates) - Math.min(...rates));
+      const roughStep = range / 5;
+      const power = 10 ** Math.floor(Math.log10(roughStep));
+      const step = [1, 2, 2.5, 5, 10].find(factor => factor * power >= roughStep) * power;
+      const min = Math.floor(Math.min(...rates) / step) * step;
+      const max = Math.max(step, Math.ceil(Math.max(...rates) / step) * step);
+      const y = rate => bottom - (rate - min) * (bottom - top) / (max - min);
+      const rounded = value => value.toFixed(2);
+      const coords = (date, rate) => `${rounded(x(date))},${rounded(y(rate))}`;
+      const plot = (values, color, stepped) => {
+        if(!values.length) return '';
+        const monthNumber = month => Number(month.slice(0,4)) * 12 + Number(month.slice(5));
+        const segments = [[]];
+        for(const [i, point] of values.entries()){
+          const previous = values[i-1];
+          if(stepped && previous) segments.at(-1).push(coords(point.date, previous.rate));
+          if(!stepped && previous && monthNumber(point.month) - monthNumber(previous.month) > 1) segments.push([]);
+          segments.at(-1).push(coords(point.date, point.rate));
+        }
+        const last = values.at(-1);
+        const strokeStyle = stepped ? ' stroke-dasharray="6 3"' : '';
+        return segments.map(segment => segment.length > 1
+          ? `<polyline points="${segment.join(' ')}" fill="none" stroke="${color}" stroke-width="2.8" stroke-linejoin="round"${strokeStyle}/>`
+          : `<circle cx="${segment[0].split(',')[0]}" cy="${segment[0].split(',')[1]}" r="3.5" fill="${color}"/>`).join('') +
+          `<circle cx="${rounded(x(last.date))}" cy="${rounded(y(last.rate))}" r="3.5" fill="${color}"/>`;
+      };
+      const grid = [];
+      for(let i = 0; i <= Math.round((max - min) / step); i++){
+        const rate = min + i * step;
+        const yy = rounded(y(rate));
+        const zero = Math.abs(rate) < step / 100;
+        grid.push(`<path d="M${left} ${yy}H${right}" stroke="${zero ? '#64748b' : '#e2e8f0'}"/>`,
+          `<text x="${left-6}" y="${yy}" dominant-baseline="middle" text-anchor="end">${Number(rate.toFixed(2))}%</text>`);
+      }
+      const day = 86400000;
+      const ticks = duration < day ? 1 : duration < 4 * day ? 2 : 4;
+      for(let i = 0; i < ticks; i++){
+        const date = new Date(start + (ticks === 1 ? 0 : Math.round(duration / day * i / (ticks - 1)) * day)).toISOString().slice(0,10);
+        const label = duration < 180 * day ? date.slice(5).replace('-', '/') : date.slice(0,7).replace('-', '/');
+        grid.push(`<text x="${rounded(x(date))}" y="${bottom+23}" text-anchor="middle">${label}</text>`);
+      }
+      return `<svg class="trendSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="現行価格決定時からの累積CPIと最低賃金の推移。各点の数値はグラフの数値から確認できます。"><g font-size="15" font-family="system-ui,sans-serif" fill="#475569">${grid.join('')}</g>${plot(points.cpi,'#17627c',false)}${plot(points.wage,'#9a461c',true)}</svg>`;
+    }
+
+    let cumulativeTrendKey = null;
+    let lastCumulativeTrend = null;
+
+    function updateCumulativeTrendChart(cpi){
+      const period = $('#cumulativeTrendPeriod');
+      const chart = $('#cumulativeTrendChart');
+      const legend = $('#cumulativeTrendLegend');
+      const notes = $('#cumulativeTrendNote');
+      const details = $('#cumulativeTrendDetails');
+      const decision = getDecisionContext();
+      const asOf = todayInJapan();
+      const prefKey = prefSelect.value;
+      const key = [decision.value, decision.precision, decision.error, prefKey, asOf, currentPriceBasis,
+        CPI_MONTHLY_DATA, CPI_TAX_ADJUSTED_DATA, COST_DATA];
+      if(cumulativeTrendKey && key.every((value, i) => value === cumulativeTrendKey[i])) return;
+      cumulativeTrendKey = key;
+      const points = cumulativeTrendData(cpi, decision, prefKey, asOf);
+      lastCumulativeTrend = points;
+      const hasPoints = Boolean(points.cpi?.length || points.wage?.length);
+      period.textContent = points.error || (hasPoints
+        ? `${decision.display} → ${fmtYMD(asOf)}（決定時＝0%）`
+        : '現在の入力ではグラフを表示できません。');
+      chart.innerHTML = hasPoints ? cumulativeTrendSvg(points) : '';
+      legend.replaceChildren();
+      const showLegend = (label, value, date, className) => {
+        const row = document.createElement('div');
+        const sample = document.createElement('span');
+        if(className) sample.className = className;
+        sample.setAttribute('aria-hidden','true');
+        row.append(sample, document.createTextNode(`${label}：${pct1(value)}%（${date}）`));
+        legend.append(row);
+      };
+      if(points.cpi?.length){
+        const last = points.cpi.at(-1);
+        showLegend(points.cpiLabel, last.rate, fmtYM(last.month));
+      }
+      if(points.wage?.length) showLegend(points.wageLabel, points.wage.at(-1).rate, '本日時点', 'wageKey');
+      notes.textContent = [
+        ...(hasPoints ? ['CPIは月次値で、最新公表月まで。最低賃金は本日までの発効済み確定額のみで、発効日に段差を表示します。'] : []),
+        ...(points.notes || [])
+      ].join(' ');
+      details.hidden = !hasPoints;
+      if(details.open) renderCumulativeTrendTable();
+    }
+
+    function renderCumulativeTrendTable(){
+      const tableWrap = $('#cumulativeTrendTable');
+      const points = lastCumulativeTrend;
+      if(!points?.cpi?.length && !points?.wage?.length){
+        tableWrap.replaceChildren();
+        return;
+      }
+      const rows = [
+        ...points.cpi.map(point => ({ ...point, label:fmtYM(point.month), cpi:pct1(point.rate) + '%', wage:'—' })),
+        ...points.wage.map(point => ({ ...point, label:fmtYMD(point.date), cpi:'—', wage:pct1(point.rate) + '%' }))
+      ].sort((a,b) => b.date.localeCompare(a.date));
+      // Only official periods and calculated numeric labels are inserted here.
+      tableWrap.innerHTML = '<table><thead><tr><th scope="col">時点</th><th scope="col">CPI</th><th scope="col">最低賃金</th></tr></thead><tbody>' +
+        rows.map(row => `<tr><th scope="row">${row.label}</th><td>${row.cpi}</td><td>${row.wage}</td></tr>`).join('') + '</tbody></table>';
+    }
+
+    $('#cumulativeTrendDetails').addEventListener('toggle', event => {
+      if(event.currentTarget.open) renderCumulativeTrendTable();
+    });
+
     function updateCpiSinceView(){
       const x = calcCpiSince();
       const mwX = calcMwSince();
+      updateCumulativeTrendChart(x);
       const calcDetailBox = $('#calcDetailBox');
       const calcDetailBoxModal = $('#calcDetailBoxModal');
 

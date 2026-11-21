@@ -224,8 +224,9 @@ if (cpi) {
     check(calculatedRounded === Number(cpi.meta?.latest_official_yoy), '最新月の指数比（小数第1位丸め）が公式前年同月比と矛盾しない');
   }
   check(Number(cpi.meta?.latest_official_yoy) === Number(cost?.national?.cpi_yoy), 'CPI月次メタデータとpref_cost_data.jsonの公式前年同月比が一致する');
-  if (latestMonth === '2026-08') {
-    check(Number(cost?.national?.cpi_yoy) === 1.7, '2026年8月が最新の場合、cpi_yoyが1.7%である');
+  if (latestMonth === '2026-10') {
+    check(Number(cost?.national?.cpi_yoy) === 2.2, '2026年10月が最新の場合、公式cpi_yoyが2.2%である');
+    check(cpi.values?.['2026-09'] === 102.256 && cpi.values?.['2026-10'] === 102.939, '2026年9月・10月の3桁参考指数が公式CSVと一致する');
   }
 }
 
@@ -430,9 +431,16 @@ if (calcCpiFunctionSource && cpi && taxAdjustedCpi) {
     const officeSuggested = Math.floor(officeExact / 1000) * 1000;
     const inclusiveExact = 30000 * generalInclusive2019.multiplier;
     const inclusiveSuggested = Math.floor(inclusiveExact / 1000) * 1000;
-    check(Math.abs(officeExact - 34053.50389321468) < 1e-8, '公式2025年基準・2026年8月までの税抜参考額が約34,053.5039円である');
-    check(officeSuggested === 34000, 'officeのCPI参考額を1,000円単位で切り下げると34,000円である');
-    check(inclusiveSuggested === 34000 && inclusiveExact > officeExact, '税抜の厳密額は税込の通常CPIで算出した額より低い（今回の千円単位切下げ額は一致）');
+    const latestIndex = cpi.values[cpi.meta.latest_month];
+    const expectedOfficeExact = 30000 * (90.5 / 89.9) * (latestIndex / 90.5);
+    const expectedInclusiveExact = 30000 * latestIndex / 89.6;
+    const expectedSuggested = Math.floor(expectedOfficeExact / 1000) * 1000;
+    check(Math.abs(officeExact - expectedOfficeExact) < 1e-8, '税抜参考額が接続月の調整済指数と通常指数を使った公式と一致する');
+    check(officeSuggested === expectedSuggested, 'officeのCPI参考額を1,000円単位で切り下げる');
+    check(inclusiveSuggested === Math.floor(expectedInclusiveExact / 1000) * 1000 && Math.abs(inclusiveExact - expectedInclusiveExact) < 1e-8 && inclusiveExact > officeExact, '税込の参考額は通常CPIで計算し、税抜の厳密額と区別する');
+    if (cpi.meta.latest_month === '2026-10') {
+      check(Math.abs(officeExact - 34351.16796440489) < 1e-8 && officeSuggested === 34000, '2026年10月までの税抜参考額が約34,351.1680円、千円単位切下げは34,000円である');
+    }
     if (computeCpiCapFunctionSource) {
       const computeCpiCap = Function('cpiResult', `
         const isOfficeMode = () => true;
@@ -448,8 +456,8 @@ if (calcCpiFunctionSource && cpi && taxAdjustedCpi) {
       `)(office2019);
       const cap = computeCpiCap();
       check(cap?.x?.method === 'tax_adjusted_bridge', 'computeCpiCapがofficeの2019年1月基準に消費税調整済CPIを使用する');
-      check(Math.abs(cap?.exact - 34053.50389321468) < 1e-8, 'computeCpiCapの厳密額が約34,053.5039円である');
-      check(cap?.suggested === 34000, 'computeCpiCapの1,000円単位切下げ提案額が34,000円である');
+      check(Math.abs(cap?.exact - expectedOfficeExact) < 1e-8, 'computeCpiCapの厳密額が公式で算出した額と一致する');
+      check(cap?.suggested === expectedSuggested, 'computeCpiCapの提案額が1,000円単位の切下げ額に一致する');
     }
   } catch (error) {
     errors.push(`累積CPIのモード別計算を実行できません: ${error.message}`);
@@ -535,8 +543,11 @@ if (priceBasisLabelFunctionSource && syncPriceBasisFunctionSource && enforceOffi
   }
 }
 
-check(indexHtml.includes("const APP_VERSION = 'r50';"), 'リリース番号を単一定数r50で管理する');
-check((indexHtml.match(/r50/g) || []).length === 1, 'index.html内のr50リテラルが単一定数だけである');
+const appVersions = [...indexHtml.matchAll(/const APP_VERSION = '(r\d+)';/g)];
+check(appVersions.length === 1, 'リリース番号を単一定数APP_VERSIONで管理する');
+if (appVersions.length === 1) {
+  check((indexHtml.match(new RegExp(`\\b${appVersions[0][1]}\\b`, 'g')) || []).length === 1, 'index.html内の現行リリース番号リテラルが単一定数だけである');
+}
 check((indexHtml.match(/data-app-version/g) || []).length >= 3 && indexHtml.includes("el.textContent = APP_VERSION"), '画面とフッターの版表示をAPP_VERSIONから反映する');
 check(indexHtml.includes('関与先向け｜価格転嫁支援モード') && indexHtml.includes('松本会計内部用｜顧問報酬改定モード'), '一般モードと松本会計内部用モードの表示がある');
 check(indexHtml.includes('.officeOnly{display:none !important;}') && indexHtml.includes("classList.toggle('officeMode', office)"), 'office専用UIをofficeモードだけで表示する');
