@@ -135,6 +135,7 @@ function nextMonth(month) {
 }
 
 const longTerm = extractSeries(longTermCsvPath);
+const publishedEntries = [...longTerm.entries()].sort(([a], [b]) => a.localeCompare(b));
 const reference = extractSeries(referenceCsvPath);
 for (const [month, value] of reference) {
   if (!longTerm.has(month)) throw new Error(`3-decimal reference month ${month} is missing from the long-term series`);
@@ -168,7 +169,8 @@ const output = {
     accessed_date: metadata.accessedDate,
     note: '\u7d2f\u7a4d\u4e0a\u6607\u7387\u306f\u5404\u6708\u306e\u63a5\u7d9a\u6307\u6570\u306e\u6bd4\u3067\u8a08\u7b97\u3002\u5c0f\u6570\u7b2c3\u4f4d\u306e\u6307\u6570\u306f\u8a08\u7b97\u7528\u306e\u53c2\u8003\u5024\u3067\u3042\u308a\u3001\u516c\u5f0f\u306e\u5909\u5316\u7387\u3092\u518d\u8a08\u7b97\u3057\u3066\u4e0a\u66f8\u304d\u3057\u306a\u3044\u3002'
   },
-  values: Object.fromEntries(entries)
+  values: Object.fromEntries(entries),
+  published_values: Object.fromEntries(publishedEntries)
 };
 
 const outputPath = path.resolve(outputArg);

@@ -20,6 +20,8 @@ const cost = { national:{ min_wage_history_by_pref_effective:{ 兵庫:[
 const context = vm.createContext({
   COST_DATA:cost,
   CPI_MONTHLY_DATA:JSON.parse(read('cpi_monthly_2025base.json')),
+  SCHEDULED_WAGE_DATA:JSON.parse(read('scheduled_wage_index_monthly.json')),
+  SCHEDULED_WAGE_ERROR:'',
   CPI_TAX_ADJUSTED_DATA:JSON.parse(read('cpi_monthly_tax_adjusted.json')),
   todayInJapan:()=> '2026-11-21',
   currentPriceBasis:'inclusive',
@@ -29,7 +31,7 @@ const context = vm.createContext({
   hasCpiResult:x=>Boolean(x && !x.error && Number.isFinite(x.cum)),
   hasMwResult:x=>Boolean(x && !x.error && Number.isFinite(x.cum)),
 });
-const names=['isIsoDate','lastDayOfMonth','getDecisionContext','getMinWageEffectiveHistory','calcMwSince','calcCpiSince','cumulativeTrendData','cumulativeTrendSvg'];
+const names=['isIsoDate','lastDayOfMonth','getDecisionContext','getMinWageEffectiveHistory','calcMwSince','calcCpiSince','monthlyComparisonPoints','cumulativeTrendData','cumulativeTrendSvg'];
 vm.runInContext(names.map(source).join('\n'), context);
 const calc = (date, precision = 'exact', basis = 'inclusive', today = '2026-11-21')=>{
   context.currentDecisionPrecision=precision;
@@ -51,7 +53,7 @@ assert.deepEqual(Array.from(result.wage, x=>x.date),['2025-10-15','2026-10-17','
 assert.equal(result.wage[0].rate,0);
 e(result.wage[1].rate,5);
 e(result.wage[2].rate,5);
-assert.match(context.cumulativeTrendSvg(result),/stroke-dasharray="6 3"/);
+assert.match(context.cumulativeTrendSvg(result),/stroke-dasharray="2 3"/);
 assert.doesNotMatch(context.cumulativeTrendSvg(result),/NaN|Infinity/);
 assert.match(context.cumulativeTrendSvg(result),/role="img"/);
 
@@ -59,8 +61,11 @@ assert.match(context.cumulativeTrendSvg(result),/role="img"/);
 assert.equal(cpi.method,'tax_adjusted_bridge');
 e(result.cpi.find(p=>p.month==='2019-12').rate,(cpi.segmentA-1)*100);
 e(result.cpi.at(-1).rate,cpi.cum);
+assert.notEqual(result.coreCpi.at(-1).rate, cpi.cum, 'Comparison CPI and customer-facing calculation are independent');
+const standardCpi = result.coreCpi.at(-1).rate;
 ({cpi,result}=calc('2019-10-30','exact','inclusive'));
 assert.equal(cpi.method,'normal_ratio');
+e(result.coreCpi.at(-1).rate,standardCpi);
 e(result.cpi.at(-1).rate,cpi.cum);
 
 ({result}=calc('2026-10-17'));
@@ -90,7 +95,8 @@ assert.ok(result.notes.some(x=>x.includes('公式履歴')));
 context.CPI_MONTHLY_DATA=null;
 ({result}=calc('2025-10-15'));
 assert.ok(result.cpi.length===0 && result.wage.length===3);
-assert.ok(result.notes.some(x=>x.includes('通常CPI')));
+assert.ok(result.notes.some(x=>x.includes('コアCPI')));
+assert.ok(result.salary.length > 1);
 
 // Exercise DOM wiring in both user-selectable price bases, at open-table and unavailable states.
 function node(){
@@ -109,15 +115,40 @@ const legend = context.$('#cumulativeTrendLegend');
 const details = context.$('#cumulativeTrendDetails');
 const numbers = context.$('#cumulativeTrendTable');
 details.open=true;
-for (const [basis,label] of [['exclusive','消費税調整済・接続'],['inclusive','通常']]){
+for (const basis of ['exclusive','inclusive']){
   ({cpi}=calc('2019-10-30','exact',basis));
   context.updateCumulativeTrendChart(cpi);
   assert.ok(chart.innerHTML.includes('viewBox="0 0 408 238"'));
-  assert.ok(legend.children[0].children[1].includes(label));
-  assert.ok(legend.children[1].children[1].includes('本日時点'));
-  assert.match(numbers.innerHTML, /<th scope="col">CPI<\/th>/);
+  assert.ok(legend.children[0].children[1].includes('コアCPI（全国）'));
+  assert.ok(legend.children[1].children[1].includes('所定内給与（全国）'));
+  assert.ok(legend.children[1].children[1].includes('速報'));
+  assert.ok(legend.children[2].children[1].includes('本日時点'));
+  assert.match(numbers.innerHTML, /<th scope="col">コアCPI<\/th>/);
   assert.ok(!details.hidden);
 }
+assert.match(numbers.innerHTML, /所定内給与/);
+assert.match(numbers.innerHTML, /（速報）/);
+({result}=calc('2015-10-01'));
+e(result.coreCpi.at(-1).rate, (102.9 / 88.7 - 1)*100);
+e(result.salary.at(-1).rate, (113.8 / 97.9 - 1)*100);
+assert.equal(result.salary.at(-1).month, '2026-09');
+assert.equal(result.salary.at(-1).date, '2026-09-30');
+assert.equal(result.salary[0].rate, 0);
+({result}=calc('1992-12-31'));
+assert.equal(result.salary.length, 0);
+assert.ok(result.coreCpi.length > 12);
+assert.ok(result.notes.some(x=>x.includes('1993-01')));
+({result}=calc('2026-10-01'));
+assert.equal(result.salary.length, 0, 'Do not carry values from September into October');
+const wageData = context.SCHEDULED_WAGE_DATA;
+context.SCHEDULED_WAGE_DATA = null;
+context.SCHEDULED_WAGE_ERROR = '読込不良';
+({cpi}=calc('2019-10-30'));
+context.updateCumulativeTrendChart(cpi);
+assert.ok(legend.children[0].children[1].includes('コアCPI（全国）'));
+assert.ok(legend.children[1].children[1].includes('最低賃金'));
+assert.doesNotMatch(numbers.innerHTML, /（速報）/);
+context.SCHEDULED_WAGE_DATA = wageData;
 ({cpi}=calc('','unknown'));
 context.updateCumulativeTrendChart(cpi);
 assert.equal(chart.innerHTML,'');

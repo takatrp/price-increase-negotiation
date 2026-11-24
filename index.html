@@ -162,7 +162,8 @@
     .trendLegend{display:flex;gap:6px 16px;flex-wrap:wrap;margin-top:7px;font-size:.8rem;color:#334155}
     .trendLegend div{display:flex;align-items:center;gap:6px}
     .trendLegend span{width:18px;border-top:3px solid #17627c;flex:none}
-    .trendLegend .wageKey{border-top:3px dashed #9a461c}
+    .trendLegend .wageKey{border-top:3px dotted #9a461c}
+    .trendLegend .salaryKey{border-top:3px dashed #13734d}
     .trendSvg{width:100%;height:auto;display:block;margin-top:8px;background:#fff;border-radius:8px}
     .trendTable{max-height:15rem;overflow:auto;margin-top:6px}
     .trendTable table{width:100%;border-collapse:collapse;font-size:.78rem}
@@ -326,7 +327,7 @@
             <div id="decisionExactWrap" class="hidden">
               <label for="currentPriceAsOf">現行価格の決定日（年月日）</label>
               <input type="date" id="currentPriceAsOf" aria-describedby="currentPriceAsOfHint" />
-              <div class="hint" id="currentPriceAsOfHint">この日付時点で発効済みの最低賃金と、同じ月のCPIを基準に計算します。</div>
+              <div class="hint" id="currentPriceAsOfHint">この日付時点で発効済みの最低賃金と、同じ月のコアCPI・所定内給与指数をそれぞれ基準に計算します。</div>
             </div>
             <div id="decisionMonthWrap">
               <label for="currentPriceMonth">現行価格の決定月</label>
@@ -334,7 +335,7 @@
               <div class="hint" id="currentPriceMonthHint">月内に最低賃金改定がある場合、最低賃金の累積上昇率は算出しません。</div>
             </div>
             <div id="decisionUnknownWrap" class="hidden">
-              <div class="mutedBox">決定時期が不明のため、累積CPI及び累積最低賃金上昇率は算出しません。</div>
+              <div class="mutedBox">決定時期が不明のため、物価・賃金・最低賃金の累積上昇率は算出しません。</div>
             </div>
             <div style="display:flex;align-items:flex-end;">
               <button class="btn emphasis" id="openExternalFactorsBtn" type="button">外部環境を確認</button>
@@ -348,6 +349,7 @@
             <div id="cumulativeTrendLegend" class="trendLegend"></div>
             <div id="cumulativeTrendChart"></div>
             <p id="cumulativeTrendNote" class="trendNote"></p>
+            <p id="cumulativeTrendSources" class="trendNote" hidden>出典：<a href="https://www.e-stat.go.jp/stat-search/files?stat_infid=000040482943" target="_blank" rel="noopener">総務省統計局（CPI）</a> ／ <a href="https://www.e-stat.go.jp/stat-search/files?stat_infid=000032189734" target="_blank" rel="noopener">厚生労働省（所定内給与の長期時系列）</a>・<a id="scheduledWageLatestSource" href="https://www.mhlw.go.jp/toukei/list/30-1a.html" target="_blank" rel="noopener">最新月の公表資料</a> ／ <a href="https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php" target="_blank" rel="noopener">厚生労働省（最低賃金）</a></p>
             <details id="cumulativeTrendDetails" class="trendDetails" hidden>
               <summary>グラフの数値を見る</summary>
               <div id="cumulativeTrendTable" class="trendTable" tabindex="0" aria-label="グラフの時点別データ"></div>
@@ -723,7 +725,7 @@
     const OFFICE_PASSWORD = 'matsu20180201';
     const AUTH_SESSION_KEY = 'mk_session_unlocked';
     const AUTH_MODE_KEY = 'mk_session_mode';
-    const APP_VERSION = 'r52';
+    const APP_VERSION = 'r53';
     const OFFICE_PRICE_BASIS_ERROR = '松本会計専用モードでは税抜価格を使用してください';
     let currentAuthMode = 'locked';
     const isGeneralMode = () => currentAuthMode === 'general';
@@ -1650,6 +1652,8 @@
     let COST_DATA = null;
     let CPI_MONTHLY_DATA = null;
     let CPI_TAX_ADJUSTED_DATA = null;
+    let SCHEDULED_WAGE_DATA = null;
+    let SCHEDULED_WAGE_ERROR = '';
     let COST_DATA_ERROR = '';
     let CPI_DATA_ERROR = '';
     let CPI_TAX_ADJUSTED_ERROR = '';
@@ -1766,6 +1770,12 @@
       }
       const lastMonth = entries.map(([month]) => month).sort().at(-1);
       if(lastMonth !== latestMonth || !Number.isFinite(Number(json.values[latestMonth]))) throw new Error('CPIの最新月と月次系列が一致しません');
+      // An unavailable comparison series must not invalidate the calculation series.
+      const official = json.published_values;
+      if(!official || Object.keys(official).length !== entries.length || entries.some(([month, value]) => {
+        const comparable = official[month];
+        return !Number.isFinite(comparable) || comparable <= 0 || Math.abs(comparable - Number(value)) > 0.051;
+      })) delete json.published_values;
       if(!hasFiniteNumber(json.meta.latest_official_yoy)) throw new Error('CPIの公式前年同月比が不正です');
       if(!String(json.meta.source_title || '').trim() || !/^https:\/\//.test(String(json.meta.source_url || ''))) throw new Error('CPIの公式出典が不正です');
       for(const key of ['updated', 'publication_date', 'accessed_date']){
@@ -1929,6 +1939,31 @@
         CPI_DATA_ERROR = 'CPI月次データ：' + e.message;
       }
       try{ updateLoadStatus(); renderAllByPref(); generate(); }catch(err){ console.error('CPIデータ反映時エラー', err); }
+    }
+
+    function validateScheduledWageDataPayload(json){
+      const meta = json?.meta;
+      const entries = Object.entries(json?.values ?? {}).sort(([a], [b]) => a.localeCompare(b));
+      if(json?.schema_version !== 1 || !meta || !entries.length ||
+        entries[0][0] !== meta.earliest_month || entries.at(-1)[0] !== meta.latest_month ||
+        entries.some(([month, value]) => !/^\d{4}-(0[1-9]|1[0-2])$/.test(month) || !Number.isFinite(value) || value <= 0) ||
+        !['preliminary', 'final'].includes(meta.latest_status) ||
+        !/^https:\/\/www\.mhlw\.go\.jp\//.test(meta.latest_source_url || '') ||
+        !isIsoDate(meta.latest_publication_date) || !isIsoDate(meta.accessed_date)){
+        throw new Error('所定内給与指数データの形式が不正です');
+      }
+      return json;
+    }
+
+    async function loadScheduledWageData(){
+      try{
+        SCHEDULED_WAGE_DATA = validateScheduledWageDataPayload(await fetchJson('./scheduled_wage_index_monthly.json'));
+        $('#scheduledWageLatestSource').href = SCHEDULED_WAGE_DATA.meta.latest_source_url;
+      }catch(e){
+        SCHEDULED_WAGE_ERROR = 'データを読み込めません。';
+      }
+      // Comparison data is supplemental. Its absence does not gate letters or calculation.
+      try{ updateCpiSinceView(); }catch(err){ console.error('所定内給与データ反映時エラー', err); }
     }
 
     async function loadTaxAdjustedCpiData(){
@@ -2353,12 +2388,44 @@
 
     const hasMwResult = x => Boolean(x && !x.error && Number.isFinite(x.cum));
 
+    function monthlyComparisonPoints(data, decision, asOf, label, unavailable){
+      const baseMonth = decision.firstDate.slice(0,7);
+      const base = data?.values?.[baseMonth];
+      if(!data) return { series:[], note:label + '：' + unavailable };
+      if(!Number.isFinite(base) || base <= 0){
+        const earliest = data.meta.earliest_month || Object.keys(data.values).sort()[0];
+        const available = `${fmtYM(earliest)}～${fmtYM(data.meta.latest_month)}`;
+        return { series:[], note:`${label}：決定月の公表指数がありません（収録期間：${available}）。` };
+      }
+      const series = Object.keys(data.values).sort()
+        .filter(month => month >= baseMonth && month <= data.meta.latest_month && month <= asOf.slice(0,7))
+        .map(month => {
+          const endOfMonth = lastDayOfMonth(month);
+          return { date:month === baseMonth ? decision.firstDate : endOfMonth < asOf ? endOfMonth : asOf,
+            month, rate:(data.values[month] / base - 1) * 100 };
+        });
+      return { series };
+    }
+
     function cumulativeTrendData(cpi, decision, prefKey, asOf){
       if(decision.error) return { error:decision.error };
       if(!isIsoDate(decision.firstDate)) return { error:'現行価格を決めた時期を確認してください。' };
       if(decision.firstDate > asOf) return { error:'現行価格を決めた時期が本日より後のため表示できません。' };
 
-      const points = { start:decision.firstDate, end:asOf, cpi:[], wage:[], notes:[] };
+      const points = { start:decision.firstDate, end:asOf, cpi:[], coreCpi:[], salary:[], wage:[], notes:[] };
+      // The comparison uses the published one-decimal CPI, not the finer price-calculation reference index.
+      const publishedCpi = CPI_MONTHLY_DATA?.published_values;
+      const core = monthlyComparisonPoints(publishedCpi ? {meta:CPI_MONTHLY_DATA.meta, values:publishedCpi} : null,
+        decision, asOf, 'コアCPI', 'データを読み込めません。');
+      const salary = monthlyComparisonPoints(SCHEDULED_WAGE_DATA, decision, asOf, '所定内給与', SCHEDULED_WAGE_ERROR || 'データを読み込み中です。');
+      points.coreCpi = core.series;
+      points.salary = salary.series;
+      if(core.note) points.notes.push(core.note);
+      if(salary.note) points.notes.push(salary.note);
+      points.salaryPreliminary = SCHEDULED_WAGE_DATA?.meta?.latest_status === 'preliminary' &&
+        points.salary.at(-1)?.month === SCHEDULED_WAGE_DATA?.meta?.latest_month;
+
+      // Preserve the adjustment basis for the pre-existing customer-facing PDF.
       if(decision.precision === 'month') points.notes.push('年月入力時は、横軸の起点を決定月の初日に置きます。');
 
       if(hasCpiResult(cpi)){
@@ -2379,8 +2446,6 @@
           points.cpi.push({ date, month, rate:(ratio - 1) * 100 });
         }
         points.cpiLabel = bridge ? 'CPI（消費税調整済・接続）' : 'CPI（通常）';
-      }else if(cpi?.error){
-        points.notes.push('物価：' + cpi.error);
       }
 
       // This graph intentionally uses the actual official history, never a selected future
@@ -2406,7 +2471,9 @@
       const millis = date => Date.parse(date + 'T00:00:00Z');
       const start = millis(points.start), end = millis(points.end), duration = end - start;
       const x = date => duration ? left + (millis(date) - start) * (right - left) / duration : (left + right) / 2;
-      const rates = [0, ...points.cpi.map(p => p.rate), ...points.wage.map(p => p.rate)];
+      const plottedCpi = points.cpiOnly ? points.cpi : points.coreCpi;
+      const salary = points.salary || [];
+      const rates = [0, ...plottedCpi.map(p => p.rate), ...salary.map(p => p.rate), ...points.wage.map(p => p.rate)];
       const range = Math.max(1, Math.max(...rates) - Math.min(...rates));
       const roughStep = range / 5;
       const power = 10 ** Math.floor(Math.log10(roughStep));
@@ -2416,7 +2483,7 @@
       const y = rate => bottom - (rate - min) * (bottom - top) / (max - min);
       const rounded = value => value.toFixed(2);
       const coords = (date, rate) => `${rounded(x(date))},${rounded(y(rate))}`;
-      const plot = (values, color, stepped) => {
+      const plot = (values, color, stepped, dash) => {
         if(!values.length) return '';
         const monthNumber = month => Number(month.slice(0,4)) * 12 + Number(month.slice(5));
         const segments = [[]];
@@ -2427,7 +2494,7 @@
           segments.at(-1).push(coords(point.date, point.rate));
         }
         const last = values.at(-1);
-        const strokeStyle = stepped ? ' stroke-dasharray="6 3"' : '';
+        const strokeStyle = dash ? ` stroke-dasharray="${dash}"` : '';
         return segments.map(segment => segment.length > 1
           ? `<polyline points="${segment.join(' ')}" fill="none" stroke="${color}" stroke-width="2.8" stroke-linejoin="round"${strokeStyle}/>`
           : `<circle cx="${segment[0].split(',')[0]}" cy="${segment[0].split(',')[1]}" r="3.5" fill="${color}"/>`).join('') +
@@ -2449,8 +2516,8 @@
         grid.push(`<text x="${rounded(x(date))}" y="${bottom+23}" text-anchor="middle">${label}</text>`);
       }
       const label = points.cpiOnly ? '現行価格決定時からの累積CPIの推移。'
-        : '現行価格決定時からの累積CPIと最低賃金の推移。各点の数値はグラフの数値から確認できます。';
-      return `<svg class="trendSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${label}"><g font-size="15" font-family="system-ui,sans-serif" fill="#475569">${grid.join('')}</g>${plot(points.cpi,'#17627c',false)}${plot(points.wage,'#9a461c',true)}</svg>`;
+        : '現行価格決定時からのコアCPI、所定内給与、最低賃金の推移。各点の数値はグラフの数値から確認できます。';
+      return `<svg class="trendSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${label}"><g font-size="15" font-family="system-ui,sans-serif" fill="#475569">${grid.join('')}</g>${plot(plottedCpi,'#17627c',false)}${plot(salary,'#13734d',false,'6 4')}${plot(points.wage,'#9a461c',true,'2 3')}</svg>`;
     }
 
     let cumulativeTrendKey = null;
@@ -2466,12 +2533,13 @@
       const asOf = todayInJapan();
       const prefKey = prefSelect.value;
       const key = [decision.value, decision.precision, decision.error, prefKey, asOf, currentPriceBasis,
-        CPI_MONTHLY_DATA, CPI_TAX_ADJUSTED_DATA, COST_DATA];
+        CPI_MONTHLY_DATA, CPI_TAX_ADJUSTED_DATA, SCHEDULED_WAGE_DATA, SCHEDULED_WAGE_ERROR, COST_DATA];
       if(cumulativeTrendKey && key.every((value, i) => value === cumulativeTrendKey[i])) return;
       cumulativeTrendKey = key;
       const points = cumulativeTrendData(cpi, decision, prefKey, asOf);
       lastCumulativeTrend = points;
-      const hasPoints = Boolean(points.cpi?.length || points.wage?.length);
+      const hasPoints = Boolean(points.coreCpi?.length || points.salary?.length || points.wage?.length);
+      $('#cumulativeTrendSources').hidden = !hasPoints;
       period.textContent = points.error || (hasPoints
         ? `${decision.display} → ${fmtYMD(asOf)}（決定時＝0%）`
         : '現在の入力ではグラフを表示できません。');
@@ -2485,13 +2553,21 @@
         row.append(sample, document.createTextNode(`${label}：${pct1(value)}%（${date}）`));
         legend.append(row);
       };
-      if(points.cpi?.length){
-        const last = points.cpi.at(-1);
-        showLegend(points.cpiLabel, last.rate, fmtYM(last.month));
+      if(points.coreCpi?.length){
+        const last = points.coreCpi.at(-1);
+        showLegend('コアCPI（全国）', last.rate, fmtYM(last.month));
+      }
+      if(points.salary?.length){
+        const last = points.salary.at(-1);
+        showLegend('所定内給与（全国）', last.rate, fmtYM(last.month) + (points.salaryPreliminary ? '速報' : ''), 'salaryKey');
       }
       if(points.wage?.length) showLegend(points.wageLabel, points.wage.at(-1).rate, '本日時点', 'wageKey');
       notes.textContent = [
-        ...(hasPoints ? ['CPIは月次値で、最新公表月まで。最低賃金は本日までの発効済み確定額のみで、発効日に段差を表示します。'] : []),
+        ...(hasPoints ? [
+          'コアCPIは生鮮食品を除く全国の消費者物価（公表指数、小数第1位）です。改定額の計算やお客様向けPDFでは、計算用の精度や消費税調整の扱いにより数値が異なる場合があります。',
+          '所定内給与は、全国の一般労働者（5人以上の事業所）の基本給や通常の手当など。残業代・賞与は含みません。',
+          '物価と所定内給与はそれぞれ最新公表月まで。最低賃金は選択した都道府県の発効済み確定額を用い、発効日に段差を表示します。'
+        ] : []),
         ...(points.notes || [])
       ].join(' ');
       details.hidden = !hasPoints;
@@ -2501,17 +2577,26 @@
     function renderCumulativeTrendTable(){
       const tableWrap = $('#cumulativeTrendTable');
       const points = lastCumulativeTrend;
-      if(!points?.cpi?.length && !points?.wage?.length){
+      if(!points?.coreCpi?.length && !points?.salary?.length && !points?.wage?.length){
         tableWrap.replaceChildren();
         return;
       }
-      const rows = [
-        ...points.cpi.map(point => ({ ...point, label:fmtYM(point.month), cpi:pct1(point.rate) + '%', wage:'—' })),
-        ...points.wage.map(point => ({ ...point, label:fmtYMD(point.date), cpi:'—', wage:pct1(point.rate) + '%' }))
-      ].sort((a,b) => b.date.localeCompare(a.date));
+      const rowsByPeriod = new Map();
+      function put(point, series){
+        const key = point.month || point.date;
+        const row = rowsByPeriod.get(key) || {date:point.date,
+          label:point.month ? fmtYM(point.month) : fmtYMD(point.date), cpi:'—', salary:'—', wage:'—'};
+        row[series] = pct1(point.rate) + '%' +
+          (series === 'salary' && points.salaryPreliminary && point === points.salary.at(-1) ? '（速報）' : '');
+        rowsByPeriod.set(key, row);
+      }
+      points.coreCpi.forEach(point => put(point, 'cpi'));
+      points.salary.forEach(point => put(point, 'salary'));
+      points.wage.forEach(point => put(point, 'wage'));
+      const rows = [...rowsByPeriod.values()].sort((a,b) => b.date.localeCompare(a.date));
       // Only official periods and calculated numeric labels are inserted here.
-      tableWrap.innerHTML = '<table><thead><tr><th scope="col">時点</th><th scope="col">CPI</th><th scope="col">最低賃金</th></tr></thead><tbody>' +
-        rows.map(row => `<tr><th scope="row">${row.label}</th><td>${row.cpi}</td><td>${row.wage}</td></tr>`).join('') + '</tbody></table>';
+      tableWrap.innerHTML = '<table><thead><tr><th scope="col">時点</th><th scope="col">コアCPI</th><th scope="col">所定内給与</th><th scope="col">最低賃金</th></tr></thead><tbody>' +
+        rows.map(row => `<tr><th scope="row">${row.label}</th><td>${row.cpi}</td><td>${row.salary}</td><td>${row.wage}</td></tr>`).join('') + '</tbody></table>';
     }
 
     $('#cumulativeTrendDetails').addEventListener('toggle', event => {
@@ -3887,7 +3972,8 @@ ${cpiTalk}
     Promise.all([
       loadCostData(savedUrl || './pref_cost_data.json', true),
       loadCpiData(),
-      loadTaxAdjustedCpiData()
+      loadTaxAdjustedCpiData(),
+      loadScheduledWageData()
     ]).then(() => {
       renderAllByPref();
       updateDataMetaUi();
