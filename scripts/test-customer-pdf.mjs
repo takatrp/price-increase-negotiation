@@ -18,6 +18,9 @@ function tag(id){
 }
 assert.match(tag('includeLetterCpiChart'), /type="checkbox"/);
 assert.doesNotMatch(tag('includeLetterCpiChart'), /\schecked\b/);
+assert.match(tag('includeLetterMinWageChart'), /type="checkbox"/);
+assert.doesNotMatch(tag('includeLetterMinWageChart'), /\schecked\b/);
+assert.match(tag('letterMinWageChartOption'), /\shidden\b/);
 assert.match(tag('letterCpiChartPreview'), /\shidden\b/);
 assert.doesNotMatch(tag('customerPrintBtn'), /disabled/);
 assert.ok(html.indexOf('id="letterCpiChartPreview"') > html.indexOf('id="outputArea"'));
@@ -32,9 +35,11 @@ assert.match(html, /customerPrintBtn\.addEventListener\('click', \(\) => printOu
 assert.match(html, /printBtn\.addEventListener\('click', \(\) => printOutput\(true\)\)/);
 assert.match(html, /addEventListener\('afterprint', clearInternalPrint\)/);
 assert.match(source('resetFormState'), /includeLetterCpiChart\.checked = false/);
+assert.match(source('resetFormState'), /includeLetterMinWageChart\.checked = false/);
 
 class Element {
   constructor(tag){this.tag=tag;this.children=[];this.textContent='';this.innerHTML='';this.hidden=false;}
+  setAttribute(){}
   append(...children){this.children.push(...children);}
   replaceChildren(...children){this.children=children;}
   cloneNode(deep){
@@ -53,14 +58,17 @@ const classes = new Set();
 const status = [];
 const printed = [];
 const box = {checked:false, disabled:false};
+const minWageBox = {checked:false, disabled:false};
 const date = new Element('div');
 const memo = new Element('div');
 const context = vm.createContext({
   $:get, document: {
     documentElement: {classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)}},
-    createElement:tag=>new Element(tag),createDocumentFragment:()=>new Element('fragment')
+    createTextNode:text=>text,createElement:tag=>new Element(tag),createDocumentFragment:()=>new Element('fragment')
   },
   includeLetterCpiChart:box,
+  includeLetterMinWageChart:minWageBox,
+  SCHEDULED_WAGE_DATA:JSON.parse(read('scheduled_wage_index_monthly.json')),
   currentOutputMode:'letter',
   officialDataReady:()=>true,
   calcCpiSince:()=>undefined,
@@ -87,7 +95,10 @@ function setSeries(bridge){
     {date:'2019-12-31',month:'2019-12',rate:4.5}
   ];
   context.calcCpiSince=()=>({baseMonth:'2019-10',latestMonth:'2019-12',cum:4.5,method:bridge?'tax_adjusted_bridge':'normal_ratio'});
-  context.lastCumulativeTrend={cpi:series,wage:[{date:'2019-12-31',rate:100}]};
+  context.lastCumulativeTrend={
+    cpi:series, salary:[{date:'2019-10-15',month:'2019-10',rate:0},{date:'2019-11-30',month:'2019-11',rate:1.7}],
+    salaryPreliminary:true, wageLabel:'最低賃金（兵庫県）', wage:[{date:'2019-10-15',rate:0},{date:'2019-12-31',rate:100}]
+  };
 }
 const preview=get('#letterCpiChartPreview');
 const chart=get('#printLetterCpiChart');
@@ -101,13 +112,37 @@ assert.match(chart.serialize(), /4\.5％/);
 assert.match(chart.serialize(), /通常指数/);
 assert.match(chart.serialize(), /改定率そのものを示すものではありません/);
 assert.match(chart.serialize(), /role="img"/);
-assert.match(chart.serialize(), /2019-10～2019-12/);
-assert.doesNotMatch(chart.serialize(), /最低賃金|stroke-dasharray|100%|INTERNAL_/);
+assert.match(chart.serialize(), /2019-12/);
+assert.match(chart.serialize(), /所定内給与（全国）：\+1.7％（2019-11速報）/);
+assert.match(chart.serialize(), /stroke-dasharray="6 4"/);
+assert.doesNotMatch(chart.serialize(), /最低賃金|stroke-dasharray="2 3"|100%|INTERNAL_/);
+assert.equal(get('#letterMinWageChartOption').hidden,false);
+minWageBox.checked=true;
+context.renderLetterCpiChart();
+assert.match(chart.serialize(), /最低賃金（兵庫県）：\+100.0％（2019-12-31）/);
+assert.match(chart.serialize(), /stroke-dasharray="2 3"/);
+assert.equal(chart.serialize(),preview.serialize());
+const previousWage = context.lastCumulativeTrend.wage;
+context.lastCumulativeTrend.wage=[];
+context.lastCumulativeTrend.notes=['最低賃金：履歴なし'];
+context.renderLetterCpiChart();
+assert.ok(minWageBox.disabled);
+assert.match(get('#letterMinWageChartHint').textContent, /履歴なし/);
+assert.doesNotMatch(chart.serialize(), /最低賃金|stroke-dasharray="2 3"/);
+context.lastCumulativeTrend.wage=previousWage;
+minWageBox.checked=false;
+context.renderLetterCpiChart();
 assert.equal(chart.serialize(),preview.serialize());
 setSeries(true);
 context.renderLetterCpiChart();
 assert.match(chart.serialize(), /消費税調整済指数と通常指数を2019年12月で接続/);
 assert.match(chart.serialize(), /消費税調整済指数/);
+context.lastCumulativeTrend.salary=[];
+context.lastCumulativeTrend.notes=['所定内給与：決定月の公表指数がありません'];
+context.renderLetterCpiChart();
+assert.match(chart.serialize(), /所定内給与：決定月の公表指数がありません/);
+assert.doesNotMatch(chart.serialize(),/stroke-dasharray="6 4"/);
+
 context.currentOutputMode='talk';
 context.renderLetterCpiChart();
 assert.ok(get('#letterCpiChartOption').hidden && preview.hidden && !chart.hidden);

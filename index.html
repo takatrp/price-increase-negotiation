@@ -173,6 +173,8 @@
     .trendDetails summary{cursor:pointer}
     .letterCpiOption{margin-top:10px}
     .letterCpiOption label{display:inline-flex}
+    .letterWageOption{margin:6px 0 0 12px}
+    .letterCpiFigure .trendLegend{gap:3px 14px}
     .letterCpiFigure .trendSvg{max-width:520px;margin:6px auto 0}
     .letterCpiFigure h3,.letterCpiFigure .trendPeriod,.letterCpiFigure .trendNote{overflow-wrap:anywhere}
 
@@ -668,9 +670,13 @@
           <textarea id="outputArea" class="docArea" readonly></textarea>
           <div class="letterCpiOption" id="letterCpiChartOption">
             <label class="choiceOption"><input id="includeLetterCpiChart" type="checkbox" aria-describedby="letterCpiChartHint" />参考グラフを付ける</label>
-            <div class="hint" id="letterCpiChartHint" aria-live="polite">案内文のプレビューとお客様向けPDFの末尾に、累積CPIのグラフを追加します。</div>
+            <div class="hint" id="letterCpiChartHint" aria-live="polite">案内文のプレビューとお客様向けPDFの末尾に、物価・所定内給与の推移を追加します。</div>
+            <div id="letterMinWageChartOption" class="letterWageOption" hidden>
+              <label class="choiceOption"><input id="includeLetterMinWageChart" type="checkbox" aria-describedby="letterMinWageChartHint" />地域別最低賃金も重ねる</label>
+              <div class="hint" id="letterMinWageChartHint" aria-live="polite"></div>
+            </div>
           </div>
-          <section class="trendPanel letterCpiFigure" id="letterCpiChartPreview" aria-label="参考：現行価格を決めてからの累積CPI" hidden></section>
+          <section class="trendPanel letterCpiFigure" id="letterCpiChartPreview" aria-label="参考：現行価格を決めてからの物価・賃金の推移" hidden></section>
 
           <div class="miniActions">
             <button class="btn" id="copyBtn" type="button">現在の表示をコピー</button>
@@ -692,7 +698,7 @@
       <div class="printH1">【案内文】</div>
       <div class="printSub">※お客さまにお渡しする文面</div>
       <div class="printText" id="printLetter"></div>
-      <section class="trendPanel letterCpiFigure" id="printLetterCpiChart" aria-label="参考：現行価格を決めてからの累積CPI" hidden></section>
+      <section class="trendPanel letterCpiFigure" id="printLetterCpiChart" aria-label="参考：現行価格を決めてからの物価・賃金の推移" hidden></section>
     </div>
 
     <div id="printInternalPack">
@@ -725,7 +731,7 @@
     const OFFICE_PASSWORD = 'matsu20180201';
     const AUTH_SESSION_KEY = 'mk_session_unlocked';
     const AUTH_MODE_KEY = 'mk_session_mode';
-    const APP_VERSION = 'r53';
+    const APP_VERSION = 'r54';
     const OFFICE_PRICE_BASIS_ERROR = '松本会計専用モードでは税抜価格を使用してください';
     let currentAuthMode = 'locked';
     const isGeneralMode = () => currentAuthMode === 'general';
@@ -872,6 +878,7 @@
     const printBtn = $('#printBtn');
     const customerPrintBtn = $('#customerPrintBtn');
     const includeLetterCpiChart = $('#includeLetterCpiChart');
+    const includeLetterMinWageChart = $('#includeLetterMinWageChart');
     const wordBtn = $('#wordBtn');
     const copyStatus = $('#copyStatus');
     const resetBtn = $('#resetBtn');
@@ -1161,6 +1168,7 @@
     function startAuthenticatedMode(mode, saveSession){
       INITIAL_DRAFT_READY = false;
       includeLetterCpiChart.checked = false;
+      includeLetterMinWageChart.checked = false;
       clearInternalPrint();
       setAuthMode(mode, { saveSession, restore:true });
       restoreDraft();
@@ -2471,7 +2479,7 @@
       const millis = date => Date.parse(date + 'T00:00:00Z');
       const start = millis(points.start), end = millis(points.end), duration = end - start;
       const x = date => duration ? left + (millis(date) - start) * (right - left) / duration : (left + right) / 2;
-      const plottedCpi = points.cpiOnly ? points.cpi : points.coreCpi;
+      const plottedCpi = points.letterFigure ? points.cpi : points.coreCpi;
       const salary = points.salary || [];
       const rates = [0, ...plottedCpi.map(p => p.rate), ...salary.map(p => p.rate), ...points.wage.map(p => p.rate)];
       const range = Math.max(1, Math.max(...rates) - Math.min(...rates));
@@ -2515,8 +2523,13 @@
         const label = duration < 180 * day ? date.slice(5).replace('-', '/') : date.slice(0,7).replace('-', '/');
         grid.push(`<text x="${rounded(x(date))}" y="${bottom+23}" text-anchor="middle">${label}</text>`);
       }
-      const label = points.cpiOnly ? '現行価格決定時からの累積CPIの推移。'
-        : '現行価格決定時からのコアCPI、所定内給与、最低賃金の推移。各点の数値はグラフの数値から確認できます。';
+      const seriesLabels = [
+        plottedCpi.length ? 'コアCPI' : '',
+        salary.length ? '所定内給与' : '',
+        points.wage.length ? '最低賃金' : ''
+      ].filter(Boolean);
+      const label = '現行価格決定時からの' + seriesLabels.join('・') + 'の累積上昇率。' +
+        (points.letterFigure ? '' : '各点の数値はグラフの数値から確認できます。');
       return `<svg class="trendSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${label}"><g font-size="15" font-family="system-ui,sans-serif" fill="#475569">${grid.join('')}</g>${plot(plottedCpi,'#17627c',false)}${plot(salary,'#13734d',false,'6 4')}${plot(points.wage,'#9a461c',true,'2 3')}</svg>`;
     }
 
@@ -3545,6 +3558,8 @@ ${cpiTalk}
       const hint = $('#letterCpiChartHint');
       const preview = $('#letterCpiChartPreview');
       const print = $('#printLetterCpiChart');
+      const minWageOption = $('#letterMinWageChartOption');
+      const minWageHint = $('#letterMinWageChartHint');
       const inLetterTab = currentOutputMode === 'letter';
       option.hidden = !inLetterTab;
       const points = lastCumulativeTrend;
@@ -3554,8 +3569,14 @@ ${cpiTalk}
       const available = hasCpiResult(cpi) && series.length > 1 && series[0].month === cpi.baseMonth &&
         end.month === cpi.latestMonth && Math.abs(end.rate - cpi.cum) < 1e-7;
       includeLetterCpiChart.disabled = !available;
+      const minWageAvailable = available && Boolean(points?.wage?.length);
+      minWageOption.hidden = !inLetterTab || !available || !includeLetterCpiChart.checked;
+      includeLetterMinWageChart.disabled = !minWageAvailable;
+      minWageHint.textContent = minWageAvailable
+        ? points.wageLabel + 'の発効済み確定額を表示します。'
+        : (points?.notes?.find(note => note.startsWith('最低賃金：')) || '決定時点の最低賃金を確認できないため表示できません。');
       const message = available
-        ? '案内文のプレビューとお客様向けPDFに追加します。コピー・Word出力には含まれません。'
+        ? '物価と所定内給与の推移を、案内文のプレビューとお客様向けPDFに追加します。コピー・Word出力には含まれません。'
         : 'グラフの追加には、最新公表月より前の現行価格の決定時期と公的データが必要です。';
       if(hint.textContent !== message) hint.textContent = message;
       preview.hidden = !inLetterTab || !available || !includeLetterCpiChart.checked;
@@ -3565,6 +3586,11 @@ ${cpiTalk}
       if(print.hidden) return;
 
       const bridge = cpi.method === 'tax_adjusted_bridge';
+      const salary = points.salary || [];
+      const wage = minWageAvailable && includeLetterMinWageChart.checked ? points.wage : [];
+      const salaryEnd = salary.at(-1);
+      const wageEnd = wage.at(-1);
+      const endDate = [end.date, salaryEnd?.date, wageEnd?.date].filter(Boolean).sort().at(-1);
       const element = (tag, className, value) => {
         const el = document.createElement(tag);
         if(className) el.className = className;
@@ -3573,13 +3599,25 @@ ${cpiTalk}
       };
       const fragment = document.createDocumentFragment();
       fragment.append(
-        element('h3', '', '参考：現行価格を決めてからの物価の推移'),
-        element('p', 'trendPeriod', `${fmtYM(cpi.baseMonth)}～${fmtYM(cpi.latestMonth)}（決定月を0％とした累積：${pct1(cpi.cum)}％）`),
-        element('p', 'trendPeriod', `消費者物価指数（CPI）：全国・生鮮食品を除く総合 ／ ${bridge ? '消費税調整済指数と通常指数を2019年12月で接続' : '通常指数'}`)
+        element('h3', '', '参考：現行価格を決めてからの物価・賃金の推移'),
+        element('p', 'trendPeriod', `基準：${fmtYM(cpi.baseMonth)}（決定時＝0％。月次指標は決定月の指数が基準）`)
       );
+      const legend = element('div', 'trendLegend');
+      const addLegend = (label, point, dateLabel, className) => {
+        const row = element('div');
+        const swatch = element('span', className);
+        swatch.setAttribute('aria-hidden', 'true');
+        const signedRate = (point.rate > 0 ? '+' : '') + pct1(point.rate);
+        row.append(swatch, document.createTextNode(`${label}：${signedRate}％（${dateLabel}）`));
+        legend.append(row);
+      };
+      addLegend('コアCPI（全国）', end, fmtYM(end.month), '');
+      if(salaryEnd) addLegend('所定内給与（全国）', salaryEnd,
+        fmtYM(salaryEnd.month) + (points.salaryPreliminary ? '速報' : ''), 'salaryKey');
+      if(wageEnd) addLegend(points.wageLabel, wageEnd, fmtYMD(wageEnd.date), 'wageKey');
       const graph = element('div');
-      graph.innerHTML = cumulativeTrendSvg({ start:series[0].date, end:end.date, cpi:series, wage:[], cpiOnly:true });
-      fragment.append(graph);
+      graph.innerHTML = cumulativeTrendSvg({ start:series[0].date, end:endDate, cpi:series, salary, wage, letterFigure:true });
+      fragment.append(legend, graph);
       const source = element('p', 'trendNote', '出典：総務省統計局「消費者物価指数」');
       const link = (linkText, url) => {
         const a = element('a', '', linkText);
@@ -3594,7 +3632,25 @@ ${cpiTalk}
       );
       if(bridge) source.append('／', link('消費税調整済指数', 'https://www.stat.go.jp/data/cpi/2025/zuhyou/2025taxadj.xlsx'));
       source.append('）');
-      fragment.append(source, element('p','trendNote','公表物価の推移を示す参考資料であり、今回の価格改定率そのものを示すものではありません。'));
+      const basis = bridge ? '消費税調整済指数と通常指数を2019年12月で接続' : '通常指数';
+      fragment.append(element('p', 'trendNote',
+        `コアCPI：全国の生鮮食品を除く総合（${basis}）。改定額の試算と同じCPIを使用しており、ナビ本体の比較グラフとは数値が異なる場合があります。`));
+      if(salaryEnd){
+        const salaryNote = element('p', 'trendNote', '所定内給与：全国の一般労働者（5人以上の事業所）。基本給・通常の手当などで、残業代・賞与は含みません。');
+        salaryNote.append(' 出典：', link('厚生労働省「毎月勤労統計調査」', 'https://www.e-stat.go.jp/stat-search/files?stat_infid=000032189734'));
+        if(SCHEDULED_WAGE_DATA?.meta?.latest_source_url)
+          salaryNote.append('（', link('最新月', SCHEDULED_WAGE_DATA.meta.latest_source_url), '）');
+        fragment.append(salaryNote);
+      }else{
+        fragment.append(element('p','trendNote', points.notes?.find(note => note.startsWith('所定内給与：')) ||
+          '所定内給与：決定月の公表指数がないため表示していません。'));
+      }
+      if(wageEnd){
+        const wageNote = element('p', 'trendNote', '最低賃金：対象地域の発効済み確定額を使用。');
+        wageNote.append(' 出典：', link('厚生労働省「地域別最低賃金の全国一覧」', 'https://saiteichingin.mhlw.go.jp/table/page_list_nationallist.php'));
+        fragment.append(wageNote);
+      }
+      fragment.append(source, element('p','trendNote','各指標は外部環境の参考であり、今回の価格改定率そのものを示すものではありません。'));
       if(!preview.hidden) preview.append(fragment.cloneNode(true));
       print.append(fragment);
     }
@@ -3741,6 +3797,7 @@ ${cpiTalk}
     customerPrintBtn.addEventListener('click', () => printOutput(false));
     printBtn.addEventListener('click', () => printOutput(true));
     includeLetterCpiChart.addEventListener('change', renderLetterCpiChart);
+    includeLetterMinWageChart.addEventListener('change', renderLetterCpiChart);
     window.addEventListener('afterprint', clearInternalPrint);
     window.matchMedia?.('print')?.addEventListener?.('change', event => {
       if(!event.matches) clearInternalPrint();
@@ -3890,6 +3947,7 @@ ${cpiTalk}
     function resetFormState(options = {}){
       const modeAtReset = currentAuthMode;
       includeLetterCpiChart.checked = false;
+      includeLetterMinWageChart.checked = false;
       clearInternalPrint();
       [partnerCompany,partnerPerson,partnerHonorificCustom,ownCompany,ownPerson,productName,currentPrice,newPrice,currentPriceAsOf,currentPriceMonth,effectiveDate,extraFactors,effortFreeText,valueFreeText,actualLaborRate].forEach(el=>{
         el.value='';
