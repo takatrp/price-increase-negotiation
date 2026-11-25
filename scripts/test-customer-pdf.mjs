@@ -88,7 +88,7 @@ const context = vm.createContext({
 });
 vm.runInContext(['cumulativeTrendSvg','renderLetterCpiChart','clearInternalPrint','printOutput'].map(source).join('\n'),context);
 
-function setSeries(bridge){
+function setSeries(bridge, salaryPreliminary){
   const series = [
     {date:'2019-10-15',month:'2019-10',rate:0},
     {date:'2019-11-30',month:'2019-11',rate:2},
@@ -97,12 +97,12 @@ function setSeries(bridge){
   context.calcCpiSince=()=>({baseMonth:'2019-10',latestMonth:'2019-12',cum:4.5,method:bridge?'tax_adjusted_bridge':'normal_ratio'});
   context.lastCumulativeTrend={
     cpi:series, salary:[{date:'2019-10-15',month:'2019-10',rate:0},{date:'2019-11-30',month:'2019-11',rate:1.7}],
-    salaryPreliminary:true, wageLabel:'最低賃金（兵庫県）', wage:[{date:'2019-10-15',rate:0},{date:'2019-12-31',rate:100}]
+    salaryPreliminary, wageLabel:'最低賃金（兵庫県）', wage:[{date:'2019-10-15',rate:0},{date:'2019-12-31',rate:100}]
   };
 }
 const preview=get('#letterCpiChartPreview');
 const chart=get('#printLetterCpiChart');
-setSeries(false);
+setSeries(false,true);
 context.renderLetterCpiChart();
 assert.ok(!box.disabled && preview.hidden && chart.hidden);
 box.checked=true;
@@ -133,8 +133,11 @@ context.lastCumulativeTrend.wage=previousWage;
 minWageBox.checked=false;
 context.renderLetterCpiChart();
 assert.equal(chart.serialize(),preview.serialize());
-setSeries(true);
+setSeries(true,false);
 context.renderLetterCpiChart();
+assert.match(chart.serialize(), /所定内給与（全国）：\+1\.7％（2019-11）/);
+assert.doesNotMatch(chart.serialize(), /速報/);
+assert.equal(chart.serialize(),preview.serialize());
 assert.match(chart.serialize(), /消費税調整済指数と通常指数を2019年12月で接続/);
 assert.match(chart.serialize(), /消費税調整済指数/);
 context.lastCumulativeTrend.salary=[];

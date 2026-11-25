@@ -11,6 +11,14 @@ function source(name){
   return html.slice(start, end + 6);
 }
 const obj = value => ({value});
+// Freeze the range for the November 2026 scenarios even as the published series grows.
+const publishedWage = JSON.parse(read('scheduled_wage_index_monthly.json'));
+const fixtureLatestMonth = '2026-09';
+const fixtureWage = {
+  ...publishedWage,
+  meta:{...publishedWage.meta, latest_month:fixtureLatestMonth, latest_status:'final'},
+  values:Object.fromEntries(Object.entries(publishedWage.values).filter(([month])=>month<=fixtureLatestMonth))
+};
 const cost = { national:{ min_wage_history_by_pref_effective:{ 兵庫:[
   { amount:899, effective_date:'2019-10-01', fiscal_year:2019 },
   { amount:1000, effective_date:'2025-10-01', fiscal_year:2025 },
@@ -20,7 +28,7 @@ const cost = { national:{ min_wage_history_by_pref_effective:{ 兵庫:[
 const context = vm.createContext({
   COST_DATA:cost,
   CPI_MONTHLY_DATA:JSON.parse(read('cpi_monthly_2025base.json')),
-  SCHEDULED_WAGE_DATA:JSON.parse(read('scheduled_wage_index_monthly.json')),
+  SCHEDULED_WAGE_DATA:fixtureWage,
   SCHEDULED_WAGE_ERROR:'',
   CPI_TAX_ADJUSTED_DATA:JSON.parse(read('cpi_monthly_tax_adjusted.json')),
   todayInJapan:()=> '2026-11-21',
@@ -121,17 +129,25 @@ for (const basis of ['exclusive','inclusive']){
   assert.ok(chart.innerHTML.includes('viewBox="0 0 408 238"'));
   assert.ok(legend.children[0].children[1].includes('コアCPI（全国）'));
   assert.ok(legend.children[1].children[1].includes('所定内給与（全国）'));
-  assert.ok(legend.children[1].children[1].includes('速報'));
+  assert.doesNotMatch(legend.children[1].children[1], /速報/);
   assert.ok(legend.children[2].children[1].includes('本日時点'));
   assert.match(numbers.innerHTML, /<th scope="col">コアCPI<\/th>/);
   assert.ok(!details.hidden);
 }
 assert.match(numbers.innerHTML, /所定内給与/);
+assert.doesNotMatch(numbers.innerHTML, /（速報）/);
+context.SCHEDULED_WAGE_DATA = {...fixtureWage, meta:{...fixtureWage.meta, latest_status:'preliminary'}};
+({cpi,result}=calc('2019-10-30'));
+assert.equal(result.salaryPreliminary,true);
+context.updateCumulativeTrendChart(cpi);
+assert.match(legend.children[1].children[1], /速報/);
 assert.match(numbers.innerHTML, /（速報）/);
+context.SCHEDULED_WAGE_DATA = fixtureWage;
 ({result}=calc('2015-10-01'));
 e(result.coreCpi.at(-1).rate, (102.9 / 88.7 - 1)*100);
-e(result.salary.at(-1).rate, (113.8 / 97.9 - 1)*100);
-assert.equal(result.salary.at(-1).month, '2026-09');
+e(result.salary.at(-1).rate, (publishedWage.values[fixtureLatestMonth] / publishedWage.values['2015-10'] - 1)*100);
+assert.equal(result.salary.at(-1).month, fixtureLatestMonth);
+assert.equal(result.salaryPreliminary,false);
 assert.equal(result.salary.at(-1).date, '2026-09-30');
 assert.equal(result.salary[0].rate, 0);
 ({result}=calc('1992-12-31'));
