@@ -6,13 +6,13 @@
     "base": "2020年平均=100",
     "source_title": "毎月勤労統計調査 長期時系列表21（TL）",
     "source_url": "https://www.e-stat.go.jp/stat-search/files?stat_infid=000032189734",
-    "latest_source_title": "2026年9月分結果速報・時系列表第1表",
-    "latest_source_url": "https://www.mhlw.go.jp/toukei/itiran/roudou/monthly/r08/2609p/2609p.html",
+    "latest_source_title": "2026年9月分結果確報・時系列表第1表",
+    "latest_source_url": "https://www.mhlw.go.jp/toukei/itiran/roudou/monthly/r08/2609r/2609r.html",
     "earliest_month": "1993-01",
     "latest_month": "2026-09",
-    "latest_status": "preliminary",
-    "latest_publication_date": "2026-11-06",
-    "accessed_date": "2026-11-24"
+    "latest_status": "final",
+    "latest_publication_date": "2026-11-25",
+    "accessed_date": "2026-11-25"
   },
   "values": {
     "1993-01": 87.7,
@@ -419,6 +419,6 @@
     "2026-06": 113.5,
     "2026-07": 113.5,
     "2026-08": 112.9,
-    "2026-09": 113.8
+    "2026-09": 113.6
   }
 }
